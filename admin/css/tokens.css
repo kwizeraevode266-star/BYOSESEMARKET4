@@ -1,1 +1,19 @@
-/* Admin design tokens placeholder. */
+:root {
+	--admin-primary: #00b894;
+	--admin-primary-strong: #00997b;
+	--admin-primary-soft: rgba(0, 184, 148, 0.18);
+	--admin-bg: #f3fbf8;
+	--admin-surface: rgba(255, 255, 255, 0.6);
+	--admin-surface-strong: rgba(255, 255, 255, 0.82);
+	--admin-surface-border: rgba(255, 255, 255, 0.46);
+	--admin-text: #16322d;
+	--admin-muted: #627a75;
+	--admin-shadow-lg: 0 24px 60px rgba(15, 45, 39, 0.14);
+	--admin-shadow-md: 0 16px 40px rgba(15, 45, 39, 0.1);
+	--admin-shadow-sm: 0 8px 24px rgba(15, 45, 39, 0.08);
+	--admin-radius-xl: 32px;
+	--admin-radius-lg: 24px;
+	--admin-radius-md: 18px;
+	--admin-radius-sm: 14px;
+	--admin-container: 1200px;
+}

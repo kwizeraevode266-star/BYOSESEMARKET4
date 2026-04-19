@@ -3,6 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setupMapScroll();
 });
 
+const CONTACT_MESSAGES_KEY = 'byose_market_messages';
+
 function setupContactForm() {
   const form = document.getElementById('form-message');
   const feedback = document.getElementById('formFeedback');
@@ -47,6 +49,17 @@ function setupContactForm() {
     const emailSubject = `Ubutumwa bushya buvuye kuri ${name}`;
     const mailtoUrl = `mailto:kwizeraevode266@gmail.com?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(textMessage)}`;
 
+    saveContactMessage({
+      id: `msg-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      name,
+      email,
+      phone,
+      message,
+      status: 'new',
+      source: 'contact-form'
+    });
+
     window.open(whatsappUrl, '_blank', 'noopener');
     window.setTimeout(() => {
       window.location.href = mailtoUrl;
@@ -79,4 +92,15 @@ function isValidEmail(email) {
 function renderFeedback(node, message, type) {
   node.textContent = message;
   node.className = `form-feedback is-${type}`;
+}
+
+function saveContactMessage(entry) {
+  try {
+    const current = JSON.parse(localStorage.getItem(CONTACT_MESSAGES_KEY) || '[]');
+    const next = Array.isArray(current) ? current : [];
+    next.unshift(entry);
+    localStorage.setItem(CONTACT_MESSAGES_KEY, JSON.stringify(next));
+  } catch (error) {
+    console.error('Failed to save contact message', error);
+  }
 }
