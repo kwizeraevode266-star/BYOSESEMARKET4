@@ -1,47 +1,169 @@
 import { getAllProductContent } from './details/js/product-content.js';
 
-const homeCatalog = getAllProductContent();
+const DEFAULT_FILTER = 'all';
+const DEFAULT_CATEGORY = 'featured';
+const DEFAULT_DETAIL_PAGE = 'product-details1.html';
+const FALLBACK_IMAGE = 'img/logo.png';
+const PRIMARY_GRID_LIMIT = 10;
+const SPOTLIGHT_LIMIT = 6;
+const SPOTLIGHT_START_OFFSET = 5;
+const HERO_INTERVAL_MS = 3500;
+const NEWSLETTER_STORAGE_KEY = 'byose_market_newsletter_subscribers';
 
-function formatCategoryLabel(category) {
-  return String(category || 'featured').replace(/(^\w|\s\w)/g, match => match.toUpperCase());
-}
-
-window.openProduct = function openProduct(id) {
-  window.location.href = `details/product-details1.html?id=${encodeURIComponent(id)}`;
+const CATEGORY_ALIASES = {
+  apparel: 'fashion',
+  bag: 'fashion',
+  bags: 'fashion',
+  clothes: 'fashion',
+  clothing: 'fashion',
+  footwear: 'shoes',
+  phone: 'electronics',
+  phones: 'electronics',
+  shoe: 'shoes',
+  sneakers: 'shoes',
+  smartwatch: 'electronics',
+  smartwatches: 'electronics',
+  watch: 'electronics',
+  watches: 'electronics'
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderProductGrid('all');
+const FILTER_KEYWORDS = {
+  bags: ['bag', 'bags', 'ibikapu', 'sac'],
+  watches: ['watch', 'smart watch', 'smartwatch', 'amasaha', 'montre'],
+  phones: ['phone', 'phones', 'smartphone', 'mobile', 'iphone']
+};
+
+const state = {
+  catalog: [],
+  filterCache: new Map(),
+  markupCache: new Map(),
+  currentFilter: DEFAULT_FILTER
+};
+
+const elements = {
+  categoryGrid: document.getElementById('categoryGrid'),
+  filterPills: document.getElementById('filterPills'),
+  homeProducts: document.getElementById('homeProducts'),
+  productGrid: document.getElementById('homeProductGrid'),
+  spotlightGrid: document.getElementById('spotlightGrid')
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeHomePage, { once: true });
+} else {
+  initializeHomePage();
+}
+
+function initializeHomePage() {
+  state.catalog = getAllProductContent().map(normalizeProduct);
+  renderProductGrid(state.currentFilter);
   renderSpotlightGrid();
-  setupFilterPills();
-  setupCategoryFilters();
+  setupFilterControls();
   setupHeroSlider();
   setupFooterSubscribe();
-});
+}
+
+function escapeHtml(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function normalizeCategory(category) {
+  const normalized = normalizeText(category);
+  if (!normalized) {
+    return DEFAULT_CATEGORY;
+  }
+
+  return CATEGORY_ALIASES[normalized] || normalized.replace(/\s+/g, '-');
+}
+
+function formatCategoryLabel(category) {
+  return String(category || DEFAULT_CATEGORY)
+    .replace(/-/g, ' ')
+    .replace(/(^\w|\s\w)/g, match => match.toUpperCase());
+}
 
 function currency(value) {
-  return `RWF ${Number(value).toLocaleString('en-US')}`;
+  return `RWF ${Number(value || 0).toLocaleString('en-US')}`;
+}
+
+function isSafePath(value) {
+  const path = String(value || '').trim();
+  return Boolean(path) && !/^(?:javascript|data):/i.test(path);
+}
+
+function getProductHref(productId) {
+  return `${DEFAULT_DETAIL_PAGE}?id=${encodeURIComponent(String(productId))}`;
+}
+
+function normalizeProduct(product, index) {
+  const fallbackId = index + 1;
+  const id = product && product.id ? product.id : fallbackId;
+  const name = String(product && product.name ? product.name : '').trim() || `Product ${fallbackId}`;
+  const category = normalizeCategory(product && product.category);
+  const badge = String(product && product.badge ? product.badge : '').trim();
+  const shortDescription = String(product && product.shortDescription ? product.shortDescription : '').trim();
+  const image = isSafePath(product && product.mainImage) ? String(product.mainImage).trim() : FALLBACK_IMAGE;
+  const price = Number(product && product.price) || 0;
+  const oldPrice = Number(product && product.oldPrice) || 0;
+  const searchText = normalizeText([
+    name,
+    category,
+    badge,
+    shortDescription,
+    ...(Array.isArray(product && product.highlights) ? product.highlights : []),
+    ...(Array.isArray(product && product.trust) ? product.trust : [])
+  ].join(' '));
+
+  return {
+    ...product,
+    id,
+    name,
+    badge,
+    category,
+    shortDescription,
+    mainImage: image,
+    oldPrice: oldPrice > price ? oldPrice : 0,
+    price,
+    href: getProductHref(id),
+    searchText
+  };
 }
 
 function createProductCard(product) {
-  const categoryLabel = formatCategoryLabel(product.category);
-  const shortDescription = product.shortDescription || '';
-  const oldPrice = Number(product.oldPrice || 0);
-  const href = `details/product-details1.html?id=${encodeURIComponent(product.id)}`;
+  const categoryLabel = escapeHtml(formatCategoryLabel(product.category));
+  const name = escapeHtml(product.name);
+  const shortDescription = escapeHtml(product.shortDescription);
+  const href = escapeHtml(product.href);
+  const image = escapeHtml(product.mainImage);
+  const badge = product.badge ? `<span class="product-badge">${escapeHtml(product.badge)}</span>` : '';
+  const oldPrice = product.oldPrice > 0 ? `<span class="product-old-price">${currency(product.oldPrice)}</span>` : '';
 
   return `
-    <a class="product-card" href="${href}" onclick="openProduct(${JSON.stringify(product.id)}); return false;" aria-label="Reba ${product.name}">
+    <a class="product-card" href="${href}" data-product-id="${escapeHtml(product.id)}" aria-label="Reba ${name}">
       <div class="product-image-wrap">
-        <img src="${product.mainImage}" alt="${product.name}" loading="lazy">
-        <span class="product-badge">${product.badge}</span>
+        <img src="${image}" alt="${name}" loading="lazy" decoding="async">
+        ${badge}
       </div>
       <div class="product-content">
         <div class="product-meta">${categoryLabel}</div>
-        <h3 class="product-title">${product.name}</h3>
+        <h3 class="product-title">${name}</h3>
         <div class="product-subtitle">${shortDescription}</div>
         <div class="product-pricing">
           <span class="product-price">${currency(product.price)}</span>
-          <span class="product-old-price">${oldPrice > 0 ? currency(oldPrice) : ''}</span>
+          ${oldPrice}
         </div>
         <div class="product-footer">
           <span class="product-meta">${categoryLabel}</span>
@@ -52,54 +174,143 @@ function createProductCard(product) {
   `;
 }
 
-function renderProductGrid(filter) {
-  const grid = document.getElementById('homeProductGrid');
+function bindGridImageFallback(grid) {
+  if (!grid || grid.dataset.imageFallbackBound === 'true') {
+    return;
+  }
+
+  grid.dataset.imageFallbackBound = 'true';
+  grid.addEventListener('error', event => {
+    const image = event.target;
+    if (!(image instanceof HTMLImageElement) || image.dataset.fallbackApplied === 'true') {
+      return;
+    }
+
+    image.dataset.fallbackApplied = 'true';
+    image.src = FALLBACK_IMAGE;
+  }, true);
+}
+
+function renderGrid(grid, cacheKey, items) {
   if (!grid) {
     return;
   }
 
-  const items = filter === 'all'
-    ? homeCatalog.slice(0, 10)
-    : homeCatalog.filter(product => product.category === filter).slice(0, 10);
+  const markup = state.markupCache.get(cacheKey) || items.map(createProductCard).join('');
+  state.markupCache.set(cacheKey, markup);
 
-  grid.innerHTML = items.map(createProductCard).join('');
+  if (grid.dataset.renderKey === cacheKey && grid.dataset.renderMarkup === markup) {
+    return;
+  }
+
+  bindGridImageFallback(grid);
+  grid.setAttribute('aria-busy', 'true');
+  grid.innerHTML = markup;
+  grid.dataset.renderKey = cacheKey;
+  grid.dataset.renderMarkup = markup;
+  grid.removeAttribute('aria-busy');
+}
+
+function getProductsForFilter(filter) {
+  const requestedFilter = String(filter || DEFAULT_FILTER).trim() || DEFAULT_FILTER;
+  const normalizedFilter = requestedFilter === DEFAULT_FILTER ? DEFAULT_FILTER : normalizeText(requestedFilter).replace(/\s+/g, '-');
+  const cacheKey = `filter:${normalizedFilter}`;
+
+  if (state.filterCache.has(cacheKey)) {
+    return state.filterCache.get(cacheKey);
+  }
+
+  let items = [];
+
+  if (normalizedFilter === DEFAULT_FILTER) {
+    items = state.catalog.slice();
+  } else {
+    items = state.catalog.filter(product => matchesFilter(product, normalizedFilter));
+
+    if (!items.length) {
+      const aliasedCategory = CATEGORY_ALIASES[normalizedFilter];
+      if (aliasedCategory) {
+        items = state.catalog.filter(product => product.category === aliasedCategory);
+      }
+    }
+  }
+
+  state.filterCache.set(cacheKey, items);
+  return items;
+}
+
+function matchesFilter(product, normalizedFilter) {
+  if (!product) {
+    return false;
+  }
+
+  if (product.category === normalizedFilter) {
+    return true;
+  }
+
+  const filterKeywords = FILTER_KEYWORDS[normalizedFilter];
+  return Array.isArray(filterKeywords)
+    ? filterKeywords.some(keyword => product.searchText.includes(normalizeText(keyword)))
+    : false;
+}
+
+function setActiveFilter(filter) {
+  state.currentFilter = String(filter || DEFAULT_FILTER).trim() || DEFAULT_FILTER;
+  document.querySelectorAll('.filter-pill').forEach(pill => {
+    pill.classList.toggle('is-active', (pill.dataset.filter || DEFAULT_FILTER) === state.currentFilter);
+  });
+  renderProductGrid(state.currentFilter);
+}
+
+function renderProductGrid(filter) {
+  const items = getProductsForFilter(filter).slice(0, PRIMARY_GRID_LIMIT);
+  renderGrid(elements.productGrid, `home:${filter}`, items);
+}
+
+function getSpotlightProducts() {
+  const spotlightSource = state.catalog.filter(product => ['electronics', 'fashion', 'shoes'].includes(product.category));
+  const startIndex = Math.min(SPOTLIGHT_START_OFFSET, Math.max(0, spotlightSource.length - SPOTLIGHT_LIMIT));
+  return spotlightSource.slice(startIndex, startIndex + SPOTLIGHT_LIMIT);
 }
 
 function renderSpotlightGrid() {
-  const grid = document.getElementById('spotlightGrid');
-  if (!grid) {
+  renderGrid(elements.spotlightGrid, 'spotlight', getSpotlightProducts());
+}
+
+function setupFilterControls() {
+  if (elements.filterPills) {
+    elements.filterPills.addEventListener('click', event => {
+      const pill = event.target.closest('.filter-pill');
+      if (!pill) {
+        return;
+      }
+
+      setActiveFilter(pill.dataset.filter || DEFAULT_FILTER);
+    });
+  }
+
+  if (elements.categoryGrid) {
+    elements.categoryGrid.addEventListener('click', event => {
+      const card = event.target.closest('.category-card');
+      if (!card) {
+        return;
+      }
+
+      setActiveFilter(card.dataset.filter || DEFAULT_FILTER);
+      scrollToProducts();
+    });
+  }
+}
+
+function scrollToProducts() {
+  if (!elements.homeProducts) {
     return;
   }
 
-  const spotlightItems = homeCatalog.filter(product => ['phones', 'electronics', 'bags', 'fashion', 'shoes'].includes(product.category)).slice(5, 15);
-  grid.innerHTML = spotlightItems.map(createProductCard).join('');
-}
-
-function setupFilterPills() {
-  const pills = document.querySelectorAll('.filter-pill');
-  pills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      pills.forEach(item => item.classList.remove('is-active'));
-      pill.classList.add('is-active');
-      renderProductGrid(pill.dataset.filter || 'all');
-    });
-  });
-}
-
-function setupCategoryFilters() {
-  const cards = document.querySelectorAll('.category-card');
-  const homeProducts = document.getElementById('homeProducts');
-  cards.forEach(card => {
-    card.addEventListener('click', () => {
-      const filter = card.dataset.filter || 'all';
-      document.querySelectorAll('.filter-pill').forEach(pill => {
-        pill.classList.toggle('is-active', pill.dataset.filter === filter);
-      });
-      renderProductGrid(filter);
-      if (homeProducts) {
-        homeProducts.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    });
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  elements.homeProducts.scrollIntoView({
+    behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    block: 'start'
   });
 }
 
@@ -115,7 +326,8 @@ function setupHeroSlider() {
   }
 
   let index = 0;
-  let timer = null;
+  let timerId = 0;
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   dotsRoot.innerHTML = slides.map((_, dotIndex) => `
     <button type="button" class="hero-dot${dotIndex === 0 ? ' is-active' : ''}" data-dot-index="${dotIndex}" aria-label="Show slide ${dotIndex + 1}"></button>
@@ -133,23 +345,32 @@ function setupHeroSlider() {
     });
   }
 
-  function start() {
-    stop();
-    timer = window.setInterval(() => show(index + 1), 3500);
-  }
-
   function stop() {
-    if (timer) {
-      window.clearInterval(timer);
-      timer = null;
+    if (timerId) {
+      window.clearInterval(timerId);
+      timerId = 0;
     }
   }
 
-  dots.forEach(dot => {
-    dot.addEventListener('click', () => {
-      show(Number(dot.dataset.dotIndex || 0));
-      start();
-    });
+  function start() {
+    if (prefersReducedMotion || slides.length < 2 || document.hidden) {
+      return;
+    }
+
+    stop();
+    timerId = window.setInterval(() => {
+      show(index + 1);
+    }, HERO_INTERVAL_MS);
+  }
+
+  dotsRoot.addEventListener('click', event => {
+    const dot = event.target.closest('.hero-dot');
+    if (!dot) {
+      return;
+    }
+
+    show(Number(dot.dataset.dotIndex || 0));
+    start();
   });
 
   if (nextBtn) {
@@ -170,6 +391,13 @@ function setupHeroSlider() {
   hero.addEventListener('mouseleave', start);
   hero.addEventListener('touchstart', stop, { passive: true });
   hero.addEventListener('touchend', start, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      stop();
+      return;
+    }
+    start();
+  });
 
   show(0);
   start();
@@ -187,20 +415,17 @@ function setupFooterSubscribe() {
   form.addEventListener('submit', event => {
     event.preventDefault();
 
-    const email = input.value.trim();
-    if (!email || !email.includes('@')) {
+    const email = input.value.trim().toLowerCase();
+    if (!email || !input.checkValidity()) {
       note.textContent = 'Andika email iboneye.';
       note.classList.remove('is-success');
       return;
     }
 
     try {
-      const key = 'byose_market_newsletter_subscribers';
-      const current = JSON.parse(localStorage.getItem(key) || '[]');
-      if (!current.includes(email)) {
-        current.push(email);
-        localStorage.setItem(key, JSON.stringify(current));
-      }
+      const current = new Set(JSON.parse(localStorage.getItem(NEWSLETTER_STORAGE_KEY) || '[]'));
+      current.add(email);
+      localStorage.setItem(NEWSLETTER_STORAGE_KEY, JSON.stringify(Array.from(current)));
       note.textContent = 'Murakoze. Twakwanditse ku rutonde rwacu.';
       note.classList.add('is-success');
       form.reset();
