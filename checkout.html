@@ -244,10 +244,10 @@
   </div>
 </div>
 
-<script src="services/authService.js"></script>
+<script src="services/authservice.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    try { if (typeof authService !== 'undefined' && !authService.isLoggedIn()) window.location.href = '/login.html'; } catch(e){}
+    try { if (typeof authService !== 'undefined' && !authService.isLoggedIn()) window.location.href = 'login.html'; } catch(e){}
   });
 </script>
 <script src="checkout.js"></script>

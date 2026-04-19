@@ -256,7 +256,7 @@ function bindLogin() {
             showSuccess('Kwinjira byakunze. Turakujyana kuri shop...');
 
             window.setTimeout(() => {
-                window.location.href = '/shop.html';
+                window.location.href = 'shop.html';
             }, 700);
         } finally {
             window.setTimeout(() => {
@@ -323,7 +323,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ✅ niba user asanzwe yinjiye
     if (isLoggedIn()) {
-        window.location.href = "/shop.html";
+        window.location.href = "shop.html";
         return;
     }
 

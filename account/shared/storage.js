@@ -11,6 +11,17 @@ const STORAGE_KEYS = {
   LANG: "bm_lang"
 };
 
+function getSitePrefix() {
+  const path = window.location.pathname || "";
+  if (path.includes("/account/settings/")) return "../../";
+  if (path.includes("/account/") || path.includes("/logout/") || path.includes("/components/") || path.includes("/details/")) return "../";
+  return "";
+}
+
+function resolveSitePath(target) {
+  return getSitePrefix() + String(target || "").replace(/^\/+/, "");
+}
+
 // ===============================
 // 💾 SAVE DATA
 // ===============================
@@ -168,15 +179,15 @@ function redirectIfNotAuth(options) {
   for (let i = 0; i < allow.length; i++) if (path.includes(allow[i])) return;
   if (!isLoggedIn()) {
     // replace to avoid back-loop to protected page
-    window.location.replace('/login.html');
+    window.location.replace(resolveSitePath('login.html'));
   }
 }
 
 function handleAccountClick() {
   if (isLoggedIn()) {
-    window.location.href = '/account/account.html';
+    window.location.href = resolveSitePath('account/account.html');
   } else {
-    window.location.href = '/login.html';
+    window.location.href = resolveSitePath('login.html');
   }
 }
 
@@ -195,3 +206,4 @@ window.loginUser = loginUser;
 window.logoutUser = logoutUserFull;
 window.redirectIfNotAuth = redirectIfNotAuth;
 window.handleAccountClick = handleAccountClick;
+window.resolveSitePath = resolveSitePath;

@@ -5,12 +5,16 @@
 // ===============================
 // 📦 BASE URL (Render Backend)
 // ===============================
-const BASE_URL = "https://your-backend-url.onrender.com/api";
+const BASE_URL = window.__BYOSE_API_BASE__ || "";
 
 // ===============================
 // 🔁 GENERIC REQUEST
 // ===============================
 async function request(endpoint, method = "GET", data = null) {
+
+  if (!BASE_URL) {
+    return { success: false, message: "Static hosting mode: no API base configured." };
+  }
 
   try {
 

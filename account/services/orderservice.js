@@ -5,12 +5,16 @@
 // ===============================
 // 📦 BASE API URL
 // ===============================
-const ORDER_API = "https://your-backend-url.onrender.com/api/orders";
+const ORDER_API = window.__BYOSE_ORDER_API__ || "";
 
 // ===============================
 // 📥 GET ALL ORDERS
 // ===============================
 async function getOrders(userId) {
+  if (!ORDER_API) {
+    return [];
+  }
+
   try {
     const res = await fetch(`${ORDER_API}/${userId}`);
     const data = await res.json();
@@ -48,6 +52,10 @@ async function getOrderHistory(userId) {
 // 🔍 GET SINGLE ORDER
 // ===============================
 async function getOrderById(orderId) {
+  if (!ORDER_API) {
+    return null;
+  }
+
   try {
     const res = await fetch(`${ORDER_API}/single/${orderId}`);
     const data = await res.json();
@@ -63,6 +71,10 @@ async function getOrderById(orderId) {
 // ❌ CANCEL ORDER
 // ===============================
 async function cancelOrder(orderId) {
+  if (!ORDER_API) {
+    return { success: false, message: 'Static hosting mode: order API unavailable.' };
+  }
+
   try {
     const res = await fetch(`${ORDER_API}/cancel/${orderId}`, {
       method: "POST"

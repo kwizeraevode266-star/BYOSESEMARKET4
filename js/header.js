@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof handleAccountClick === 'function') return handleAccountClick();
       if (typeof window.handleAccountClick === 'function') return window.handleAccountClick();
       // fallback
-      window.location.href = '/login.html';
+      window.location.href = resolveHeaderPath('login.html');
     });
     // render avatar if available
     (function renderAccountAvatar(){
@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       if (typeof handleAccountClick === 'function') return handleAccountClick();
       if (typeof window.handleAccountClick === 'function') return window.handleAccountClick();
-      window.location.href = '/login.html';
+      window.location.href = resolveHeaderPath('login.html');
     });
   }
 
@@ -113,10 +113,17 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       if (typeof handleAccountClick === 'function') return handleAccountClick();
       if (typeof window.handleAccountClick === 'function') return window.handleAccountClick();
-      window.location.href = '/login.html';
+      window.location.href = resolveHeaderPath('login.html');
     });
   });
 });
+
+function resolveHeaderPath(target) {
+  const path = window.location.pathname || '';
+  if (path.includes('/account/settings/')) return '../../' + target;
+  if (path.includes('/account/') || path.includes('/logout/') || path.includes('/components/') || path.includes('/details/') || path.includes('/shop/') || path.includes('/auth/')) return '../' + target;
+  return target;
+}
 
 /**
  * SET ACTIVE NAV LINK BASED ON CURRENT PAGE

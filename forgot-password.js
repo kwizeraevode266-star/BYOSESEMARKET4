@@ -35,6 +35,58 @@ function validatePhone(phone) {
     return /^\+2507\d{8}$/.test(phone); // Rwanda format
 }
 
+function getStoredUsers() {
+    try {
+        return JSON.parse(localStorage.getItem('bm_users')) || [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function hasMatchingUser(method, identifier) {
+    const normalized = method === 'email' ? identifier.toLowerCase() : identifier;
+    return getStoredUsers().some((user) => {
+        if (method === 'email') {
+            return (user.email || '').toLowerCase() === normalized;
+        }
+        return (user.phone || '') === normalized;
+    });
+}
+
+function storeResetCode(identifier) {
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    localStorage.setItem('resetIdentifier', identifier);
+    localStorage.setItem('resetCode', code);
+    return code;
+}
+
+async function requestResetCode(method, identifier) {
+    const endpoint = window.__BYOSE_PASSWORD_RESET_API__ || '';
+
+    if (endpoint) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ method, identifier })
+        });
+
+        return response.json();
+    }
+
+    if (!hasMatchingUser(method, identifier)) {
+        return { success: false, message: 'Account not found for that identifier.' };
+    }
+
+    const code = storeResetCode(identifier);
+    return {
+        success: true,
+        staticCode: code,
+        message: 'Static hosting mode: use the generated code to continue.'
+    };
+}
+
 // ===============================
 // SEND CODE
 // ===============================
@@ -62,15 +114,7 @@ sendBtn.addEventListener('click', async () => {
     sendBtn.disabled = true;
 
     try {
-        const response = await fetch('http://localhost:3000/api/forgot-password', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ method, identifier })
-        });
-
-        const data = await response.json();
+        const data = await requestResetCode(method, identifier);
 
         if (data.success) {
 
@@ -79,6 +123,9 @@ sendBtn.addEventListener('click', async () => {
             localStorage.setItem("resetIdentifier", identifier);
 
             // Go to verify page
+            if (data.staticCode) {
+                alert(`Static hosting mode code: ${data.staticCode}`);
+            }
             window.location.href = "verify-code.html";
 
         } else {
@@ -87,7 +134,7 @@ sendBtn.addEventListener('click', async () => {
 
     } catch (error) {
         console.error(error);
-        alert("Server error");
+        alert("Unable to send reset code right now.");
     }
 
     sendBtn.innerText = "Send Reset Code";

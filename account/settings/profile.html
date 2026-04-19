@@ -242,11 +242,11 @@
 
   </div>
 
-  <script src="/services/authService.js"></script>
+  <script src="../../services/authservice.js"></script>
   <!-- Minimal JS hooks. Keep light; profile.js should replace/enhance interactions. -->
   <script>
     document.addEventListener('DOMContentLoaded', function(){
-      try { if (typeof authService !== 'undefined' && !authService.isLoggedIn()) window.location.href = '/login.html'; } catch(e){}
+      try { if (typeof authService !== 'undefined' && !authService.isLoggedIn()) window.location.href = '../../login.html'; } catch(e){}
     });
     // Hook: open file picker when edit avatar clicked
     document.getElementById('editAvatarBtn').addEventListener('click', function(){

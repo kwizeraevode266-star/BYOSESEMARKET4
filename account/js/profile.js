@@ -130,7 +130,7 @@
 
     if (!u) {
       // Not logged in -> redirect to login
-      try { window.location.href = '/login.html'; } catch (e) {}
+      try { window.location.href = '../../login.html'; } catch (e) {}
       return;
     }
 
@@ -301,7 +301,7 @@
     // protect: must have user, otherwise redirect
     const user = readUser();
     if (!user) {
-      try { window.location.href = '/login.html'; } catch (e) {}
+      try { window.location.href = '../../login.html'; } catch (e) {}
       return;
     }
 

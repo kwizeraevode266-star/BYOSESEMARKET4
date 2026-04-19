@@ -38,6 +38,49 @@ function getOTP() {
 // ===============================
 let time = 60;
 
+function getStoredResetCode() {
+    return localStorage.getItem('resetCode');
+}
+
+async function verifyResetCode(method, identifier, otp) {
+    const endpoint = window.__BYOSE_VERIFY_CODE_API__ || '';
+
+    if (endpoint) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ method, identifier, otp })
+        });
+
+        return response.json();
+    }
+
+    return { success: otp === getStoredResetCode() };
+}
+
+async function resendResetCode(method, identifier) {
+    const endpoint = window.__BYOSE_PASSWORD_RESET_API__ || '';
+
+    if (endpoint) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ method, identifier })
+        });
+
+        return response.json();
+    }
+
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    localStorage.setItem('resetCode', code);
+    localStorage.setItem('resetIdentifier', identifier || '');
+    return { success: true, staticCode: code };
+}
+
 const timer = setInterval(() => {
     time--;
     countdownEl.innerText = time;
@@ -68,15 +111,7 @@ verifyBtn.addEventListener("click", async () => {
     const identifier = localStorage.getItem("resetIdentifier");
 
     try {
-        const response = await fetch("http://localhost:3000/api/verify-code", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ method, identifier, otp })
-        });
-
-        const data = await response.json();
+        const data = await verifyResetCode(method, identifier, otp);
 
         if (data.success) {
             window.location.href = "reset-password.html";
@@ -86,7 +121,7 @@ verifyBtn.addEventListener("click", async () => {
 
     } catch (err) {
         console.error(err);
-        alert("Server error");
+        alert("Unable to verify the code right now.");
     }
 
     verifyBtn.innerText = "Verify Code";
@@ -105,17 +140,12 @@ resendBtn.addEventListener("click", async () => {
     resendBtn.innerText = "Sending...";
 
     try {
-        const response = await fetch("http://localhost:3000/api/forgot-password", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ method, identifier })
-        });
-
-        const data = await response.json();
+        const data = await resendResetCode(method, identifier);
 
         if (data.success) {
+            if (data.staticCode) {
+                alert(`Static hosting mode code: ${data.staticCode}`);
+            }
             alert("Code resent!");
             time = 60;
         } else {
@@ -124,7 +154,7 @@ resendBtn.addEventListener("click", async () => {
 
     } catch (err) {
         console.error(err);
-        alert("Server error");
+        alert("Unable to resend the code right now.");
     }
 
     resendBtn.innerText = "Resend";

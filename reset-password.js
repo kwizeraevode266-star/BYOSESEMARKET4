@@ -30,6 +30,62 @@ function validatePassword(password) {
     return password.length >= 4;
 }
 
+function getStoredUsers() {
+    try {
+        return JSON.parse(localStorage.getItem('bm_users')) || [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveStoredUsers(users) {
+    localStorage.setItem('bm_users', JSON.stringify(users));
+}
+
+async function updatePassword(method, identifier, newPassword) {
+    const endpoint = window.__BYOSE_RESET_PASSWORD_API__ || '';
+
+    if (endpoint) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ method, identifier, newPassword })
+        });
+
+        return response.json();
+    }
+
+    const users = getStoredUsers();
+    const index = users.findIndex((user) => {
+        if (method === 'email') {
+            return (user.email || '').toLowerCase() === String(identifier || '').toLowerCase();
+        }
+        return (user.phone || '') === identifier;
+    });
+
+    if (index === -1) {
+        return { success: false, message: 'Account not found.' };
+    }
+
+    users[index].password = newPassword;
+    saveStoredUsers(users);
+
+    try {
+        const currentUser = JSON.parse(localStorage.getItem('bm_current_user') || 'null');
+        if (currentUser && users[index].id === currentUser.id) {
+            localStorage.setItem('bm_current_user', JSON.stringify(users[index]));
+            localStorage.setItem('bm_user', JSON.stringify(users[index]));
+        }
+    } catch (error) {
+        console.error(error);
+    }
+
+    localStorage.removeItem('resetCode');
+    return { success: true };
+}
+
 // ===============================
 // RESET PASSWORD
 // ===============================
@@ -60,19 +116,7 @@ resetBtn.addEventListener("click", async () => {
     const identifier = localStorage.getItem("resetIdentifier");
 
     try {
-        const response = await fetch("http://localhost:3000/api/reset-password", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                method,
-                identifier,
-                newPassword
-            })
-        });
-
-        const data = await response.json();
+        const data = await updatePassword(method, identifier, newPassword);
 
         if (data.success) {
 
@@ -91,7 +135,7 @@ resetBtn.addEventListener("click", async () => {
 
     } catch (err) {
         console.error(err);
-        alert("Server error");
+        alert("Unable to update the password right now.");
     }
 
     resetBtn.innerText = "Reset Password";

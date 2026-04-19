@@ -348,7 +348,7 @@
 
     logoutButton.addEventListener('click', function (event) {
       event.preventDefault();
-      window.location.href = '/logout/logout.html';
+      window.location.href = '../logout/logout.html';
     });
   }
 

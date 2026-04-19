@@ -298,7 +298,7 @@
         type: t,
         time: new Date().toISOString(),
         status: 'unread',
-        link: t === 'order' ? '/account/order-details.html?id='+Math.floor(Math.random()*9000) : (t === 'promo' ? '/product-details.html?id='+Math.floor(Math.random()*9000) : '')
+        link: t === 'order' ? 'order-details.html?id='+Math.floor(Math.random()*9000) : (t === 'promo' ? '../product-details.html?id='+Math.floor(Math.random()*9000) : '')
       };
       addNotification(sample);
 

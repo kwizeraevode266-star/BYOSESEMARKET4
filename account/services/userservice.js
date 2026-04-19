@@ -51,7 +51,7 @@ async function updateProfile(data) {
 // ===============================
 function logout() {
   // Redirect to centralized logout page for confirmation and session cleanup
-  try { window.location.href = '/logout/logout.html'; } catch (e) { window.location.replace('/logout/logout.html'); }
+  try { window.location.href = '../logout/logout.html'; } catch (e) { window.location.replace('../logout/logout.html'); }
 }
 
 // ===============================

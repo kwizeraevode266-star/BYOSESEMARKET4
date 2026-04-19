@@ -78,5 +78,5 @@ function getState() {
 function logoutState() {
   AppState.user = null;
   // Use centralized logout flow
-  try { window.location.href = '/logout/logout.html'; } catch (e) { window.location.replace('/logout/logout.html'); }
+  try { window.location.href = '../logout/logout.html'; } catch (e) { window.location.replace('../logout/logout.html'); }
 }

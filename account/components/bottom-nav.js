@@ -38,6 +38,10 @@ function loadBottomNav() {
   `;
 }
 
+function sitePath(target) {
+  return '../' + String(target || '').replace(/^\/+/, '');
+}
+
 // ===============================
 // 🖱️ EVENTS
 // ===============================
@@ -58,11 +62,11 @@ function initBottomNavEvents() {
       // navigation
       switch (page) {
         case "home":
-          window.location.href = "/";
+          window.location.href = sitePath('index.html');
           break;
 
         case "cart":
-          window.location.href = "/cart.html";
+          window.location.href = sitePath('cart.html');
           break;
 
         case "orders":
@@ -73,7 +77,7 @@ function initBottomNavEvents() {
           // delegate to global account handler to ensure consistent auth logic
           if (typeof handleAccountClick === 'function') handleAccountClick();
           else if (typeof window.handleAccountClick === 'function') window.handleAccountClick();
-          else window.location.href = '/account/account.html';
+            else window.location.href = sitePath('account/account.html');
           break;
       }
 

@@ -3,20 +3,31 @@
 // ===============================
 (function () {
 
+  function getSitePrefix() {
+    const path = window.location.pathname || "";
+    if (path.includes("/account/settings/")) return "../../";
+    if (path.includes("/account/") || path.includes("/logout/") || path.includes("/components/") || path.includes("/details/") || path.includes("/shop/") || path.includes("/auth/")) return "../";
+    return "";
+  }
+
+  function sitePath(target) {
+    return getSitePrefix() + String(target || "").replace(/^\/+/, "");
+  }
+
   const NAV_HTML = `
     <nav class="mobile-bottom-nav" role="navigation" aria-label="Mobile navigation">
       
-      <a href="/index.html" class="mobile-bottom-nav__item" data-nav="home">
+      <a href="${sitePath('index.html')}" class="mobile-bottom-nav__item" data-nav="home">
         <span class="mobile-bottom-nav__icon"><i class="fa-solid fa-house"></i></span>
         <span class="mobile-bottom-nav__label">Home</span>
       </a>
 
-      <a href="/shop.html" class="mobile-bottom-nav__item" data-nav="shop">
+      <a href="${sitePath('shop.html')}" class="mobile-bottom-nav__item" data-nav="shop">
         <span class="mobile-bottom-nav__icon"><i class="fa-solid fa-store"></i></span>
         <span class="mobile-bottom-nav__label">Shop</span>
       </a>
 
-      <a href="/cart.html" class="mobile-bottom-nav__item" data-nav="cart">
+      <a href="${sitePath('cart.html')}" class="mobile-bottom-nav__item" data-nav="cart">
         <span class="mobile-bottom-nav__icon"><i class="fas fa-shopping-cart"></i></span>
         <span class="mobile-bottom-nav__label">Cart</span>
         <span class="mobile-bottom-nav__badge" id="mobile-nav-cart-badge"></span>
@@ -68,14 +79,14 @@
       // fallback (if app.js missing) — prefer centralized helper
       if (typeof window.isLoggedIn === 'function') {
         try {
-          if (window.isLoggedIn()) { window.location.href = "/account/account.html"; return; }
-          else { window.location.href = "/login.html"; return; }
+          if (window.isLoggedIn()) { window.location.href = sitePath('account/account.html'); return; }
+          else { window.location.href = sitePath('login.html'); return; }
         } catch (e) { /* fallback below */ }
       }
 
       const logged = localStorage.getItem("bm_logged_in") === "true";
-      if (logged) window.location.href = "/account/account.html";
-      else window.location.href = "/login.html";
+      if (logged) window.location.href = sitePath('account/account.html');
+      else window.location.href = sitePath('login.html');
     });
   }
 

@@ -753,13 +753,13 @@
   </script>
   <!-- Mobile bottom navigation (mobile & tablet only) -->
   <link rel="stylesheet" href="mobile-nav.css">
-  <script src="services/authService.js"></script>
+  <script src="services/authservice.js"></script>
   <script>
     // Protect cart: require authentication
     document.addEventListener('DOMContentLoaded', function(){
       try {
         if (typeof authService !== 'undefined' && !authService.isLoggedIn()) {
-          window.location.href = '/login.html';
+          window.location.href = 'login.html';
         }
       } catch (e) { console.error(e); }
     });

@@ -5,12 +5,16 @@
 // ===============================
 // 📦 BASE API URL
 // ===============================
-const NOTIF_API = "https://your-backend-url.onrender.com/api/notifications";
+const NOTIF_API = window.__BYOSE_NOTIFICATION_API__ || "";
 
 // ===============================
 // 📥 GET NOTIFICATIONS
 // ===============================
 async function getNotifications(userId) {
+  if (!NOTIF_API) {
+    return [];
+  }
+
   try {
     const res = await fetch(`${NOTIF_API}/${userId}`);
     const data = await res.json();
@@ -27,6 +31,10 @@ async function getNotifications(userId) {
 // 🔴 GET UNREAD COUNT
 // ===============================
 async function getUnreadCount(userId) {
+  if (!NOTIF_API) {
+    return 0;
+  }
+
   try {
     const res = await fetch(`${NOTIF_API}/unread/${userId}`);
     const data = await res.json();
@@ -43,6 +51,10 @@ async function getUnreadCount(userId) {
 // ✔ MARK AS READ
 // ===============================
 async function markAsRead(notificationId) {
+  if (!NOTIF_API) {
+    return { success: true, static: true };
+  }
+
   try {
     const res = await fetch(`${NOTIF_API}/read/${notificationId}`, {
       method: "POST"
@@ -60,6 +72,10 @@ async function markAsRead(notificationId) {
 // ❌ DELETE NOTIFICATION
 // ===============================
 async function deleteNotification(notificationId) {
+  if (!NOTIF_API) {
+    return { success: true, static: true };
+  }
+
   try {
     const res = await fetch(`${NOTIF_API}/delete/${notificationId}`, {
       method: "POST"

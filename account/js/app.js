@@ -23,6 +23,13 @@ function getCurrentUser() {
   }
 }
 
+function sitePath(target) {
+  if (typeof window.resolveSitePath === 'function') {
+    return window.resolveSitePath(target);
+  }
+  return '../' + String(target || '').replace(/^\/+/, '');
+}
+
 // ===============================
 // 🔐 AUTH CHECK (PROTECTION)
 // ===============================
@@ -33,7 +40,7 @@ function checkAuth() {
     path.includes("/account/");
 
   if (isProtected && !isUserLoggedIn()) {
-    window.location.href = "/login.html";
+    window.location.href = sitePath('login.html');
   }
 }
 
@@ -42,9 +49,9 @@ function checkAuth() {
 // ===============================
 function handleAccountClick() {
   if (isUserLoggedIn()) {
-    window.location.href = "/account/account.html";
+    window.location.href = sitePath('account/account.html');
   } else {
-    window.location.href = "/login.html";
+    window.location.href = sitePath('login.html');
   }
 }
 
@@ -58,7 +65,7 @@ function attachLogout() {
 
   btn.addEventListener("click", function () {
     // go to centralized logout confirmation page
-    try { window.location.href = '/logout/logout.html'; } catch (e) { window.location.replace('/logout/logout.html'); }
+    try { window.location.href = sitePath('logout/logout.html'); } catch (e) { window.location.replace(sitePath('logout/logout.html')); }
   });
 }
 
