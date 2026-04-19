@@ -211,7 +211,7 @@ export function formatPrice(value) {
 }
 
 export function createProductUrl(product, mode = 'relative') {
-  const base = mode === 'root' ? 'Details/product-details1.html' : 'product-details1.html';
+  const base = mode === 'root' ? 'details/product-details1.html' : 'product-details1.html';
   return `${base}?id=${encodeURIComponent(product.id)}`;
 }
 
