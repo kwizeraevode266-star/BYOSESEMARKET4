@@ -1,145 +1,136 @@
-const products=[
-{
-id:1,
-name:"Inkweto Pro Elite",
-category:"shoes",
-price:18000,
-oldPrice:25000,
-badge:"SALE",
-image:"img/All Products   NEW BOLONCE.jpeg",
-url: 'Details/product-details1.html?id=1',
-page: 'product-details1.html',
-keywords:["inkweto","shoes","chaussures","footwear","pro"]
-},
-
-{
-id:2,
-name:"Smart Watch X",
-category:"electronics",
-price:28000,
-oldPrice:32000,
-badge:"NEW",
-image:"img/All Products  1990 ajf kkF.jpeg",
-url: 'Details/product-details1.html?id=2',
-page: 'product-details2.html',
-keywords:["watch","amasaha","montre","smartwatch","electronics"]
-},
-
-{
-id:3,
-name:"Leather Bag",
-category:"fashion",
-price:15000,
-oldPrice:20000,
-badge:"POPULAR",
-image:"img/All Products  ADIDOS.jpeg",
-url: 'Details/product-details1.html?id=3',
-page: 'product-details3.html',
-keywords:["bag","ibikapu","sac","leather","fashion"]
-},
-{
-id:4,
-name:"Android Smart TV",
-category:"electronics",
-price:20000,
-oldPrice:25000,
-badge:"SALE",
-image:"img/All Products  SPOERTS.jpeg",
-url: 'Details/product-details1.html?id=4',
-page: 'product-details4.html',
-keywords:["tv","television","smart tv","electronics"]
-},
-{
-id:5,
-name:"Classic T-Shirt",
-category:"fashion",
-price:10000,
-oldPrice:15000,
-badge:"SALE",
-image:"img/All Products AMASHATI.jpeg",
-url: 'Details/product-details1.html?id=5',
-page: 'product-details5.html',
-keywords:["t-shirt","tshirt","imyenda","clothes","shirt","fashion"]
-},
-{
-id:6,
-name:"Inkweto Pro Elite",
-category:"shoes",
-price:18000,
-oldPrice:25000,
-badge:"SALE",
-image:"img/Reduced  phone  Smart2.jpeg",
-url: 'Details/product-details1.html?id=6',
-page: 'product-details6.html',
-keywords:["inkweto","shoes","chaussures","footwear","pro"]
-},
-
-{
-id:7,
-name:"Smart Watch X",
-category:"electronics",
-price:28000,
-oldPrice:32000,
-badge:"NEW",
-image:"img/IMYENDE2.jpeg",
-url: 'Details/product-details1.html?id=7',
-page: 'product-details7.html',
-keywords:["watch","amasaha","montre","smartwatch","electronics"]
-},
-
-{
-id:8,
-name:"Leather Bag",
-category:"fashion",
-price:15000,
-oldPrice:20000,
-badge:"POPULAR",
-image:"img/All Products   IBIKAPU TIRIPO.jpeg",
-url: 'Details/product-details1.html?id=8',
-page: 'product-details8.html',
-keywords:["bag","ibikapu","sac","leather","fashion"]
-},
-{
-id:9,
-name:"Android Smart TV",
-category:"electronics",
-price:20000,
-oldPrice:25000,
-badge:"SALE",
-image:"img/All Products   INWETO R.jpeg",
-url: 'Details/product-details1.html?id=9',
-page: 'product-details9.html',
-keywords:["tv","television","smart tv","electronics"]
-},
-{
-id:10,
-name:"Classic T-Shirt",
-category:"fashion",
-price:10000,
-oldPrice:15000,
-badge:"SALE",
-image:"img/All Products COGO3.jpeg",
-url: 'Details/product-details1.html?id=10',
-page: 'product-details10.html',
-keywords:["t-shirt","tshirt","imyenda","clothes","shirt","fashion"]
-},
-{
-id:11,
-name:"Classic T-Shirt",
-category:"fashion",
-price:10000,
-oldPrice:15000,
-badge:"SALE",
-image:"img/reduced  butterfly queen set.jpeg",
-url: 'Details/product-details1.html?id=11',
-page: 'product-details11.html',
-keywords:["t-shirt","tshirt","imyenda","clothes","shirt","fashion"]
-},
-
-
-
-
-
+const products = [
+	{
+		id: 1,
+		name: "Inkweto Pro Elite",
+		category: "shoes",
+		price: 18000,
+		oldPrice: 25000,
+		badge: "Top Pick",
+		image: "img/all products   new bolonce.jpeg",
+		url: "product-details1.html?id=1",
+		page: "product-details1.html",
+		keywords: ["inkweto", "shoes", "sneakers", "footwear", "pro", "elite"]
+	},
+	{
+		id: 2,
+		name: "Smart Watch X",
+		category: "electronics",
+		price: 28000,
+		oldPrice: 32000,
+		badge: "Smart Choice",
+		image: "img/top2 isaha.jpeg",
+		url: "product-details1.html?id=2",
+		page: "product-details1.html",
+		keywords: ["watch", "amasaha", "montre", "smartwatch", "electronics"]
+	},
+	{
+		id: 3,
+		name: "Leather Bag",
+		category: "fashion",
+		price: 15000,
+		oldPrice: 20000,
+		badge: "Trending",
+		image: "img/ibikapu.jpeg",
+		url: "product-details1.html?id=3",
+		page: "product-details1.html",
+		keywords: ["bag", "ibikapu", "sac", "leather", "fashion"]
+	},
+	{
+		id: 4,
+		name: "Android Smart TV",
+		category: "electronics",
+		price: 20000,
+		oldPrice: 25000,
+		badge: "Living Room Pick",
+		image: "img/all products androidn tv.jpeg",
+		url: "product-details1.html?id=4",
+		page: "product-details1.html",
+		keywords: ["tv", "television", "smart tv", "electronics", "android"]
+	},
+	{
+		id: 5,
+		name: "Classic T-Shirt",
+		category: "fashion",
+		price: 10000,
+		oldPrice: 15000,
+		badge: "Everyday Essential",
+		image: "img/all products amashati.jpeg",
+		url: "product-details1.html?id=5",
+		page: "product-details1.html",
+		keywords: ["t-shirt", "tshirt", "imyenda", "clothes", "shirt", "fashion"]
+	},
+	{
+		id: 6,
+		name: "Inkweto Pro Sport",
+		category: "shoes",
+		price: 18000,
+		oldPrice: 25000,
+		badge: "Sport Edit",
+		image: "img/all products  ingweto.jpeg",
+		url: "product-details1.html?id=6",
+		page: "product-details1.html",
+		keywords: ["inkweto", "shoes", "sport", "sneakers", "footwear"]
+	},
+	{
+		id: 7,
+		name: "Smart Watch X Lite",
+		category: "electronics",
+		price: 28000,
+		oldPrice: 32000,
+		badge: "Everyday Tech",
+		image: "img/hiro 5 amasaha.jpg",
+		url: "product-details1.html?id=7",
+		page: "product-details1.html",
+		keywords: ["watch", "smartwatch", "amasaha", "electronics", "lite"]
+	},
+	{
+		id: 8,
+		name: "Leather Bag Studio",
+		category: "fashion",
+		price: 15000,
+		oldPrice: 20000,
+		badge: "Statement Pick",
+		image: "img/all products   ibikapu tiripo.jpeg",
+		url: "product-details1.html?id=8",
+		page: "product-details1.html",
+		keywords: ["bag", "ibikapu", "studio", "fashion", "leather"]
+	},
+	{
+		id: 9,
+		name: "Android Smart TV Plus",
+		category: "electronics",
+		price: 20000,
+		oldPrice: 25000,
+		badge: "Home Upgrade",
+		image: "img/top 4 android tv.jpeg",
+		url: "product-details1.html?id=9",
+		page: "product-details1.html",
+		keywords: ["tv", "television", "android", "smart tv", "electronics"]
+	},
+	{
+		id: 10,
+		name: "Classic T-Shirt Studio",
+		category: "fashion",
+		price: 10000,
+		oldPrice: 15000,
+		badge: "Daily Layer",
+		image: "img/all products cogo3.jpeg",
+		url: "product-details1.html?id=10",
+		page: "product-details1.html",
+		keywords: ["t-shirt", "shirt", "fashion", "studio", "clothes"]
+	},
+	{
+		id: 11,
+		name: "Butterfly Queen Set",
+		category: "fashion",
+		price: 8000,
+		oldPrice: 10000,
+		badge: "Styled Set",
+		image: "img/reduced  butterfly queen set.jpeg",
+		url: "product-details1.html?id=11",
+		page: "product-details1.html",
+		keywords: ["butterfly", "queen", "set", "fashion", "accessories"]
+	}
 ];
 
 window.products = products;

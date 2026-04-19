@@ -56,7 +56,7 @@ export const productContent = [
     price: 28000,
     oldPrice: 32000,
     stock: 14,
-    mainImage: 'img/all products  1990 ajf kkf.jpeg',
+    mainImage: 'img/top2 isaha.jpeg',
     gallery: [
       'img/top2 isaha.jpeg',
       'img/hiro 5 amasaha.jpg',
@@ -103,7 +103,7 @@ export const productContent = [
     price: 15000,
     oldPrice: 20000,
     stock: 10,
-    mainImage: 'img/all products  adidos.jpeg',
+    mainImage: 'img/ibikapu.jpeg',
     gallery: [
       'img/ibikapu.jpeg',
       'img/reduced  bag trendy.jpeg',
@@ -127,7 +127,7 @@ export const productContent = [
         name: 'Color',
         type: 'image',
         options: [
-          { value: 'Chocolate', image: 'img/all products  adidos.jpeg', stock: 4 },
+          { value: 'Chocolate', image: 'img/ibikapu.jpeg', stock: 4 },
           { value: 'Espresso', image: 'img/reduced  bag trendy.jpeg', stock: 3 },
           { value: 'Sand', image: 'img/reduced  bag trendy2.jpeg', stock: 3 }
         ]
@@ -142,7 +142,7 @@ export const productContent = [
     price: 20000,
     oldPrice: 25000,
     stock: 9,
-    mainImage: 'img/all products  spoerts.jpeg',
+    mainImage: 'img/all products androidn tv.jpeg',
     gallery: [
       'img/all products androidn tv.jpeg',
       'img/top 4 android tv.jpeg',
@@ -238,7 +238,7 @@ export const productContent = [
     price: 18000,
     oldPrice: 25000,
     stock: 16,
-    mainImage: 'img/reduced  phone  smart2.jpeg',
+    mainImage: 'img/all products  ingweto.jpeg',
     gallery: [
       'img/all products  ingweto.jpeg',
       'img/all products sport3.jpeg',
@@ -262,7 +262,7 @@ export const productContent = [
         name: 'Color',
         type: 'image',
         options: [
-          { value: 'Signal Red', image: 'img/reduced  phone  smart2.jpeg', stock: 5 },
+          { value: 'Signal Red', image: 'img/all products sports.jpeg', stock: 5 },
           { value: 'Urban White', image: 'img/all products  ingweto.jpeg', stock: 5 },
           { value: 'Volt Lime', image: 'img/all products sport3.jpeg', stock: 6 }
         ]
@@ -287,7 +287,7 @@ export const productContent = [
     price: 28000,
     oldPrice: 32000,
     stock: 11,
-    mainImage: 'img/imyende2.jpeg',
+    mainImage: 'img/hiro 5 amasaha.jpg',
     gallery: [
       'img/top2 isaha.jpeg',
       'img/hiro 5 amasaha.jpg',
@@ -311,7 +311,7 @@ export const productContent = [
         name: 'Color',
         type: 'image',
         options: [
-          { value: 'Rose Gold', image: 'img/imyende2.jpeg', stock: 4 },
+          { value: 'Rose Gold', image: 'img/hiro 5 amasaha.jpg', stock: 4 },
           { value: 'Graphite', image: 'img/hiro 5 amasaha.jpg', stock: 3 },
           { value: 'Ocean Blue', image: 'img/hiro 5b amasaha.jpg', stock: 4 }
         ]
@@ -373,7 +373,7 @@ export const productContent = [
     price: 20000,
     oldPrice: 25000,
     stock: 7,
-    mainImage: 'img/all products   inweto r.jpeg',
+    mainImage: 'img/top 4 android tv.jpeg',
     gallery: [
       'img/all products androidn tv.jpeg',
       'img/top 4 android tv.jpeg',
@@ -454,48 +454,48 @@ export const productContent = [
   },
   {
     id: 11,
-    name: 'Classic T-Shirt Studio',
+    name: 'Butterfly Queen Set',
     category: 'fashion',
-    badge: 'Daily Layer',
+    badge: 'Styled Set',
     price: 8000,
     oldPrice: 10000,
     stock: 20,
     mainImage: 'img/reduced  butterfly queen set.jpeg',
     gallery: [
-      'img/hiro 3 imyenda.jpg',
-      'img/top5 imyenda.jpeg',
-      'img/reduced  t-shirt classic.jpeg'
+      'img/reduced  butterfly queen set.jpeg',
+      'img/reduced  butterfly elegan set.jpeg',
+      'img/hiro 3 imyenda.jpg'
     ],
-    shortDescription: 'An everyday fashion basic with a simple look, comfortable wear, and flexible styling.',
+    shortDescription: 'A compact fashion set with a coordinated finish, easy styling, and standout detail for gifting or occasion wear.',
     longDescription: [
-      'This Classic T-Shirt entry is built around easy dressing, regular comfort, and a look that fits naturally into casual wardrobes.',
-      'It is meant to be uncomplicated, wearable, and dependable for frequent use without sacrificing a clean finish.'
+      'Butterfly Queen Set is selected for shoppers who want a ready-made fashion combination that feels polished without extra styling effort.',
+      'It works well as a giftable set, a simple occasion accessory, or a quick upgrade for shoppers who prefer coordinated pieces.'
     ],
-    highlights: ['Easy casual styling', 'Comfort for regular wear', 'Practical wardrobe staple'],
+    highlights: ['Coordinated fashion styling', 'Gift-friendly presentation', 'Easy occasion-ready finish'],
     trust: ['Curated seasonal selection', 'Responsive customer support', 'Easy order tracking'],
     specs: [
-      ['Category', 'Casual fashion'],
-      ['Fit', 'Regular fit'],
-      ['Use case', 'Daily casual wear'],
-      ['Care', 'Easy maintenance']
+      ['Category', 'Fashion accessories set'],
+      ['Style', 'Coordinated statement look'],
+      ['Use case', 'Gift and occasion wear'],
+      ['Care', 'Store in a dry place']
     ],
     attributes: [
       {
-        name: 'Color',
+        name: 'Set Style',
         type: 'image',
         options: [
-          { value: 'Olive', image: 'img/all products cogo3.jpeg', stock: 7 },
-          { value: 'Ivory', image: 'img/top5 imyenda.jpeg', stock: 7 },
-          { value: 'Black', image: 'img/reduced  t-shirt classic.jpeg', stock: 6 }
+          { value: 'Queen Set', image: 'img/reduced  butterfly queen set.jpeg', stock: 7 },
+          { value: 'Elegant Set', image: 'img/reduced  butterfly elegan set.jpeg', stock: 7 },
+          { value: 'Classic Accent', image: 'img/hiro 3 imyenda.jpg', stock: 6 }
         ]
       },
       {
-        name: 'Size',
+        name: 'Package',
         type: 'text',
         options: [
-          { value: 'M', stock: 5 },
-          { value: 'L', stock: 8 },
-          { value: 'XL', stock: 7 }
+          { value: 'Standard', stock: 8 },
+          { value: 'Gift Ready', stock: 7 },
+          { value: 'Premium Wrap', stock: 5 }
         ]
       }
     ]

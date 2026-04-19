@@ -1,9 +1,4 @@
 (function () {
-  const VALID_PRODUCT_PAGES = new Set([
-    'product-details.html',
-    'product-details1.html',
-    'product-details2.html'
-  ]);
 
   const TOKEN_ALIASES = {
     shoe: ['shoes', 'sneakers', 'footwear', 'inkweto'],
@@ -59,19 +54,22 @@
   }
 
   function resolveProductUrl(product) {
-    if (product && product.page && VALID_PRODUCT_PAGES.has(product.page)) {
-      return product.page;
+    const rawUrl = String(product && product.url ? product.url : '').trim();
+    if (rawUrl && !/^(?:javascript|data):/i.test(rawUrl)) {
+      return rawUrl;
     }
 
-    if (product && Number(product.id) === 1) {
-      return 'product-details1.html';
+    const id = Number(product && product.id);
+    if (Number.isFinite(id) && id > 0) {
+      return `product-details1.html?id=${encodeURIComponent(id)}`;
     }
 
-    if (product && Number(product.id) === 2) {
-      return 'product-details2.html';
+    const rawPage = String(product && product.page ? product.page : '').trim();
+    if (rawPage && !/^(?:javascript|data):/i.test(rawPage)) {
+      return rawPage;
     }
 
-    return 'product-details.html';
+    return 'product-details1.html';
   }
 
   function buildSearchText(product) {
