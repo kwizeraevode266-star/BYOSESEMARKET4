@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Categories Section - Integration Example</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Categories CSS -->
+  <link rel="stylesheet" href="css/categories.css">
+  
+  <!-- Mobile Navigation CSS -->
+  <link rel="stylesheet" href="mobile-nav.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f8fafc;
+      color: #0f172a;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: white;
+      padding: 20px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #2563eb;
+    }
+    
+    .subtitle {
+      color: #64748b;
+      font-size: 16px;
+    }
+    
+    .content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: #0f172a;
+    }
+    
+    .demo-section {
+      margin-bottom: 30px;
+    }
+    
+    .code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      overflow-x: auto;
+      margin: 15px 0;
+      line-height: 1.5;
+    }
+    
+    .feature-list {
+      list-style: none;
+      margin: 15px 0;
+    }
+    
+    .feature-list li {
+      padding: 12px;
+      margin: 8px 0;
+      background: #f8fafc;
+      border-left: 4px solid #2563eb;
+      border-radius: 4px;
+      padding-left: 20px;
+    }
+    
+    .feature-list li strong {
+      color: #2563eb;
+    }
+    
+    .button {
+      display: inline-block;
+      background: #2563eb;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 150ms ease;
+      font-size: 14px;
+    }
+    
+    .button:hover {
+      background: #1e40af;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+    
+    .button:active {
+      transform: translateY(0);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+    
+    footer {
+      background: white;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      color: #64748b;
+      font-size: 14px;
+    }
+    
+    @media (max-width: 1024px) {
+      .content {
+        padding: 20px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <h1>Categories Section Integration</h1>
+  <p class="subtitle">Modern, responsive category browsing for mobile e-commerce</p>
+</header>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+  
+  <!-- DEMO SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">🚀 Getting Started</h2>
+    
+    <p>The Categories section is fully integrated with your mobile navigation. To test it:</p>
+    
+    <div class="button-group">
+      <button class="button" id="testCategoriesBtn">Test Categories Modal</button>
+      <a href="shop.html?category=shoes" class="button" style="background: #7c3aed;">View Products (Shoes)</a>
+    </div>
+    
+    <p style="margin-top: 20px; color: #64748b;">
+      <strong>On Mobile/Tablet:</strong> Look for the "Categories" button in the bottom navigation bar and tap it to see the full experience.
+    </p>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">✨ Key Features</h2>
+    
+    <ul class="feature-list">
+      <li><strong>Modern Design:</strong> Professional UI matching top global e-commerce platforms</li>
+      <li><strong>Fully Responsive:</strong> Optimized for all mobile and tablet devices</li>
+      <li><strong>Smooth Animations:</strong> GPU-accelerated transitions for silky smooth experience</li>
+      <li><strong>Touch-Optimized:</strong> Large tap targets and haptic feedback support</li>
+      <li><strong>12 Categories:</strong> Shoes, Clothing, Bags, Watches, Phones, Accessories, Electronics, Tools, Home & Garden, Sports, Beauty, Books</li>
+      <li><strong>Icon Support:</strong> Beautiful Font Awesome icons with gradient colors</li>
+      <li><strong>Product Counts:</strong> Displays number of products in each category</li>
+      <li><strong>Fast Loading:</strong> Minimal JavaScript with zero dependencies</li>
+      <li><strong>Accessible:</strong> WCAG 2.1 Level AA compliant</li>
+      <li><strong>Keyboard Support:</strong> Full keyboard navigation and control</li>
+      <li><strong>Dark Mode:</strong> Automatic dark mode support</li>
+      <li><strong>Analytics Ready:</strong> Built-in event tracking for GTM and custom analytics</li>
+    </ul>
+  </section>
+
+  <!-- INTEGRATION SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">📋 Integration Steps</h2>
+    
+    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Step 1: Include CSS and JavaScript</h3>
+    
+    <p>Add these to your HTML file:</p>
+    
+    <div class="code-block">
+&lt;!-- In &lt;head&gt; --&gt;
+&lt;link rel="stylesheet" href="css/categories.css"&gt;
+
+&lt;!-- Before closing &lt;/body&gt; --&gt;
+&lt;script src="js/categories.js"&gt;&lt;/script&gt;
+    </div>
+    
+    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Step 2: Add Categories Component</h3>
+    
+    <p>Include the categories modal HTML anywhere in your body:</p>
+    
+    <div class="code-block">
+&lt;!-- Before closing &lt;/body&gt; --&gt;
+&lt;!-- Categories Component --&gt;
+&lt;!-- [Paste content from components/categories.html here] --&gt;
+    </div>
+    
+    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Step 3: Mobile Navigation</h3>
+    
+    <p>Ensure your mobile navigation has a Categories button:</p>
+    
+    <div class="code-block">
+&lt;a href="#" class="mobile-bottom-nav__item" data-nav="categories"&gt;
+  &lt;span class="mobile-bottom-nav__icon"&gt;
+    &lt;i class="fa-solid fa-list"&gt;&lt;/i&gt;
+  &lt;/span&gt;
+  &lt;span class="mobile-bottom-nav__label"&gt;Categories&lt;/span&gt;
+&lt;/a&gt;
+    </div>
+    
+    <p style="margin-top: 15px; color: #64748b;">
+      The JavaScript will automatically detect and connect this button to the categories modal.
+    </p>
+  </section>
+
+  <!-- CUSTOMIZATION SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">🎨 Customization</h2>
+    
+    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Add/Remove Categories</h3>
+    
+    <p>Edit the CATEGORIES array in js/categories.js:</p>
+    
+    <div class="code-block">
+const CATEGORIES = [
+  {
+    id: 'shoes',
+    name: 'Shoes',
+    icon: 'fa-solid fa-shoe-prints',
+    color: '#2563eb',
+    path: 'shop.html?category=shoes',
+    count: 245
+  },
+  // Add more categories here...
+];
+    </div>
+    
+    <h3 style="margin-top: 20px; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Change Colors</h3>
+    
+    <p>Modify CSS variables in css/categories.css:</p>
+    
+    <div class="code-block">
+:root {
+  --categories-primary: #2563eb;      /* Main brand color */
+  --categories-secondary: #1e40af;    /* Hover state */
+  --categories-light-bg: #f8fafc;     /* Card background */
+  --categories-text-primary: #0f172a; /* Primary text */
+  /* ... more variables ... */
+}
+    </div>
+  </section>
+
+  <!-- API SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">📚 JavaScript API</h2>
+    
+    <p>The Categories Manager is automatically initialized. Access it via:</p>
+    
+    <div class="code-block">
+// Get the instance
+const categoriesManager = window.categoriesInstance;
+
+// Available methods:
+categoriesManager.open();           // Open modal
+categoriesManager.close();          // Close modal
+categoriesManager.toggle();         // Toggle open/close
+categoriesManager.getCategory(id);  // Get category by ID
+categoriesManager.getAllCategories(); // Get all categories
+categoriesManager.updateCategories(array); // Update categories
+    </div>
+    
+    <p style="margin-top: 15px; color: #64748b;">
+      Example: <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">window.categoriesInstance.open();</code>
+    </p>
+  </section>
+
+  <!-- FILES SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">📁 Files & Structure</h2>
+    
+    <ul class="feature-list">
+      <li><strong>components/categories.html</strong> - Modal structure and template (~2 KB)</li>
+      <li><strong>css/categories.css</strong> - Complete responsive styling (~8 KB)</li>
+      <li><strong>js/categories.js</strong> - Full functionality and category management (~6 KB)</li>
+      <li><strong>CATEGORIES_INTEGRATION_GUIDE.md</strong> - Complete integration documentation</li>
+    </ul>
+    
+    <p style="margin-top: 20px; color: #64748b;">
+      <strong>Total Size:</strong> ~16 KB (minimal impact on page load)
+    </p>
+  </section>
+
+  <!-- BROWSER SUPPORT SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">🌐 Browser Support</h2>
+    
+    <ul class="feature-list">
+      <li><strong>iOS Safari:</strong> iOS 12+</li>
+      <li><strong>Chrome:</strong> Latest versions</li>
+      <li><strong>Firefox:</strong> Latest versions</li>
+      <li><strong>Samsung Internet:</strong> Latest versions</li>
+      <li><strong>Edge:</strong> Latest versions</li>
+    </ul>
+    
+    <p style="margin-top: 15px; color: #64748b;">
+      ✅ Works on all modern mobile and tablet browsers
+    </p>
+  </section>
+
+  <!-- TESTING SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">✅ Testing Checklist</h2>
+    
+    <ul class="feature-list">
+      <li><strong>Categories button:</strong> Appears in mobile navigation</li>
+      <li><strong>Modal opens:</strong> Smooth slide-up animation</li>
+      <li><strong>Category cards:</strong> Display with icons and names</li>
+      <li><strong>Tap interaction:</strong> Cards respond to touch</li>
+      <li><strong>Navigation:</strong> Clicking navigates to product category</li>
+      <li><strong>Close button:</strong> Works properly</li>
+      <li><strong>Backdrop:</strong> Clicking closes modal</li>
+      <li><strong>Escape key:</strong> Closes modal on desktop</li>
+      <li><strong>Animations:</strong> Smooth and not laggy</li>
+      <li><strong>Responsive:</strong> Works on all screen sizes</li>
+    </ul>
+  </section>
+
+  <!-- NEXT STEPS SECTION -->
+  <section class="content demo-section">
+    <h2 class="section-title">🎯 Next Steps</h2>
+    
+    <p style="margin-bottom: 15px;">
+      1. Copy the three files (HTML, CSS, JS) to your project<br>
+      2. Include them in your main HTML file<br>
+      3. Test on mobile device or DevTools mobile view<br>
+      4. Customize categories and colors as needed<br>
+      5. Connect shop.html to handle category filters<br>
+      6. Monitor analytics events
+    </p>
+    
+    <p style="color: #64748b;">
+      For detailed integration instructions, see <strong>CATEGORIES_INTEGRATION_GUIDE.md</strong>
+    </p>
+  </section>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>Categories Section v1.0 | Modern E-commerce Solution | © 2026</p>
+</footer>
+
+<!-- CATEGORIES COMPONENT (Include this HTML in your pages) -->
+<div id="categories-container"></div>
+
+<script>
+  // Test button functionality
+  document.getElementById('testCategoriesBtn').addEventListener('click', function() {
+    if (window.categoriesInstance) {
+      window.categoriesInstance.toggle();
+    } else {
+      alert('Categories component not loaded. Make sure to include categories.html and categories.js');
+    }
+  });
+</script>
+
+</body>
+</html>

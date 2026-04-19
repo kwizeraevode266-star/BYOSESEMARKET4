@@ -1,0 +1,568 @@
+/* ========================================
+   HEADER & NAVIGATION STYLES
+   ======================================== */
+
+.main-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-fixed);
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.header-wrapper, .header-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+  padding: var(--space-md) 0;
+  flex-wrap: wrap;
+}
+
+/* ========================================
+   LOGO
+   ======================================== */
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--text-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.logo:hover {
+  color: var(--primary);
+}
+
+.logo i {
+  font-size: var(--text-2xl);
+  color: var(--primary);
+}
+
+/* ========================================
+   NAVIGATION
+   ======================================== */
+
+.nav, .nav-menu {
+  display: flex;
+  gap: var(--space-xl);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.nav-link {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--primary);
+  background: var(--bg);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--primary);
+  transition: width var(--transition-base);
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ========================================
+   SEARCH BAR
+   ======================================== */
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-lg);
+  gap: var(--space-md);
+  max-width: 350px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  color: var(--text);
+  font-size: var(--text-base);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.search-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  display: flex;
+  align-items: center;
+}
+
+.search-btn:hover {
+  color: var(--primary);
+}
+
+/* ========================================
+   HEADER ICONS
+   ======================================== */
+
+.header-icons {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+}
+
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  color: var(--text);
+  font-size: var(--text-lg);
+}
+
+.icon-btn:hover {
+  background: var(--bg);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.icon-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: var(--accent);
+  color: white;
+  font-size: var(--text-xs);
+  font-weight: var(--font-weight-bold);
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+}
+
+/* Avatar shown inside header account button */
+.header-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: inline-block;
+}
+
+.header-avatar--letter {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: var(--primary);
+  color: #fff;
+  font-weight:700;
+}
+
+/* ========================================
+   HAMBURGER MENU (MOBILE)
+   ======================================== */
+
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  align-items: center;
+}
+
+.hamburger-btn span {
+  width: 24px;
+  height: 2.5px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: all var(--transition-base);
+}
+
+.hamburger-btn.active span:nth-child(1) {
+  transform: translateY(10px) rotate(45deg);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+  transform: translateY(-10px) rotate(-45deg);
+}
+
+/* ========================================
+   MOBILE MENU
+   ======================================== */
+
+.mobile-menu {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100vh;
+  background: var(--card);
+  z-index: var(--z-modal-backdrop);
+  transition: left var(--transition-base);
+  padding-top: 100px;
+  box-shadow: var(--shadow-lg);
+}
+
+.mobile-menu.active {
+  left: 0;
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.mobile-nav-link {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  transition: all var(--transition-fast);
+  display: block;
+}
+
+.mobile-nav-link:hover {
+  background: var(--bg);
+  color: var(--primary);
+  padding-left: var(--space-2xl);
+}
+
+/* ========================================
+   CART SIDEBAR
+   ======================================== */
+
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 420px;
+  max-width: 100%;
+  height: 100vh;
+  background: var(--card);
+  z-index: var(--z-modal);
+  box-shadow: var(--shadow-xl);
+  transition: right var(--transition-base);
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-sidebar.active {
+  right: 0;
+}
+
+.cart-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-xl);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cart-header h2 {
+  margin: 0;
+  font-size: var(--text-2xl);
+}
+
+.cart-close {
+  background: transparent;
+  border: none;
+  font-size: var(--text-xl);
+  cursor: pointer;
+  color: var(--text);
+  padding: 0;
+}
+
+.cart-close:hover {
+  color: var(--primary);
+}
+
+.cart-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-lg);
+}
+
+.cart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  height: 100%;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.cart-empty i {
+  font-size: 56px;
+  color: var(--border-dark);
+}
+
+.cart-empty p {
+  margin: 0;
+}
+
+.cart-item {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+}
+
+.cart-item-image {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background: var(--bg);
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cart-item-name {
+  font-weight: var(--font-weight-semibold);
+  color: var(--text);
+  margin-bottom: var(--space-xs);
+  line-height: var(--line-height-tight);
+}
+
+.cart-item-price {
+  color: var(--primary);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-sm);
+}
+
+.cart-item-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.qty-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.qty-control button {
+  background: var(--bg);
+  border: none;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.qty-control button:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.qty-control input {
+  width: 40px;
+  height: 28px;
+  border: none;
+  text-align: center;
+  padding: 0;
+}
+
+.cart-remove-btn {
+  background: transparent;
+  border: none;
+  color: var(--error);
+  cursor: pointer;
+  margin-left: auto;
+  transition: all var(--transition-fast);
+}
+
+.cart-remove-btn:hover {
+  color: var(--accent);
+}
+
+.cart-footer {
+  border-top: 1px solid var(--border);
+  padding: var(--space-xl);
+  flex-shrink: 0;
+}
+
+.cart-summary {
+  margin-bottom: var(--space-xl);
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-sm) 0;
+  color: var(--text-secondary);
+}
+
+.summary-row.total {
+  font-weight: var(--font-weight-bold);
+  color: var(--text);
+  font-size: var(--text-lg);
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-md);
+  margin-top: var(--space-md);
+}
+
+.cart-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: var(--z-modal-backdrop);
+  display: none;
+}
+
+.cart-overlay.active {
+  display: block;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .header-wrapper {
+    flex-wrap: wrap;
+    padding: var(--space-md) 0;
+  }
+  /* On tablets and smaller, only HIDE navigation items visually (keep layout unchanged).
+     Use visibility so header height/spacing remains identical to desktop. The bottom nav
+     will provide the navigation on mobile/tablet. */
+  .nav, .nav-menu, .nav-link {
+    visibility: hidden; /* hides content but preserves layout space */
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Hide header icons (cart/account) visually but keep header structure intact */
+  .header-icons {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-wrapper {
+    gap: var(--space-md);
+  }
+
+  .logo {
+    font-size: var(--text-lg);
+  }
+
+  .hamburger-btn {
+    display: flex;
+  }
+
+  /* visually hide navigation links but preserve layout spacing */
+  .nav, .nav-menu, .nav-link { visibility: hidden; opacity: 0; pointer-events: none; }
+
+  /* Keep search bar visible on mobile unless your design explicitly hides it */
+  .search-bar { display: block; }
+
+  .mobile-menu {
+    display: block;
+  }
+
+  .header-icons {
+    order: 2;
+  }
+
+  .cart-sidebar {
+    right: -100%;
+    width: 100%;
+  }
+
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    font-size: var(--text-base);
+  }
+}
+
+@media (max-width: 640px) {
+  .search-bar {
+    flex-basis: 100%;
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  .search-input {
+    font-size: 14px;
+  }
+
+  .icon-badge {
+    width: 18px;
+    height: 18px;
+    font-size: 10px;
+  }
+}

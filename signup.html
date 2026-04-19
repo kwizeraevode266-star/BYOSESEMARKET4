@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iyandikishe | Byose Market Rwanda | Kugura Inkweto, Imyenda, Ibikapu Online Kigali</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- CSS linking example:
+         <link rel="stylesheet" href="auth-modern.css">
+         <link rel="stylesheet" href="signup-desktop.css">
+         <link rel="stylesheet" href="signup-mobile.css"> -->
+    <link rel="stylesheet" href="auth-modern.css">
+    <link rel="stylesheet" href="signup-desktop.css">
+    <link rel="stylesheet" href="signup-mobile.css">
+</head>
+
+<body class="signup-page">
+
+<div class="auth-wrapper">
+
+    <div class="auth-side">
+        <div class="side-content">
+            <span class="side-badge">Create Your Account</span>
+            <h1>Tangiza shopping yawe mu buryo bwihuse kandi bwizewe.</h1>
+            <p>Fungura account yawe kuri Byose Market kugira ngo ubike addresses, ukurikirane orders, kandi ubone checkout yihuta ku bikoresho byose.</p>
+
+            <div class="side-metrics" aria-hidden="true">
+                <div class="metric-card">
+                    <span class="metric-value">Fast</span>
+                    <span class="metric-label">Account creation mu minota mike gusa</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">Secure</span>
+                    <span class="metric-label">Password checks na protected profile access</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">Smart</span>
+                    <span class="metric-label">Saved cart, addresses, na order history ahantu hamwe</span>
+                </div>
+            </div>
+
+            <ul class="side-points" aria-hidden="true">
+                <li>Commerce-style onboarding inspired by premium retail apps</li>
+                <li>Responsive experience that feels native on phone and desktop</li>
+                <li>Clear identity capture with email or phone sign up</li>
+            </ul>
+
+            <a href="login.html" class="side-btn">Injira muri account iriho</a>
+        </div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-shell">
+
+            <div class="auth-logo">
+                <img src="img/logo.png" alt="Byose Market logo">
+                <div class="logo-copy">
+                    <p class="auth-eyebrow">New Account</p>
+                    <h2 class="app-name">Byose Market</h2>
+                </div>
+            </div>
+
+            <div class="auth-card">
+                <div class="auth-card-inner">
+
+                    <div class="auth-header">
+                        <h1 data-lang="signup_title">Iyandikishe</h1>
+                        <p class="auth-subtitle">Shyiramo amakuru make utangire kugura no gukurikirana orders zawe byoroshye.</p>
+                    </div>
+
+                    <div id="authFeedback" class="auth-feedback" aria-live="polite" aria-atomic="true"></div>
+
+                    <form id="signupForm" class="auth-form" novalidate>
+                        <div class="input-group" data-field="name">
+                            <label class="field-label" for="name">Amazina yawe</label>
+                            <div class="input-control">
+                                <i class="fa fa-user"></i>
+                                <input type="text" id="name" name="name" autocomplete="name" data-lang-placeholder="name" placeholder="Shyiramo amazina yawe" aria-describedby="nameMeta">
+                            </div>
+                            <div id="nameMeta" class="field-meta">Koresha amazina ashobora kumenyekana kuri deliveries na invoices.</div>
+                        </div>
+
+                        <div class="auth-switch-method" role="tablist" aria-label="Hitamo uburyo bwo kwiyandikisha">
+                            <button type="button" id="emailBtn" class="active" aria-pressed="true">Email</button>
+                            <button type="button" id="phoneBtn" aria-pressed="false">Phone</button>
+                        </div>
+
+                        <div id="emailField" class="input-group" data-field="email">
+                            <label class="field-label" for="email">Email address</label>
+                            <div class="input-control">
+                                <i class="fa fa-envelope"></i>
+                                <input type="email" id="email" name="email" inputmode="email" autocomplete="email" data-lang-placeholder="email" placeholder="you@example.com" aria-describedby="emailMeta">
+                            </div>
+                            <div id="emailMeta" class="field-meta">Iyi email ni yo uzajya ukoresha mu kwinjira no kwakira updates.</div>
+                        </div>
+
+                        <div id="phoneField" class="input-group" data-field="phone" style="display:none;" hidden>
+                            <label class="field-label" for="phone">Phone number</label>
+                            <div class="input-control">
+                                <i class="fa fa-phone"></i>
+                                <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" data-lang-placeholder="phone" placeholder="0788 000 000" aria-describedby="phoneMeta">
+                            </div>
+                            <div id="phoneMeta" class="field-meta">Andika nimero ya telefone ushobora kwakiraho notifications za order.</div>
+                        </div>
+
+                        <div class="password-grid">
+                            <div class="input-group" data-field="password">
+                                <label class="field-label" for="password">Password</label>
+                                <div class="input-control">
+                                    <i class="fa fa-lock"></i>
+                                    <input type="password" id="password" name="password" autocomplete="new-password" data-lang-placeholder="password" placeholder="Andika password ikomeye" aria-describedby="passwordMeta passwordCriteria">
+                                    <button type="button" id="togglePassword" aria-label="Show password">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div id="passwordMeta" class="field-meta">Koresha byibura inyuguti 8 zirimo uppercase, lowercase na number.</div>
+                            </div>
+
+                            <div class="input-group" data-field="confirmPassword">
+                                <label class="field-label" for="confirmPassword">Confirm password</label>
+                                <div class="input-control">
+                                    <i class="fa fa-shield-halved"></i>
+                                    <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" data-lang-placeholder="confirm_password" placeholder="Ongera wandike password" aria-describedby="confirmPasswordMeta">
+                                    <button type="button" id="toggleConfirmPassword" class="toggle-secondary-password" aria-label="Show confirm password">
+                                        <i class="fa fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div id="confirmPasswordMeta" class="field-meta">Iri genzura rifasha kwemeza ko nta typo yabayeho.</div>
+                            </div>
+                        </div>
+
+                        <div id="passwordCriteria" class="password-criteria" aria-live="polite">
+                            <div class="criteria-header">
+                                <span>Password strength</span>
+                                <span class="pw-strength-label" id="pwStrengthText">Weak</span>
+                            </div>
+
+                            <div class="pw-strength-track" aria-hidden="true">
+                                <div class="pw-strength-bar weak" id="pwStrengthBar"></div>
+                            </div>
+
+                            <ul class="criteria-list">
+                                <li id="pw-min" class="criteria-item invalid"><span class="icon">x</span><span>Minimum 8 characters</span></li>
+                                <li id="pw-upper" class="criteria-item invalid"><span class="icon">x</span><span>At least one uppercase letter</span></li>
+                                <li id="pw-lower" class="criteria-item invalid"><span class="icon">x</span><span>At least one lowercase letter</span></li>
+                                <li id="pw-number" class="criteria-item invalid"><span class="icon">x</span><span>At least one number</span></li>
+                            </ul>
+
+                            <div id="pw-match" class="pw-match invalid"><span class="icon">x</span><span>Passwords do not match</span></div>
+                        </div>
+
+                        <button id="signupBtn" type="submit" data-lang="signup_btn">
+                            <span class="btn-spinner" aria-hidden="true"></span>
+                            <span class="btn-label">Iyandikishe</span>
+                        </button>
+                    </form>
+
+                    <div class="auth-footer">
+                        <p>Ufite account?</p>
+                        <a href="login.html" class="signup-btn">Injira</a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="storage.js"></script>
+<script src="services/validation.js"></script>
+<script src="services/authService.js"></script>
+<script src="auth.js"></script>
+<script src="signup.js"></script>
+<script src="language.js"></script>
+<script src="theme.js"></script>
+
+</body>
+</html>

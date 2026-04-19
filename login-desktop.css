@@ -1,0 +1,182 @@
+/* ===============================
+   LOGIN DESKTOP LAYER
+   Desktop, tablet, large screen, and TV-specific layout.
+   =============================== */
+
+@media (min-width: 768px) {
+  .auth-wrapper {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .auth-side {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 48px clamp(32px, 6vw, 96px);
+    background:
+      radial-gradient(circle at 16% 18%, rgba(255, 255, 255, 0.2), transparent 22%),
+      radial-gradient(circle at 82% 18%, rgba(255, 255, 255, 0.12), transparent 18%),
+      linear-gradient(160deg, #071d18 0%, #0a3a30 34%, #00b894 100%);
+    overflow: hidden;
+  }
+
+  .auth-side::before,
+  .auth-side::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .auth-side::before {
+    top: -110px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .auth-side::after {
+    bottom: -140px;
+    left: -80px;
+    width: 320px;
+    height: 320px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .side-content {
+    display: block;
+    width: min(100%, 520px);
+  }
+
+  .auth-container {
+    z-index: 1;
+    min-height: 100dvh;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(32px, 4vw, 56px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(244, 250, 248, 0.92));
+  }
+
+  .auth-shell {
+    width: min(100%, 520px);
+    max-width: 520px;
+    margin-left: auto;
+  }
+
+  .auth-card {
+    border-radius: 32px;
+  }
+
+  .auth-card-inner {
+    padding: clamp(30px, 3vw, 38px);
+  }
+
+  .auth-logo {
+    margin-bottom: 18px;
+  }
+
+  .side-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .side-content {
+    width: min(100%, 420px);
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .auth-container {
+    padding-inline: clamp(44px, 6vw, 88px);
+  }
+
+  .auth-shell {
+    max-width: 540px;
+  }
+
+  .side-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .side-metrics {
+    gap: 14px;
+  }
+
+  .metric-card {
+    padding: 18px;
+  }
+}
+
+@media (min-width: 1440px) {
+  body {
+    padding: 24px;
+  }
+
+  .auth-wrapper {
+    min-height: calc(100dvh - 48px);
+    max-width: 1680px;
+    margin: 0 auto;
+    border-radius: 40px;
+    overflow: hidden;
+    box-shadow: 0 44px 100px rgba(17, 34, 51, 0.16);
+  }
+
+  .auth-side {
+    padding: clamp(56px, 5vw, 84px);
+  }
+
+  .side-content h1 {
+    max-width: 10ch;
+    font-size: clamp(3.6rem, 4vw, 5.2rem);
+  }
+
+  .side-content p {
+    max-width: 40ch;
+    font-size: 1.08rem;
+  }
+
+  .auth-card-inner {
+    padding: 40px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .auth-wrapper {
+    max-width: 1880px;
+    min-height: calc(100dvh - 72px);
+  }
+
+  .auth-side {
+    padding-inline: 92px;
+  }
+
+  .side-content {
+    width: min(100%, 680px);
+  }
+
+  .side-content h1 {
+    font-size: 5.5rem;
+  }
+
+  .side-metrics {
+    max-width: 620px;
+  }
+
+  .auth-container {
+    padding: 72px 92px;
+  }
+
+  .auth-shell {
+    max-width: 560px;
+  }
+
+  .auth-header h1 {
+    font-size: 2.8rem;
+  }
+}

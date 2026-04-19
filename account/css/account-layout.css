@@ -1,0 +1,203 @@
+/* =========================
+   🔹 GLOBAL LAYOUT & VARIABLES
+========================= */
+:root {
+  --max-width: 1100px;
+  --pad: 20px;
+  --bottom-nav-height: 64px; /* adjust if bottom nav changes */
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-border: rgba(255,255,255,0.45);
+  --glass-shadow: 0 8px 30px rgba(2,6,23,0.08);
+  --muted: #64748b;
+  --text: #0f172a;
+}
+
+html { box-sizing: border-box; scroll-behavior: smooth; }
+*, *::before, *::after { box-sizing: inherit; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f5f7fa;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Main wrapper for account pages (centers content + reserves space for bottom nav) */
+.account-container {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--pad);
+  padding-bottom: calc(var(--pad) + var(--bottom-nav-height));
+}
+
+/* Backwards-compatible alias (keeps legacy usage working) */
+.account-main { max-width: var(--max-width); margin: 0 auto; padding: var(--pad); }
+
+/* =========================
+   🔹 HEADER
+========================= */
+/* =========================
+   🔹 HEADER
+   Layout-only: spacing, alignment, and surface treatment
+========================= */
+.account-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+
+  padding: 14px;
+  margin-bottom: 18px;
+
+  border-radius: 14px;
+  background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(15,23,42,0.04);
+  box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+/* LEFT SIDE */
+.header-left { display:flex; align-items:center; gap:14px; }
+
+/* PROFILE */
+.profile-wrapper { position: relative; width: 56px; height: 56px; cursor: pointer; }
+.profile-wrapper img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; display:block; }
+
+/* CAMERA ICON */
+.edit-icon {
+  position: absolute; right: -4px; bottom: -4px;
+  width: 22px; height: 22px; display:flex; align-items:center; justify-content:center;
+  background: #3b82f6; color: #fff; border-radius: 50%; font-size: 11px;
+}
+
+/* USER INFO */
+.user-info h2 { margin:0; font-size:18px; font-weight:600; }
+.user-info .location { font-size:13px; color: var(--muted); }
+
+/* RIGHT SIDE */
+.header-right { display:flex; gap:10px; align-items:center; }
+
+/* ICON BUTTON */
+.icon-btn { width:40px; height:40px; border-radius:10px; background:#f8fafc; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; transition: background 200ms ease; }
+.icon-btn:hover { background:#eef2f7; }
+
+/* =========================
+   🔹 SECTION BLOCKS (Glassmorphism)
+   Layout only: surface, spacing and readable contrast
+========================= */
+.account-section {
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 14px;
+
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  color: var(--text);
+}
+
+/* Small helper if a section needs a tighter/denser look */
+.account-section--compact { padding: 12px; }
+
+/* =========================
+   🔹 GRID SYSTEM (Mobile-first)
+   Use these layout classes for generic page grids.
+========================= */
+.grid { display: grid; gap: 12px; }
+
+.grid-2 { grid-template-columns: 1fr; }
+.grid-4 { grid-template-columns: 1fr; }
+
+/* Tablet */
+@media (min-width: 600px) {
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Desktop */
+@media (min-width: 1100px) {
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* =========================
+  🔹 CARDS BASE (kept minimal - component styles should live elsewhere)
+========================= */
+.card { background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 6px 18px rgba(2,6,23,0.06); text-align:center; }
+
+/* =========================
+  🔹 BOTTOM NAV (spacing helper)
+  Ensure content does not overlap the fixed bottom navigation.
+========================= */
+#bottom-nav { position: fixed; left:0; right:0; bottom:0; height:var(--bottom-nav-height); background:#ffffff; border-top:1px solid rgba(15,23,42,0.04); display:flex; justify-content:space-around; align-items:center; padding:8px 0; z-index: 20; }
+
+/* =========================
+   🔹 LIST LAYOUT
+========================= */
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+}
+.list-item .li-icon { flex: 0 0 40px; display:flex; align-items:center; justify-content:center; }
+.list-item .li-content { flex: 1 1 auto; }
+.list-item .li-arrow { flex: 0 0 24px; display:flex; align-items:center; justify-content:center; }
+
+
+/* =========================
+   🔹 PRODUCTS LAYOUT
+   horizontal scrolling for product lists + grid fallback
+========================= */
+.products-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+.products-scroll > * { scroll-snap-align: start; }
+
+.products-grid { display: grid; gap:12px; grid-template-columns: repeat(2, 1fr); }
+
+/* make horizontal scroll visually nicer */
+.products-scroll::-webkit-scrollbar { height:8px; }
+.products-scroll::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.12); border-radius:999px; }
+
+
+/* =========================
+   🔹 RESPONSIVENESS (mobile-first)
+========================= */
+@media (min-width: 500px) {
+  .account-container { padding-left: calc(var(--pad) * 1.25); padding-right: calc(var(--pad) * 1.25); }
+}
+
+@media (min-width: 768px) {
+  .account-header { padding: 18px; }
+  .products-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1100px) {
+  .products-grid { grid-template-columns: repeat(4, 1fr); }
+  .account-container { padding-left: calc(var(--pad) * 1.5); padding-right: calc(var(--pad) * 1.5); }
+}
+
+/* PHONE tweaks */
+@media (max-width: 500px) {
+  .account-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .header-right { width: 100%; display:flex; justify-content:space-between; }
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* utility to visually hide scrollbars when desired */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

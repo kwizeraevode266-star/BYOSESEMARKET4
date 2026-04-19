@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Byose Market Rwanda | Kugura Online Byoroshye</title>
+  <meta name="description" content="Byose Market ni online shopping platform yo mu Rwanda igufasha kubona inkweto, imyenda, electronics n'ibindi ku giciro cyiza kandi mu buryo bworoshye.">
+  <meta name="keywords" content="byose market, shopping app rwanda, kugura online kigali, inkweto, electronics, imyenda">
+  <meta name="author" content="Byose Market">
+  <meta name="robots" content="index, follow">
+  <meta property="og:title" content="Byose Market Rwanda">
+  <meta property="og:description" content="Explore products nyinshi icyarimwe kuri home page isa na real shopping app.">
+  <meta property="og:image" content="https://byosemarket.com/img/logo.png">
+  <meta property="og:url" content="https://byosemarket.com">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Byose Market Rwanda">
+  <meta name="twitter:description" content="Shop online in Rwanda with a clean compact ecommerce experience.">
+  <meta name="twitter:image" content="https://byosemarket.com/img/logo.png">
+  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="canonical" href="https://byosemarket.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/home-mobile.css">
+  <link rel="stylesheet" href="css/home-desktop.css">
+  <link rel="stylesheet" href="mobile-nav.css">
+</head>
+<body class="home-page">
+  <header class="main-header" id="mainHeader" data-sticky-header>
+    <div class="container header-shell">
+      <div class="header-mobile-top">
+        <a class="brand brand-mobile" href="index.html" aria-label="Byose Market Home">
+          <img class="brand-logo" src="img/logo.png" alt="Byose Market logo">
+        </a>
+        <a href="messages.html" class="icon-btn mobile-messages-btn" aria-label="Messages">
+          <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <a class="brand header-desktop-brand" href="index.html" aria-label="Byose Market Home">
+        <img class="brand-logo" src="img/logo.png" alt="Byose Market logo">
+      </a>
+
+      <nav class="header-nav nav header-desktop-nav" aria-label="Main navigation">
+        <a href="index.html" class="nav-link active" data-page="home">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+          <span>Home</span>
+        </a>
+        <a href="shop.html" class="nav-link" data-page="shop">
+          <i class="fa-solid fa-store" aria-hidden="true"></i>
+          <span>Shop</span>
+        </a>
+        <a href="contact.html" class="nav-link" data-page="contact">
+          <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+
+      <div class="header-actions header-desktop-actions">
+        <div class="header-search-hover">
+          <a href="search.html" class="icon-btn header-search-toggle" aria-label="Open search page">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </a>
+          <form class="header-search header-search-preview site-search" id="desktopSearchPreview" role="search" action="search.html">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input id="searchInput" name="q" type="search" placeholder="Search products..." aria-label="Search products">
+            <button id="searchBtn" type="submit" aria-label="Submit search">
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+        </div>
+        <a href="cart.html" class="icon-btn desktop-cart-btn" id="cartBtn" aria-label="Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </a>
+        <a href="login.html" class="icon-btn" id="accountBtn" aria-label="Account">
+          <i class="fa-regular fa-user"></i>
+        </a>
+      </div>
+
+      <div class="header-search header-search-mobile-redirect" id="homeSearchRedirect" role="button" tabindex="0" aria-label="Open search page">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input id="homeSearchInput" type="search" placeholder="Search shoes..." aria-label="Search products" readonly tabindex="-1" inputmode="none">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero-section container">
+      <div class="hero-grid" id="heroSection">
+        <div class="hero-media card-surface">
+          <div class="hero-slides">
+            <img class="hero-slide active" src="img/hiro1 inketo.jpg" alt="Inkweto promotions" loading="eager">
+            <img class="hero-slide" src="img/hiro 2 ibikapu.jpg" alt="Ibikapu promotions" loading="lazy">
+            <img class="hero-slide" src="img/hiro 3 imyenda.jpg" alt="Imyenda promotions" loading="lazy">
+            <img class="hero-slide" src="img/hiro  4 electronics.jpg" alt="Electronics promotions" loading="lazy">
+          </div>
+          <div class="hero-controls" aria-label="Hero slider controls">
+            <button type="button" class="hero-control hero-control-prev" id="prevBtn" aria-label="Previous slide">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <div class="hero-dots" id="heroDots"></div>
+            <button type="button" class="hero-control hero-control-next" id="nextBtn" aria-label="Next slide">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="category-section container">
+      <div class="section-heading">
+        <div>
+          <span class="section-kicker">Categories</span>
+          <h2>Shakisha byihuse ibyo ushaka</h2>
+        </div>
+        <a href="shop.html" class="text-link">Reba byose</a>
+      </div>
+
+      <div class="category-grid" id="categoryGrid">
+        <button type="button" class="category-card" data-filter="shoes">
+          <img src="img/categories 1.jpeg" alt="Inkweto">
+          <span>Inkweto</span>
+        </button>
+        <button type="button" class="category-card" data-filter="bags">
+          <img src="img/categories 2.jpeg" alt="Ibikapu">
+          <span>Ibikapu</span>
+        </button>
+        <button type="button" class="category-card" data-filter="fashion">
+          <img src="img/hiro 3 imyenda.jpg" alt="Imyenda">
+          <span>Imyenda</span>
+        </button>
+        <button type="button" class="category-card" data-filter="electronics">
+          <img src="img/hiro  4 electronics.jpg" alt="Electronics">
+          <span>Electronics</span>
+        </button>
+        <button type="button" class="category-card" data-filter="watches">
+          <img src="img/hiro 5b amasaha.jpg" alt="Amasaha">
+          <span>Amasaha</span>
+        </button>
+        <button type="button" class="category-card" data-filter="phones">
+          <img src="img/categories6.jpeg" alt="Phones">
+          <span>Phones</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="compact-banner container">
+      <div class="banner-copy">
+        <span class="section-kicker">Quick selection</span>
+        <h2>Dense layout, products nyinshi, no wasted space.</h2>
+        <p>Home ni iyo kureba no guhitamo. Cart ibikorwa bisigaye kuri product details na cart page.</p>
+      </div>
+      <div class="banner-tags">
+        <span>Top rated</span>
+        <span>Fast moving</span>
+        <span>New arrivals</span>
+        <span>Best value</span>
+      </div>
+    </section>
+
+    <section class="products-section container" id="homeProducts">
+      <div class="section-heading compact-heading">
+        <div>
+          <span class="section-kicker">Explore products</span>
+          <h2>Top deals kuri Home</h2>
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <button type="button" class="filter-pill is-active" data-filter="all">All</button>
+          <button type="button" class="filter-pill" data-filter="fashion">Fashion</button>
+          <button type="button" class="filter-pill" data-filter="electronics">Electronics</button>
+          <button type="button" class="filter-pill" data-filter="shoes">Shoes</button>
+          <button type="button" class="filter-pill" data-filter="bags">Bags</button>
+          <button type="button" class="filter-pill" data-filter="watches">Watches</button>
+          <button type="button" class="filter-pill" data-filter="phones">Phones</button>
+        </div>
+      </div>
+
+      <div class="product-grid" id="homeProductGrid" aria-live="polite"></div>
+    </section>
+
+    <section class="products-section container secondary-products">
+      <div class="section-heading compact-heading">
+        <div>
+          <span class="section-kicker">Fresh picks</span>
+          <h2>Just landed</h2>
+        </div>
+        <a href="shop.html" class="text-link">Shop more</a>
+      </div>
+
+      <div class="product-grid spotlight-grid" id="spotlightGrid"></div>
+    </section>
+
+    <section class="benefits-section container">
+      <div class="benefit-card">
+        <i class="fa-solid fa-truck-fast"></i>
+        <div>
+          <strong>Kohereza vuba</strong>
+          <span>Kigali and beyond</span>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <i class="fa-solid fa-shield-heart"></i>
+        <div>
+          <strong>Trusted quality</strong>
+          <span>Products zatoranyijwe</span>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <i class="fa-solid fa-headset"></i>
+        <div>
+          <strong>Support yihuse</strong>
+          <span>Tugusubiza vuba</span>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <i class="fa-solid fa-wallet"></i>
+        <div>
+          <strong>Good pricing</strong>
+          <span>Deals buri cyumweru</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-shell">
+      <div class="footer-grid">
+        <section class="footer-card footer-column footer-brand footer-about-card" aria-labelledby="footer-about-title">
+          <span class="footer-eyebrow">Byose Market</span>
+          <h3 id="footer-about-title">About</h3>
+          <p>Byose Market ni shopping platform ikora neza kandi isa neza, igufasha kugura fashion, electronics n'ibindi by'ingenzi mu buryo bworoshye kandi bwihuse.</p>
+        </section>
+
+        <nav class="footer-card footer-column footer-links-card" aria-labelledby="footer-links-title">
+          <span class="footer-eyebrow">Quick access</span>
+          <h3 id="footer-links-title">Links</h3>
+          <div class="footer-links-list">
+            <a href="index.html">Home</a>
+            <a href="shop.html">Shop</a>
+            <a href="contact.html">Contact</a>
+            <a href="search.html">Search</a>
+          </div>
+        </nav>
+
+        <section class="footer-card footer-column footer-contact-card" aria-labelledby="footer-contact-title">
+          <span class="footer-eyebrow">Reach us</span>
+          <h3 id="footer-contact-title">Contact</h3>
+          <div class="footer-contact-list">
+            <a href="tel:+250780430710" class="footer-contact-item" aria-label="Call 0780430710">
+              <span class="footer-contact-icon"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>0780430710</strong>
+                <small>Call or WhatsApp</small>
+              </span>
+            </a>
+            <a href="tel:+250723731250" class="footer-contact-item" aria-label="Call 0723731250">
+              <span class="footer-contact-icon"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>0723731250</strong>
+                <small>Call or WhatsApp</small>
+              </span>
+            </a>
+            <a href="mailto:byosemarket@gmail.com" class="footer-contact-item" aria-label="Email byosemarket@gmail.com">
+              <span class="footer-contact-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>byosemarket@gmail.com</strong>
+                <small>Email support</small>
+              </span>
+            </a>
+            <div class="footer-contact-item footer-contact-static" aria-label="Location Kigali, Rwanda">
+              <span class="footer-contact-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>Kigali, Rwanda</strong>
+                <small>We serve customers nationwide</small>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="footer-card footer-column footer-subscribe-card" aria-labelledby="footer-subscribe-title">
+          <span class="footer-eyebrow">Stay updated</span>
+          <h3 id="footer-subscribe-title">Subscribe</h3>
+          <p class="footer-subscribe-copy">Shyiramo email yawe ubone deals nshya, arrivals, n'amatangazo y'ibiciro byihariye.</p>
+          <form id="footerSubscribeForm" class="footer-subscribe">
+            <label class="sr-only" for="footerEmail">Email address</label>
+            <input type="email" id="footerEmail" placeholder="Andika email yawe" aria-label="Email address">
+            <button type="submit">Join now</button>
+          </form>
+          <p class="footer-note" id="footerNote">Menya deals nshya buri cyumweru.</p>
+        </section>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Byose Market. All rights reserved.</span>
+        <span>Smart shopping experience for Rwanda.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="shared/storage.js"></script>
+  <script src="js/header.js" defer></script>
+  <script src="js/mobile-nav.js" defer></script>
+  <script src="js/search.js" defer></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

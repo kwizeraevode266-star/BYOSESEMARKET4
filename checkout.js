@@ -1,0 +1,377 @@
+/* ===============================
+   GLOBAL VARIABLES
+================================= */
+let cart = [];
+let shippingFee = 0;
+let codFee = 0;
+let capturedLocation = null;
+let selectedPaymentType = "pay_now";
+
+function readItemAttributes(item) {
+  if (item && item.attributes && typeof item.attributes === "object" && !Array.isArray(item.attributes)) {
+    return Object.entries(item.attributes).filter(([, value]) => value !== undefined && value !== null && value !== "");
+  }
+
+  const attributes = [];
+  if (item?.size) attributes.push(["Size", item.size]);
+  if (item?.color) attributes.push(["Color", item.color]);
+  return attributes;
+}
+
+function formatItemAttributes(item) {
+  const attributes = readItemAttributes(item);
+  if (!attributes.length) {
+    return `Qty: ${item.qty}`;
+  }
+
+  return `Qty: ${item.qty} | ${attributes.map(([key, value]) => `${key}: ${value}`).join(" | ")}`;
+}
+
+/* ===============================
+   INIT
+================================= */
+document.addEventListener("DOMContentLoaded", () => {
+  loadCart();
+  renderProducts();
+  updateSummary();
+  setupPaymentSelection();
+  setupAddressSystem();
+  setupScreenshotPreview();
+  setupCityLogic();
+  setupPlaceOrderButtons();
+});
+
+/* ===============================
+   LOAD CART
+================================= */
+function loadCart() {
+
+  try {
+
+    // 1️⃣ Check if direct checkout exists
+    const directItem = JSON.parse(localStorage.getItem("byose_direct_checkout"));
+
+    if (directItem) {
+      cart = [directItem];
+
+      // Remove it so refresh doesn't duplicate
+      localStorage.removeItem("byose_direct_checkout");
+
+      return;
+    }
+
+    // 2️⃣ Otherwise load normal cart
+    cart = JSON.parse(localStorage.getItem("byose_market_cart_v1")) || [];
+
+  } catch {
+    cart = [];
+  }
+
+  if (cart.length === 0) {
+    document.querySelector(".checkout-container").innerHTML = `
+      <div style="padding:40px;text-align:center;">
+        <h2>Your cart is empty</h2>
+        <a href="shop.html">Go back to shop</a>
+      </div>
+    `;
+  }
+}
+
+/* ===============================
+   RENDER PRODUCTS
+================================= */
+function renderProducts() {
+  const container = document.getElementById("checkoutProducts");
+  if (!container) return;
+
+  container.innerHTML = cart.map(item => `
+    <div class="checkout-product">
+      <img src="${item.img || item.image || 'https://via.placeholder.com/80'}">
+      <div class="product-info">
+        <h4>${item.name}</h4>
+        <div class="product-attributes">
+          ${formatItemAttributes(item)}
+        </div>
+        <div class="product-price">
+          RWF ${(item.price * item.qty).toLocaleString()}
+        </div>
+      </div>
+    </div>
+  `).join("");
+}
+
+/* ===============================
+   SUMMARY
+================================= */
+function calculateSubtotal() {
+  return cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+}
+
+function updateSummary() {
+  const subtotal = calculateSubtotal();
+  const total = subtotal + shippingFee + codFee;
+
+  document.getElementById("summarySubtotal").textContent =
+    `RWF ${subtotal.toLocaleString()}`;
+
+  document.getElementById("summaryShipping").textContent =
+    `RWF ${shippingFee.toLocaleString()}`;
+
+  document.getElementById("summaryTotal").textContent =
+    `RWF ${total.toLocaleString()}`;
+
+  document.getElementById("mobileTotal").textContent =
+    `RWF ${total.toLocaleString()}`;
+
+  const codRow = document.getElementById("codFeeRow");
+  if (codFee > 0) {
+    codRow.classList.remove("hidden");
+  } else {
+    codRow.classList.add("hidden");
+  }
+}
+
+/* ===============================
+   CITY LOGIC (KIGALI CHECK)
+================================= */
+function setupCityLogic() {
+  const cityInput = document.getElementById("city");
+  const paymentTypeSection = document.getElementById("paymentTypeSection");
+  const payNowSection = document.getElementById("payNowSection");
+  const codMessage = document.getElementById("codMessage");
+
+  if (!cityInput) return;
+
+  cityInput.addEventListener("input", function () {
+    const cityValue = this.value.trim().toLowerCase();
+
+    if (cityValue === "kigali") {
+      paymentTypeSection.classList.remove("hidden");
+    } else {
+      paymentTypeSection.classList.add("hidden");
+      codFee = 0;
+      selectedPaymentType = "pay_now";
+      codMessage.classList.add("hidden");
+      payNowSection.classList.remove("hidden");
+      updateSummary();
+    }
+  });
+
+  document.querySelectorAll("input[name='paymentType']").forEach(option => {
+    option.addEventListener("change", function () {
+      selectedPaymentType = this.value;
+
+      if (this.value === "cod") {
+        codFee = 2000;
+        document.getElementById("payNowSection").classList.add("hidden");
+        document.getElementById("codMessage").classList.remove("hidden");
+      } else {
+        codFee = 0;
+        document.getElementById("payNowSection").classList.remove("hidden");
+        document.getElementById("codMessage").classList.add("hidden");
+      }
+
+      updateSummary();
+    });
+  });
+}
+
+/* ===============================
+   PAYMENT SELECTION
+================================= */
+function setupPaymentSelection() {
+  document.querySelectorAll(".payment-option").forEach(option => {
+    option.addEventListener("click", () => {
+      document.querySelectorAll(".payment-option")
+        .forEach(el => el.classList.remove("active"));
+
+      option.classList.add("active");
+      option.querySelector("input").checked = true;
+    });
+  });
+}
+
+/* ===============================
+   COPY FUNCTION
+================================= */
+function copyText(id) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text);
+  alert("Copied: " + text);
+}
+
+/* ===============================
+   SCREENSHOT PREVIEW
+================================= */
+function setupScreenshotPreview() {
+  const input = document.getElementById("paymentScreenshot");
+  const preview = document.getElementById("screenshotPreview");
+
+  if (!input) return;
+
+  input.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      preview.src = e.target.result;
+      preview.classList.remove("hidden");
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+/* ===============================
+   ADDRESS SYSTEM
+================================= */
+function setupAddressSystem() {
+  document.getElementById("saveAddressBtn")
+    .addEventListener("click", saveAddress);
+
+  document.getElementById("editAddressBtn")
+    .addEventListener("click", editAddress);
+
+  document.getElementById("gpsBtn")
+    .addEventListener("click", captureLocation);
+}
+
+function saveAddress() {
+  const requiredFields = [
+    "firstName", "lastName", "phone",
+    "city", "district", "sector",
+    "cell", "village"
+  ];
+
+  for (let id of requiredFields) {
+    if (!document.getElementById(id).value.trim()) {
+      alert("Please complete all required address fields.");
+      return;
+    }
+  }
+
+  if (!document.getElementById("confirmLocation").checked) {
+    alert("Please confirm your location.");
+    return;
+  }
+
+  document.getElementById("shippingForm").classList.add("hidden");
+  document.getElementById("shippingDisplay").classList.remove("hidden");
+  document.getElementById("editAddressBtn").style.display = "inline-block";
+}
+
+function editAddress() {
+  document.getElementById("shippingForm").classList.remove("hidden");
+  document.getElementById("shippingDisplay").classList.add("hidden");
+  document.getElementById("editAddressBtn").style.display = "none";
+}
+
+/* ===============================
+   GPS LOCATION
+================================= */
+function captureLocation() {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(position => {
+    capturedLocation = {
+      lat: position.coords.latitude,
+      lng: position.coords.longitude
+    };
+    alert("Location captured successfully!");
+  });
+}
+
+/* ===============================
+   PLACE ORDER BUTTONS
+================================= */
+function setupPlaceOrderButtons() {
+  document.getElementById("desktopPlaceOrder")
+    .addEventListener("click", placeOrder);
+
+  document.getElementById("mobilePlaceOrder")
+    .addEventListener("click", placeOrder);
+}
+
+/* ===============================
+   PLACE ORDER
+================================= */
+function placeOrder() {
+
+  if (cart.length === 0) {
+    alert("Cart is empty");
+    return;
+  }
+
+  // Validate address
+  if (!document.getElementById("shippingDisplay") ||
+      document.getElementById("shippingDisplay").classList.contains("hidden")) {
+    alert("Please save your shipping address.");
+    return;
+  }
+
+  // Validate payment
+  if (selectedPaymentType === "pay_now") {
+    const paymentMethod = document.querySelector("input[name='payment']:checked");
+    if (!paymentMethod) {
+      alert("Select payment method");
+      return;
+    }
+
+    const screenshot = document.getElementById("paymentScreenshot").files[0];
+    if (!screenshot) {
+      alert("Upload payment screenshot");
+      return;
+    }
+  }
+
+  // SHOW LOADING
+  document.getElementById("loadingOverlay").classList.remove("hidden");
+
+  setTimeout(() => {
+
+    const subtotal = calculateSubtotal();
+    const total = subtotal + shippingFee + codFee;
+
+    const orderData = {
+      id: "ORD-" + Date.now(),
+      date: new Date().toISOString(),
+      products: cart,
+      subtotal,
+      shippingFee,
+      codFee,
+      total,
+      paymentType: selectedPaymentType,
+      status: selectedPaymentType === "cod"
+        ? "Pending Delivery (COD)"
+        : "Pending Payment Verification"
+    };
+
+    saveOrder(orderData);
+    localStorage.setItem("byose_market_cart_v1", JSON.stringify([]));
+
+    // HIDE LOADING
+    document.getElementById("loadingOverlay").classList.add("hidden");
+
+    // SHOW SUCCESS MODAL
+    document.getElementById("successModal").classList.remove("hidden");
+
+  }, 1500);
+}
+/* ===============================
+   DOMContentLoaded
+================================= */
+document.getElementById("continueBtn")
+  .addEventListener("click", () => {
+    window.location.href = "shop.html";
+  });
+/* ===============================
+   SAVE ORDER
+================================= */
+function saveOrder(order) {
+  let orders = JSON.parse(localStorage.getItem("byose_orders")) || [];
+  orders.push(order);
+  localStorage.setItem("byose_orders", JSON.stringify(orders));
+}

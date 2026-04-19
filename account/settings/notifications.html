@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Notification Settings — ByoseMarket</title>
+  <!-- Poppins font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta name="description" content="Manage how you receive notifications on ByoseMarket">
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: rgba(255,255,255,0.65);
+      --accent: #2563eb;
+      --muted: #6b7280;
+      --radius: 14px;
+      --glass-blur: 8px;
+      --shadow: 0 6px 18px rgba(16,24,40,0.06);
+      --toggle-on: linear-gradient(135deg,#34d399,#10b981);
+    }
+
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom:40px;
+    }
+
+    /* Sticky header */
+    .header{
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(6px);
+      background: rgba(255,255,255,0.6);
+      border-bottom: 1px solid rgba(15,23,42,0.04);
+      padding:12px 16px;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      z-index:10;
+    }
+
+    .back-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;
+      height:40px;
+      border-radius:10px;
+      border: none;
+      background: transparent;
+      color:var(--accent);
+      text-decoration:none;
+      font-size:18px;
+    }
+
+    .title{
+      font-weight:600;
+      font-size:16px;
+    }
+
+    .container{
+      max-width:760px;
+      margin:18px auto;
+      padding:0 16px;
+    }
+
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      padding:8px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(var(--glass-blur));
+    }
+
+    .list{display:flex;flex-direction:column;gap:12px;padding:12px}
+
+    .notification-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:12px;
+      transition: transform .12s ease, box-shadow .12s ease;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(2,6,23,0.03);
+      box-shadow: 0 4px 10px rgba(2,6,23,0.03);
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .notification-item:active{transform:scale(.997)}
+
+    .icon-wrap{
+      width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.03), rgba(0,0,0,0.01));color:var(--accent);font-size:18px
+    }
+
+    .meta{flex:1;min-width:0}
+    .meta .name{font-weight:600;font-size:14px}
+    .meta .desc{color:var(--muted);font-size:13px;margin-top:4px}
+
+    /* Toggle */
+    .toggle-switch{display:inline-block}
+    .switch{
+      --w:46px;--h:28px;--p:2px;
+      width:var(--w);height:var(--h);background:#e6eefb;border-radius:999px;position:relative;display:inline-block;transition:all .22s ease;border:1px solid rgba(2,6,23,0.04);
+    }
+    .switch::after{
+      content:"";position:absolute;left:var(--p);top:var(--p);width:calc(var(--h) - var(--p)*2);height:calc(var(--h) - var(--p)*2);border-radius:50%;background:white;box-shadow:0 4px 10px rgba(16,24,40,0.12);transition:transform .22s cubic-bezier(.2,.9,.2,1), background .22s ease;transform:translateX(0);
+    }
+    .toggle-input{display:none}
+    .toggle-input:checked + .switch{background:var(--toggle-on)}
+    .toggle-input:checked + .switch::after{transform:translateX(calc(var(--w) - var(--h)));}
+
+    /* Small info */
+    .info{font-size:13px;color:var(--muted);padding:10px 12px;text-align:center}
+
+    /* Responsive tweaks */
+    @media(min-width:640px){
+      .header{padding:14px 20px}
+      .title{font-size:18px}
+      .container{padding:0 20px}
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Sticky header with back button -->
+  <header class="header">
+    <a href="settings.html" class="back-btn" aria-label="Back to settings">
+      <i class="fas fa-arrow-left" aria-hidden="true"></i>
+    </a>
+    <div class="title">Notification Settings</div>
+  </header>
+
+  <main class="container">
+    <!-- Card wrapper -->
+    <section class="card" aria-labelledby="notif-heading">
+      <h2 id="notif-heading" style="margin:12px 16px 0;font-size:13px;color:var(--muted);font-weight:600">Manage delivery and preference settings</h2>
+      <div class="list" role="list">
+
+        <!-- Order Notifications -->
+        <div class="notification-item" role="listitem" data-type="orders">
+          <div class="icon-wrap" aria-hidden="true">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <div class="meta">
+            <div class="name">Order Notifications</div>
+            <div class="desc">Get updates about your orders</div>
+          </div>
+          <div class="toggle-switch">
+            <input class="toggle-input" id="toggle-orders" type="checkbox" data-type="orders" checked>
+            <label class="switch" for="toggle-orders" aria-hidden="true"></label>
+          </div>
+        </div>
+
+        <!-- Shipping / Logistics -->
+        <div class="notification-item" role="listitem" data-type="shipping">
+          <div class="icon-wrap" aria-hidden="true">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="meta">
+            <div class="name">Shipping / Logistics Notifications</div>
+            <div class="desc">Track delivery updates</div>
+          </div>
+          <div class="toggle-switch">
+            <input class="toggle-input" id="toggle-shipping" type="checkbox" data-type="shipping" checked>
+            <label class="switch" for="toggle-shipping" aria-hidden="true"></label>
+          </div>
+        </div>
+
+        <!-- Promotions & Offers -->
+        <div class="notification-item" role="listitem" data-type="promo">
+          <div class="icon-wrap" aria-hidden="true">
+            <i class="fas fa-tags"></i>
+          </div>
+          <div class="meta">
+            <div class="name">Promotions &amp; Offers</div>
+            <div class="desc">Receive discounts and deals</div>
+          </div>
+          <div class="toggle-switch">
+            <input class="toggle-input" id="toggle-promo" type="checkbox" data-type="promo" checked>
+            <label class="switch" for="toggle-promo" aria-hidden="true"></label>
+          </div>
+        </div>
+
+        <!-- System Notifications -->
+        <div class="notification-item" role="listitem" data-type="system">
+          <div class="icon-wrap" aria-hidden="true">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div class="meta">
+            <div class="name">System Notifications</div>
+            <div class="desc">Important account updates</div>
+          </div>
+          <div class="toggle-switch">
+            <input class="toggle-input" id="toggle-system" type="checkbox" data-type="system" checked>
+            <label class="switch" for="toggle-system" aria-hidden="true"></label>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Optional info text -->
+    <div class="info">You can manage how you receive notifications at any time.</div>
+
+  </main>
+
+  <!-- Minimal JS hooks: auto-save to localStorage and integration points for storage/notification services -->
+  <script>
+    /*
+      notifications state is stored under key: 'byose_notifications'
+      Structure: { orders: true, shipping: true, promo: true, system: true }
+      This script is intentionally minimal — it will:
+       - initialize toggles from storage/localStorage
+       - auto-save on change
+       - call integration hooks if available (window.storage.saveNotifications, window.notificationService.updatePreference)
+    */
+
+    (function(){
+      const KEY = 'byose_notifications';
+
+      // Helper: read from integration storage if available
+      function readStored(){
+        try{
+          if(window.storage && typeof window.storage.readNotifications === 'function'){
+            return window.storage.readNotifications() || {};
+          }
+        }catch(e){/* ignore */}
+        try{
+          const raw = localStorage.getItem(KEY);
+          return raw ? JSON.parse(raw) : {}; 
+        }catch(e){return {}};
+      }
+
+      // Helper: persist value
+      function saveStored(value){
+        try{
+          if(window.storage && typeof window.storage.saveNotifications === 'function'){
+            window.storage.saveNotifications(value);
+            return;
+          }
+        }catch(e){/* fallthrough to localStorage */}
+        try{localStorage.setItem(KEY, JSON.stringify(value));}catch(e){}
+      }
+
+      // Try to hydrate toggles from stored state
+      const stored = readStored();
+      const inputs = Array.from(document.querySelectorAll('.toggle-input'));
+      inputs.forEach(inp => {
+        const type = inp.dataset.type;
+        if(stored.hasOwnProperty(type)) inp.checked = !!stored[type];
+      });
+
+      // Build state object from inputs
+      function buildState(){
+        const s = {};
+        inputs.forEach(i=> s[i.dataset.type] = !!i.checked);
+        return s;
+      }
+
+      // On change: autosave and fire integration hooks
+      function handleChange(e){
+        const state = buildState();
+        saveStored(state);
+
+        // Integration hook: notificationService
+        try{
+          if(window.notificationService && typeof window.notificationService.updatePreference === 'function'){
+            // call for the changed type only if possible
+            const type = e.target.dataset.type;
+            window.notificationService.updatePreference(type, !!e.target.checked);
+          }
+        }catch(err){/* not critical */}
+
+        // Dispatch a custom event for app-level listeners
+        try{
+          window.dispatchEvent(new CustomEvent('byose:notifications:changed', {detail: state}));
+        }catch(err){}
+      }
+
+      inputs.forEach(i=> i.addEventListener('change', handleChange, {passive:true}));
+
+      // Expose a small API for other scripts to access current settings
+      window.ByoseNotifications = {
+        getState: buildState,
+        save: (obj) => { saveStored(obj); window.dispatchEvent(new CustomEvent('byose:notifications:changed',{detail:obj})); }
+      };
+
+    })();
+  </script>
+
+</body>
+</html>

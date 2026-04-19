@@ -1,0 +1,30 @@
+@media (min-width: 1024px) {
+  .details-grid {
+    grid-template-columns: minmax(0, 1.02fr) minmax(380px, 0.98fr);
+    align-items: start;
+    gap: 24px;
+  }
+
+  .gallery-panel {
+    position: sticky;
+    top: 98px;
+  }
+
+  .purchase-card {
+    padding: 18px;
+  }
+
+  .trust-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1440px) {
+  .details-main {
+    padding-top: 12px;
+  }
+
+  .details-panel {
+    padding: 26px;
+  }
+}

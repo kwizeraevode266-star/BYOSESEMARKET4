@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Preferences — ByoseMarket</title>
+  <!-- Poppins font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root{
+      --bg: #f6f7fb;
+      --card: rgba(255,255,255,0.6);
+      --accent: #2563eb; /* blue-600 */
+      --accent-600: #1d4ed8;
+      --muted: #6b7280;
+      --success: #16a34a;
+      --radius: 14px;
+      --glass: rgba(255,255,255,0.55);
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg, #f8fafc 0%, var(--bg) 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom:96px; /* space for bottom button */
+    }
+    /* Sticky header */
+    .page-header{
+      position:sticky;
+      top:0;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));
+      padding:12px 16px;
+      display:flex;
+      gap:12px;
+      align-items:center;
+      border-bottom:1px solid rgba(15,23,42,0.04);
+      z-index:20;
+    }
+    .back-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      width:40px;height:40px;
+      border-radius:10px;
+      background:transparent;
+      border:none;
+      color:var(--accent-600);
+      text-decoration:none;
+      font-size:18px;
+    }
+    .header-title{
+      font-weight:600;font-size:16px;
+    }
+    .container{
+      padding:16px;
+      max-width:960px;
+      margin:0 auto;
+    }
+    .intro{margin:8px 0 18px;}
+    .intro .title{font-size:18px;font-weight:600;margin-bottom:6px}
+    .intro .subtitle{color:var(--muted);font-size:13px}
+
+    /* Grid: mobile-first 2 columns */
+    .preferences-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+    }
+
+    /* Larger screens */
+    @media(min-width:640px){
+      .preferences-grid{grid-template-columns:repeat(3,1fr);gap:14px}
+    }
+    @media(min-width:1024px){
+      .preferences-grid{grid-template-columns:repeat(4,1fr);gap:16px}
+    }
+
+    /* Hidden inputs for accessibility & no-JS toggling */
+    .category-input{display:none}
+
+    /* Card */
+    .category-card{
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:14px;
+      min-height:110px;
+      border-radius:12px;
+      background:var(--card);
+      box-shadow: 0 6px 18px rgba(16,24,40,0.06);
+      border:1px solid rgba(15,23,42,0.04);
+      transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+      cursor:pointer;
+      text-align:center;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .category-card:active{transform:scale(.997)}
+    .category-media{
+      width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.9);
+      color:var(--accent-600);font-size:18px;box-shadow: 0 4px 10px rgba(15,23,42,0.04);
+    }
+    .category-name{font-size:13px;font-weight:600;color: #0f172a}
+    .category-card .check{
+      position:absolute;top:8px;right:8px;color:white;background:var(--accent);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.9);transition:all .14s ease}
+
+    /* Visual selected state via adjacent sibling selector */
+    .category-input:checked + label.category-card{
+      background: linear-gradient(180deg, rgba(37,99,235,0.08), rgba(37,99,235,0.04));
+      border:1px solid rgba(37,99,235,0.16);
+      box-shadow: 0 10px 30px rgba(37,99,235,0.06);
+      transform:translateY(-2px);
+    }
+    .category-input:checked + label.category-card .check{opacity:1;transform:scale(1)}
+
+    /* Focus styles for keyboard */
+    .category-input:focus + label.category-card{
+      outline:3px solid rgba(37,99,235,0.12);
+      outline-offset:3px;
+    }
+
+    /* Save button fixed at bottom */
+    .save-wrap{
+      position:fixed;left:0;right:0;bottom:16px;display:flex;justify-content:center;z-index:40;
+      pointer-events:none;
+    }
+    .save-btn{
+      pointer-events:auto;
+      width:calc(100% - 32px);
+      max-width:960px;
+      background:var(--accent);
+      color:#fff;border:none;padding:14px 18px;border-radius:12px;font-weight:600;font-size:15px;box-shadow:0 8px 24px rgba(37,99,235,0.18);
+    }
+    .save-btn:active{transform:translateY(1px)}
+
+    /* Validation message */
+    .validation{
+      margin-top:12px;color:#b91c1c;background:rgba(185,28,28,0.04);padding:10px;border-radius:8px;font-size:13px;display:none
+    }
+    .validation.visible{display:block}
+
+    /* Small helpers */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <a class="back-btn" href="settings.html" aria-label="Back to settings">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="header-title">My Preferences</div>
+  </header>
+
+  <main class="container" id="preferencesMain">
+    <section class="intro" aria-labelledby="prefs-heading">
+      <h1 id="prefs-heading" class="title">Select what you are interested in</h1>
+      <p class="subtitle">This helps us personalize your experience</p>
+    </section>
+
+    <!--
+      Preferences grid
+      - Each input toggles selection (no-JS friendly)
+      - Labels act as cards: use .category-card and data-category attributes
+      - Inputs have class .category-input and dataset attribute data-category
+      - JavaScript integration point: listens to input change events or the custom 'preferences:save' event
+    -->
+    <section class="preferences-grid" aria-label="Category preferences">
+
+      <!-- Fashion -->
+      <input id="pref-fashion" class="category-input" type="checkbox" data-category="fashion" value="fashion">
+      <label for="pref-fashion" class="category-card" data-category="fashion">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-shirt"></i></div>
+        <div class="category-name">Fashion</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Shoes -->
+      <input id="pref-shoes" class="category-input" type="checkbox" data-category="shoes" value="shoes">
+      <label for="pref-shoes" class="category-card" data-category="shoes">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-shoe-prints"></i></div>
+        <div class="category-name">Shoes</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Bags -->
+      <input id="pref-bags" class="category-input" type="checkbox" data-category="bags" value="bags">
+      <label for="pref-bags" class="category-card" data-category="bags">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></div>
+        <div class="category-name">Bags</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Electronics -->
+      <input id="pref-electronics" class="category-input" type="checkbox" data-category="electronics" value="electronics">
+      <label for="pref-electronics" class="category-card" data-category="electronics">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-tv"></i></div>
+        <div class="category-name">Electronics</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Phones -->
+      <input id="pref-phones" class="category-input" type="checkbox" data-category="phones" value="phones">
+      <label for="pref-phones" class="category-card" data-category="phones">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-mobile-screen-button"></i></div>
+        <div class="category-name">Phones</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Beauty -->
+      <input id="pref-beauty" class="category-input" type="checkbox" data-category="beauty" value="beauty">
+      <label for="pref-beauty" class="category-card" data-category="beauty">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-magic-wand-sparkles"></i></div>
+        <div class="category-name">Beauty</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Accessories -->
+      <input id="pref-accessories" class="category-input" type="checkbox" data-category="accessories" value="accessories">
+      <label for="pref-accessories" class="category-card" data-category="accessories">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-gem"></i></div>
+        <div class="category-name">Accessories</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+      <!-- Home -->
+      <input id="pref-home" class="category-input" type="checkbox" data-category="home" value="home">
+      <label for="pref-home" class="category-card" data-category="home">
+        <div class="category-media" aria-hidden="true"><i class="fa-solid fa-house"></i></div>
+        <div class="category-name">Home</div>
+        <div class="check" aria-hidden="true"><i class="fa-solid fa-check"></i></div>
+      </label>
+
+    </section>
+
+    <!-- Validation area prepared for JS integration -->
+    <div id="preferencesValidation" class="validation" role="alert" aria-live="assertive">
+      Please select at least one category
+    </div>
+
+  </main>
+
+  <div class="save-wrap">
+    <button id="savePreferencesBtn" class="save-btn" type="button">Save Preferences</button>
+  </div>
+
+  <!-- Minimal JS hooks: toggles CSS-selected class and emits a custom event with selected categories.
+       Keep minimal — replace or extend in preferences.js, userService.js, or storage.js
+  -->
+  <script>
+    (function(){
+      // Find elements
+      const inputs = Array.from(document.querySelectorAll('.category-input'));
+      const saveBtn = document.getElementById('savePreferencesBtn');
+      const validation = document.getElementById('preferencesValidation');
+
+      // Keep label.selected in sync for easier JS-driven styling
+      function syncSelectedClass(input){
+        const label = document.querySelector('label[for="'+input.id+'"]');
+        if(!label) return;
+        if(input.checked) label.classList.add('selected'); else label.classList.remove('selected');
+      }
+
+      inputs.forEach(i=>{
+        // initialize state
+        syncSelectedClass(i);
+        // update on change
+        i.addEventListener('change', ()=>{
+          syncSelectedClass(i);
+          // hide validation when user interacts
+          if(validation.classList.contains('visible')) validation.classList.remove('visible');
+        });
+      });
+
+      // Save button emits a custom event with the selected categories.
+      // Integration point: listen for 'preferences:save' and connect to userService/storage.
+      saveBtn.addEventListener('click', ()=>{
+        const selected = inputs.filter(i=>i.checked).map(i=>i.dataset.category || i.value);
+        if(selected.length === 0){
+          validation.classList.add('visible');
+          validation.focus && validation.focus();
+          return;
+        }
+
+        // Emit custom event for integration (no backend logic here)
+        const event = new CustomEvent('preferences:save', {detail:{categories:selected}});
+        document.dispatchEvent(event);
+
+        // Lightweight UX hint: show saving state then clear (replace with real integration)
+        const prev = saveBtn.textContent;
+        saveBtn.textContent = 'Saved';
+        saveBtn.disabled = true;
+        setTimeout(()=>{ saveBtn.textContent = prev; saveBtn.disabled = false; }, 900);
+      });
+
+      // Accessibility: allow keyboard toggle on Enter/Space when label focused
+      document.querySelectorAll('label.category-card').forEach(label=>{
+        label.setAttribute('tabindex', '0');
+        label.addEventListener('keydown', (e)=>{
+          if(e.key === 'Enter' || e.key === ' '){
+            e.preventDefault();
+            const input = document.getElementById(label.getAttribute('for'));
+            if(input) input.checked = !input.checked, input.dispatchEvent(new Event('change'));
+          }
+        });
+      });
+
+    })();
+  </script>
+
+</body>
+</html>

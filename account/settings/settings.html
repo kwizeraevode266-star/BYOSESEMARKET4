@@ -1,0 +1,257 @@
+<!--
+  account/settings/settings.html
+  Main Settings dashboard (HTML-only, modular, mobile-first)
+  - Uses Poppins font and FontAwesome icons (CDN)
+  - Glassmorphism style, semantic HTML, accessible
+  - Placeholders for dynamic data: {{user.name}}, {{user.avatar}}
+  - Each row uses .settings-item and data-link for future JS integration
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Settings — ByoseMarket</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pc6fQ0Y6FQe+z0m5JQqv3y8G6e2e9vQq0uW7j3x8kQx1Jk1y6vQ8TQh2kG6Q0c3zQ9F9z9a9l3e3+3Q==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta name="description" content="Account settings dashboard for ByoseMarket">
+  <style>
+    :root{
+      --bg-grad: linear-gradient(180deg,#f7f9fc 0%,#eef4fb 100%);
+      --card-bg: rgba(255,255,255,0.55);
+      --glass-border: rgba(255,255,255,0.6);
+      --muted: #6b7280;
+      --accent: #0066ff;
+      --danger: #e53935;
+      --radius: 14px;
+      --shadow: 0 6px 18px rgba(18,38,63,0.08);
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      background: var(--bg-grad);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      color:#0f172a;
+      padding-bottom:calc(env(safe-area-inset-bottom,0px) + 88px);
+    }
+    .app{
+      max-width:900px;
+      margin:0 auto;
+      padding:18px;
+    }
+    /* Sticky header */
+    header.settings-header{
+      position:sticky;
+      top:0;
+      z-index:20;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:12px 6px;
+      backdrop-filter: blur(8px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35));
+      border-bottom:1px solid rgba(15,23,42,0.04);
+      border-radius:12px;
+      box-shadow:var(--shadow);
+    }
+    .back-btn{
+      display:inline-grid;
+      place-items:center;
+      width:40px;height:40px;
+      border-radius:10px;
+      background:var(--card-bg);
+      border:1px solid var(--glass-border);
+      color:var(--accent);
+      text-decoration:none;
+      box-shadow:0 2px 8px rgba(12,20,40,0.05);
+      transition:transform .12s ease, box-shadow .12s ease;
+    }
+    .back-btn:active{transform:translateY(1px)}
+    h1{font-size:18px;margin:0;font-weight:600}
+
+    /* Profile card */
+    .profile-card{
+      display:flex;align-items:center;gap:12px;
+      margin:18px 0;padding:14px;border-radius:14px;
+      background:var(--card-bg);
+      border:1px solid var(--glass-border);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      text-decoration:none;color:inherit;
+    }
+    .avatar{
+      width:64px;height:64px;border-radius:16px;flex:0 0 64px;overflow:hidden;
+      background:linear-gradient(135deg,#f0f4ff,#e6f7ff);
+      display:inline-grid;place-items:center;font-weight:600;color:var(--accent);
+    }
+    .profile-meta{flex:1;min-width:0}
+    .profile-meta .name{font-weight:600;font-size:16px}
+    .profile-meta .sub{font-size:13px;color:var(--muted);margin-top:4px}
+    .chev{color:var(--muted)}
+
+    /* Settings list */
+    .settings-section{margin-top:8px}
+    .settings-item{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:12px;padding:12px;border-radius:12px;margin:8px 0;
+      background:rgba(255,255,255,0.6);border:1px solid rgba(15,23,42,0.03);
+      text-decoration:none;color:inherit;transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+      backdrop-filter: blur(6px);
+    }
+    .settings-item:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(12,20,40,0.06)}
+    .settings-item:active{transform:translateY(0)}
+    .settings-left{display:flex;align-items:center;gap:12px}
+    .settings-left .icon{
+      width:44px;height:44px;border-radius:10px;display:grid;place-items:center;
+      background:linear-gradient(180deg,rgba(0,102,255,0.08),rgba(0,102,255,0.02));color:var(--accent)
+    }
+    .settings-label{font-weight:600}
+    .settings-right{display:flex;align-items:center;gap:10px;color:var(--muted);min-width:0}
+    .settings-meta{font-size:13px;color:var(--muted)}
+
+    /* Danger zone */
+    .danger{
+      padding:12px;border-radius:12px;margin:12px 0;background:linear-gradient(90deg, rgba(229,57,53,0.06), rgba(229,57,53,0.02));
+      border:1px solid rgba(229,57,53,0.12);
+    }
+    .danger .danger-btn{display:flex;align-items:center;gap:10px;color:var(--danger);font-weight:600;text-decoration:none}
+
+    /* Logout */
+    .logout-wrap{position:fixed;left:0;right:0;bottom:0;padding:12px;background:transparent;display:flex;justify-content:center;}
+    .logout-btn{width:min(920px,100%);max-width:920px;padding:14px;border-radius:12px;background:#fff;border:1px solid rgba(15,23,42,0.06);font-weight:700;color:var(--accent);box-shadow:0 8px 28px rgba(2,6,23,0.06);text-align:center;text-decoration:none}
+
+    @media (min-width:700px){
+      .app{padding:22px}
+      header.settings-header{border-radius:16px}
+      .profile-card{padding:18px;border-radius:16px}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sticky header -->
+    <header class="settings-header" role="banner">
+      <a class="back-btn" href="/account/account.html" aria-label="Back to account">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+      </a>
+      <h1>Settings</h1>
+    </header>
+
+    <!-- Profile preview card (clickable) -->
+    <a href="profile.html" class="profile-card" aria-label="Open profile" data-link="profile.html">
+      <div class="avatar" aria-hidden="true">
+        <!-- Placeholder avatar; replace with <img src="{{user.avatar}}"> -->
+        <img src="../../img/default-avatar.png" alt="User avatar" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.style.display='none'">
+        <span style="display:none">{{user.avatar}}</span>
+      </div>
+      <div class="profile-meta">
+        <div class="name">{{user.name}}</div>
+        <div class="sub">Profile</div>
+      </div>
+      <div class="chev"><i class="fa fa-chevron-right"></i></div>
+    </a>
+
+    <!-- Settings list -->
+    <main>
+      <section class="settings-section" aria-labelledby="settings-main">
+        <h2 id="settings-main" style="position:absolute;left:-9999px;">Settings</h2>
+
+        <a class="settings-item" href="address.html" data-link="address.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-map-marker-alt" aria-hidden="true"></i></div>
+            <div>
+              <div class="settings-label">Address Management</div>
+            </div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="reset-password.html" data-link="reset-password.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-key" aria-hidden="true"></i></div>
+            <div><div class="settings-label">Reset Password</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="preferences.html" data-link="preferences.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-sliders-h" aria-hidden="true"></i></div>
+            <div><div class="settings-label">My Preferences</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="language.html" data-link="language.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-language" aria-hidden="true"></i></div>
+            <div><div class="settings-label">Language</div></div>
+          </div>
+          <div class="settings-right"><span class="settings-meta">English</span><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="notifications.html" data-link="notifications.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-bell" aria-hidden="true"></i></div>
+            <div><div class="settings-label">Notification Settings</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+      </section>
+
+      <!-- System / Info -->
+      <section class="settings-section" aria-labelledby="info-section">
+        <h3 id="info-section" style="font-size:13px;margin:14px 4px;color:var(--muted)">System & Info</h3>
+        <a class="settings-item" href="guide.html" data-link="guide.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-book" aria-hidden="true"></i></div>
+            <div><div class="settings-label">User Guide</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="policy.html" data-link="policy.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-undo-alt" aria-hidden="true"></i></div>
+            <div><div class="settings-label">Refund Policy</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+
+        <a class="settings-item" href="about.html" data-link="about.html">
+          <div class="settings-left">
+            <div class="icon"><i class="fa fa-info-circle" aria-hidden="true"></i></div>
+            <div><div class="settings-label">About Us</div></div>
+          </div>
+          <div class="settings-right"><i class="fa fa-chevron-right" aria-hidden="true"></i></div>
+        </a>
+      </section>
+
+      <!-- Danger zone -->
+      <section class="settings-section" aria-labelledby="danger-zone">
+        <h3 id="danger-zone" style="font-size:13px;margin:14px 4px;color:var(--muted)">Danger Zone</h3>
+        <div class="danger">
+          <a href="delete-account.html" class="danger-btn" data-link="delete-account.html" role="button" aria-label="Delete my account">
+            <i class="fa fa-trash-alt" aria-hidden="true"></i>
+            <span>Delete My Account</span>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Logout bar (fixed at bottom) -->
+  <div class="logout-wrap" role="contentinfo">
+    <a class="logout-btn" href="/logout/logout.html" data-link="/logout/logout.html">LOG OUT</a>
+  </div>
+
+  <!-- Minimal JS hooks for future integration (no logic) -->
+  <script>
+    // JS hooks: rows have data-link attributes and .settings-item class.
+    // Future JS can use these selectors to bind navigation or SPA routing.
+    // No runtime logic included per requirements.
+  </script>
+</body>
+</html>

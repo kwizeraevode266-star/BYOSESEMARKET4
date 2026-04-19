@@ -1,0 +1,349 @@
+/* -------------------------------------------
+   GLOBAL RESETS
+------------------------------------------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* 🎨 Main Color Palette */
+  --primary: #ff6b35;
+  --primary-dark: #e85a2b;
+  --secondary: #3498db;
+  --text-dark: #222;
+  --text-light: #666;
+  --bg-light: #f7f7f7;
+  --white: #ffffff;
+  --radius: 14px;
+  --shadow: 0 8px 25px rgba(0,0,0,0.12);
+  --transition: 0.3s ease;
+}
+
+body {
+  background: var(--bg-light);
+  font-family: "Segoe UI", sans-serif;
+  color: var(--text-dark);
+}
+
+/* -------------------------------------------
+   HEADER
+------------------------------------------- */
+.main-header {
+  background: var(--white);
+  padding: 12px 0;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.header-container {
+  width: 90%;
+  max-width: 1300px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  height: 45px;
+}
+
+.hamburger-btn {
+  display: none;
+}
+
+.nav-menu ul {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-link {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--transition);
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--primary);
+}
+
+.header-icons .icon-btn {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  margin-left: 10px;
+  position: relative;
+}
+
+.badge {
+  background: var(--primary);
+  color: white;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  position: absolute;
+  top: -4px;
+  right: -4px;
+}
+
+/* -------------------------------------------
+   AUTH CONTAINER
+------------------------------------------- */
+.auth-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.auth-box {
+  background: var(--white);
+  width: 100%;
+  max-width: 450px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 30px 25px;
+  animation: fadeIn 0.4s ease;
+}
+
+/* -------------------------------------------
+   TABS
+------------------------------------------- */
+.auth-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+}
+
+.auth-tabs .tab {
+  flex: 1;
+  padding: 14px 0;
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text-light);
+  transition: var(--transition);
+}
+
+.auth-tabs .tab.active {
+  color: var(--primary);
+  border-bottom: 3px solid var(--primary);
+}
+
+/* -------------------------------------------
+   FORMS
+------------------------------------------- */
+.form {
+  display: none;
+}
+
+.form.active {
+  display: block;
+}
+
+h2 {
+  margin-bottom: 15px;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-top: 6px;
+  border-radius: var(--radius);
+  border: 1px solid #ccc;
+  outline: none;
+  transition: var(--transition);
+  font-size: 14px;
+}
+
+input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(255,107,53,0.15);
+}
+
+.password-field {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-light);
+}
+
+.feedback {
+  font-size: 12px;
+  margin-top: 4px;
+  color: red;
+}
+
+/* Password strength bars */
+.password-strength {
+  display: flex;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.password-strength span {
+  flex: 1;
+  height: 5px;
+  background: #ddd;
+  border-radius: 50px;
+  transition: var(--transition);
+}
+
+/* -------------------------------------------
+   REMEMBER & FORGOT
+------------------------------------------- */
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.forgot {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 14px;
+}
+
+/* -------------------------------------------
+   BUTTONS
+------------------------------------------- */
+.btn-primary {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.switch-form {
+  margin-top: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.switch-form span {
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* -------------------------------------------
+   WHATSAPP FLOAT
+------------------------------------------- */
+.whatsapp-float {
+  position: fixed;
+  bottom: 22px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  background: #25D366;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  z-index: 999;
+  box-shadow: var(--shadow);
+  text-decoration: none;
+}
+
+.whatsapp-float:hover {
+  background: #1ebc5c;
+}
+
+/* -------------------------------------------
+   FOOTER
+------------------------------------------- */
+.footer {
+  margin-top: 30px;
+  text-align: center;
+  padding: 20px 0;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* -------------------------------------------
+   ANIMATIONS
+------------------------------------------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* -------------------------------------------
+   RESPONSIVE
+------------------------------------------- */
+@media (max-width: 768px) {
+  .auth-box {
+    width: 95%;
+  }
+
+  .nav-menu ul {
+    display: none;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.auth-question {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 8px;
+}
+
+.signup-btn {
+    display: inline-block;
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, orange, gold);
+    color: #000;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.signup-btn:hover {
+    transform: scale(1.05);
+}

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kwinjira | Byose Market</title>
+
+    <!-- FONTS & ICONS -->
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="auth-modern.css">
+    <link rel="stylesheet" href="login-desktop.css">
+    <link rel="stylesheet" href="auth-mobile.css">
+
+</head>
+
+<body>
+
+<div class="auth-wrapper">
+
+    <!-- LEFT SIDE (WELCOME PANEL) -->
+    <div class="auth-side">
+        <div class="side-content">
+            <span class="side-badge">Byose Market Access</span>
+            <h1>Murakaza neza muri shopping ya buri munsi.</h1>
+            <p>Injira muri account yawe, ukomeze ibyo washyize muri cart, kandi ucunge orders zawe mu buryo bwihuse kandi butekanye.</p>
+
+            <div class="side-metrics" aria-hidden="true">
+                <div class="metric-card">
+                    <span class="metric-value">24/7</span>
+                    <span class="metric-label">Support na order tracking igihe cyose</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">1 Tap</span>
+                    <span class="metric-label">Kwinjira no gukomeza aho wari ugeze</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-value">Secure</span>
+                    <span class="metric-label">Payment na account protection byizewe</span>
+                </div>
+            </div>
+
+            <ul class="side-points" aria-hidden="true">
+                <li>Fast checkout experience across phone and desktop</li>
+                <li>Saved addresses, orders, and preferences in one place</li>
+                <li>Clean product-first journey inspired by top commerce apps</li>
+            </ul>
+
+            <a href="signup.html" class="side-btn">
+                Iyandikishe
+            </a>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE (FORM) -->
+    <div class="auth-container">
+        <div class="auth-shell">
+
+        <!-- LOGO -->
+        <div class="auth-logo">
+            <img src="/img/logo.png" alt="Logo">
+            <div class="logo-copy">
+                <p class="auth-eyebrow">Secure Login</p>
+                <h2 class="app-name">Byose Market</h2>
+            </div>
+        </div>
+
+        <!-- CARD -->
+        <div class="auth-card">
+            <div class="auth-card-inner">
+
+            <div class="auth-header">
+                <h1>Injira</h1>
+            </div>
+
+            <div id="authFeedback" class="auth-feedback" aria-live="polite" aria-atomic="true"></div>
+
+            <div class="auth-switch-method" role="tablist" aria-label="Hitamo uburyo bwo kwinjira">
+                <button type="button" id="emailBtn" class="active" aria-pressed="true">Email</button>
+                <button type="button" id="phoneBtn" aria-pressed="false">Phone</button>
+            </div>
+
+            <form id="loginForm" class="auth-form" novalidate>
+
+            <!-- EMAIL -->
+            <div id="emailField" class="input-group" data-field="email">
+                <label class="field-label" for="email">Email address</label>
+                <div class="input-control">
+                    <i class="fa fa-envelope"></i>
+                    <input type="email" id="email" name="email" inputmode="email" autocomplete="email" placeholder="you@example.com" aria-describedby="emailMeta">
+                </div>
+                <div id="emailMeta" class="field-meta">Koresha email waherukaga gukoresha kuri account yawe.</div>
+            </div>
+
+            <!-- PHONE -->
+            <div id="phoneField" class="input-group" data-field="phone" style="display:none;" hidden>
+                <label class="field-label" for="phone">Phone number</label>
+                <div class="input-control">
+                    <i class="fa fa-phone"></i>
+                    <input type="tel" id="phone" name="phone" inputmode="tel" autocomplete="tel" placeholder="0788 000 000" aria-describedby="phoneMeta">
+                </div>
+                <div id="phoneMeta" class="field-meta">Andika nimero ya telefone iri kuri account yawe.</div>
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="input-group" data-field="password">
+                <label class="field-label" for="password">Password</label>
+                <div class="input-control">
+                    <i class="fa fa-lock"></i>
+                    <input type="password" id="password" name="password" autocomplete="current-password" placeholder="Andika password yawe" aria-describedby="passwordMeta">
+                    <button type="button" id="togglePassword" aria-label="Show password">
+                        <i class="fa fa-eye"></i>
+                    </button>
+                </div>
+                <div id="passwordMeta" class="field-meta">Password yawe irinzwe kandi ntisangizwa abandi.</div>
+            </div>
+
+            <!-- BUTTON -->
+            <button id="loginBtn" type="submit">
+                <span class="btn-spinner" aria-hidden="true"></span>
+                <span class="btn-label">Injira</span>
+            </button>
+
+            <!-- LINKS -->
+            <div class="auth-links">
+                <label>
+                    <input type="checkbox" id="rememberMe" name="rememberMe">
+                    Unyibuke
+                </label>
+
+                <a href="forgot-password.html">
+                    Wibagiwe ijambo ry'ibanga?
+                </a>
+            </div>
+            </form>
+
+            <!-- FOOTER -->
+            <div class="auth-footer">
+                <p>Nta account ufite?</p>
+                <a href="signup.html" class="signup-btn">
+                    Iyandikishe
+                </a>
+            </div>
+
+            </div>
+
+        </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- JS (UNCHANGED) -->
+<script src="storage.js"></script>
+<script src="services/validation.js"></script>
+<script src="services/authService.js"></script>
+<script src="auth.js"></script>
+<script src="login.js"></script>
+<script src="language.js"></script>
+<script src="theme.js"></script>
+
+</body>
+</html>

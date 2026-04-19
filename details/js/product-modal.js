@@ -1,0 +1,387 @@
+import {
+  findMissingRequiredAttributes,
+  getSelectionStock
+} from './product-attributes.js';
+import { buildModalMarkup } from './product-ui-renderer.js';
+
+function clampQuantity(value, max, min = 0) {
+  const nextValue = Math.max(min, Number(value) || 0);
+  if (!Number.isFinite(max)) {
+    return nextValue;
+  }
+
+  return Math.min(nextValue, Math.max(min, Number(max) || 0));
+}
+
+function formatList(values) {
+  if (!values.length) {
+    return '';
+  }
+
+  if (values.length === 1) {
+    return values[0];
+  }
+
+  if (values.length === 2) {
+    return `${values[0]} and ${values[1]}`;
+  }
+
+  return `${values.slice(0, -1).join(', ')}, and ${values[values.length - 1]}`;
+}
+
+function chooseVisualAttribute(attributes) {
+  return attributes.find(attribute => attribute.type === 'image') || null;
+}
+
+function chooseQuantityAttribute(attributes, visualAttribute) {
+  const candidates = attributes.filter(attribute => attribute !== visualAttribute);
+  const textCandidates = candidates.filter(attribute => attribute.type === 'text');
+  const pool = textCandidates.length ? textCandidates : [];
+
+  if (!pool.length) {
+    return null;
+  }
+
+  const ranked = pool
+    .map(attribute => {
+      const label = String(attribute.name || '').toLowerCase();
+      let score = 100;
+
+      if (/\b(size|storage|capacity|memory|ram|screen size|band size|waist|shoe)\b/.test(label)) {
+        score += 50;
+      }
+
+      if (/color|finish|material|bundle/.test(label)) {
+        score -= 10;
+      }
+
+      score += Math.min(attribute.options.length, 10);
+
+      return { attribute, score };
+    })
+    .sort((left, right) => right.score - left.score);
+
+  return ranked[0]?.attribute || null;
+}
+
+function createLayout(attributes) {
+  const visualAttribute = chooseVisualAttribute(attributes);
+  const quantityAttribute = chooseQuantityAttribute(attributes, visualAttribute);
+  const supportingAttributes = attributes.filter(attribute => (
+    attribute !== visualAttribute && attribute !== quantityAttribute
+  ));
+
+  return {
+    visualAttribute,
+    quantityAttribute,
+    supportingAttributes
+  };
+}
+
+function getRequiredAttributes(layout, includeQuantityAttribute = true) {
+  return [layout.visualAttribute, ...layout.supportingAttributes, includeQuantityAttribute ? layout.quantityAttribute : null]
+    .filter(attribute => attribute && attribute.required !== false);
+}
+
+function createSelection(state, quantityAttribute, optionValue) {
+  if (!quantityAttribute) {
+    return { ...state.selectedAttributes };
+  }
+
+  return {
+    ...state.selectedAttributes,
+    [quantityAttribute.name]: optionValue
+  };
+}
+
+export function createProductModal({ product, attributes, onSubmit, showToast }) {
+  const modalRoot = document.getElementById('productConfigModal');
+  const modalBody = document.getElementById('productConfigModalBody');
+  const layout = createLayout(attributes);
+  let pageScrollY = 0;
+
+  if (!modalRoot || !modalBody) {
+    return {
+      open() {},
+      close() {}
+    };
+  }
+
+  const state = {
+    action: 'add',
+    selectedAttributes: {},
+    quantityByOption: {},
+    currentQuantity: 1,
+    initialQuantity: 1,
+    validationMessage: '',
+    scrollTop: 0
+  };
+
+  function lockPageScroll() {
+    pageScrollY = window.scrollY || window.pageYOffset || 0;
+    document.body.classList.add('details-config-open');
+    document.body.style.top = `-${pageScrollY}px`;
+    document.body.style.position = 'fixed';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
+    document.body.style.width = '100%';
+  }
+
+  function unlockPageScroll() {
+    const nextScrollY = Math.abs(parseInt(document.body.style.top || '0', 10)) || pageScrollY;
+    document.body.classList.remove('details-config-open');
+    document.body.style.removeProperty('top');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('left');
+    document.body.style.removeProperty('right');
+    document.body.style.removeProperty('width');
+    window.scrollTo({ top: nextScrollY, left: 0, behavior: 'auto' });
+    pageScrollY = 0;
+  }
+
+  function readScrollPosition() {
+    const scrollBody = modalBody.querySelector('.pcm-body');
+    state.scrollTop = scrollBody ? scrollBody.scrollTop : 0;
+  }
+
+  function restoreScrollPosition() {
+    const scrollBody = modalBody.querySelector('.pcm-body');
+    if (scrollBody) {
+      scrollBody.scrollTop = state.scrollTop;
+    }
+  }
+
+  function getMissingRequired(includeQuantityAttribute = true) {
+    const requiredAttributes = getRequiredAttributes(layout, includeQuantityAttribute);
+    return findMissingRequiredAttributes(requiredAttributes, state.selectedAttributes);
+  }
+
+  function getQuantityRows() {
+    if (!layout.quantityAttribute) {
+      return [];
+    }
+
+    return layout.quantityAttribute.options.map(option => {
+      const selection = createSelection(state, layout.quantityAttribute, option.value);
+      const maxQty = getSelectionStock(product, attributes, selection);
+      const qty = clampQuantity(state.quantityByOption[option.value], maxQty);
+
+      return {
+        option,
+        qty,
+        maxQty,
+        attributes: selection
+      };
+    });
+  }
+
+  function getVariants() {
+    if (layout.quantityAttribute) {
+      return getQuantityRows()
+        .filter(row => row.qty > 0)
+        .map(row => ({
+          qty: row.qty,
+          attributes: row.attributes,
+          maxQty: row.maxQty
+        }));
+    }
+
+    return [{
+      qty: clampQuantity(state.currentQuantity, getSelectionStock(product, attributes, state.selectedAttributes), 1),
+      attributes: { ...state.selectedAttributes }
+    }];
+  }
+
+  function syncCurrentQuantity(preferredQuantity = state.currentQuantity) {
+    const maxQty = getSelectionStock(product, attributes, state.selectedAttributes);
+    state.currentQuantity = clampQuantity(preferredQuantity, maxQty, 1);
+  }
+
+  function syncOptionQuantity(optionValue, preferredQuantity) {
+    const quantityAttribute = layout.quantityAttribute;
+    if (!quantityAttribute) {
+      return;
+    }
+
+    const selection = createSelection(state, quantityAttribute, optionValue);
+    const maxQty = getSelectionStock(product, attributes, selection);
+    state.quantityByOption = {
+      ...state.quantityByOption,
+      [optionValue]: clampQuantity(preferredQuantity, maxQty)
+    };
+  }
+
+  function validate(action) {
+    const missingRequired = getMissingRequired(!layout.quantityAttribute);
+    if (missingRequired.length) {
+      const message = `Please select ${formatList(missingRequired)}`;
+      state.validationMessage = message;
+      render();
+      showToast?.(message);
+      return false;
+    }
+
+    const variants = getVariants().filter(variant => variant.qty > 0);
+    if (!variants.length) {
+      const label = layout.quantityAttribute?.name || 'quantity';
+      const message = `Add at least one ${label.toLowerCase()} quantity before ${action === 'buy' ? 'buying' : 'adding to cart'}`;
+      state.validationMessage = message;
+      render();
+      showToast?.(message);
+      return false;
+    }
+
+    return true;
+  }
+
+  function close() {
+    modalRoot.hidden = true;
+    modalRoot.classList.remove('is-open');
+    unlockPageScroll();
+    modalRoot.setAttribute('aria-hidden', 'true');
+    state.scrollTop = 0;
+  }
+
+  function commit(action) {
+    if (!validate(action)) {
+      return;
+    }
+
+    const variants = getVariants().filter(variant => variant.qty > 0);
+    onSubmit?.(action, variants);
+    close();
+  }
+
+  function handleModalClick(event) {
+    const closeTrigger = event.target.closest('[data-config-close]');
+    if (closeTrigger) {
+      close();
+      return;
+    }
+
+    const optionButton = event.target.closest('[data-attribute-name][data-attribute-value]');
+    if (optionButton) {
+      readScrollPosition();
+      const attributeName = optionButton.getAttribute('data-attribute-name');
+      const attributeValue = optionButton.getAttribute('data-attribute-value');
+      state.selectedAttributes = {
+        ...state.selectedAttributes,
+        [attributeName]: attributeValue
+      };
+
+      if (!layout.quantityAttribute) {
+        syncCurrentQuantity(state.currentQuantity);
+      }
+
+      state.validationMessage = '';
+      render();
+      return;
+    }
+
+    const submitButton = event.target.closest('[data-config-submit-action]');
+    if (submitButton) {
+      commit(submitButton.getAttribute('data-config-submit-action'));
+      return;
+    }
+
+    const qtyButton = event.target.closest('[data-config-base-qty]');
+    if (qtyButton) {
+      readScrollPosition();
+      const direction = qtyButton.getAttribute('data-config-base-qty');
+      const delta = direction === 'increase' ? 1 : -1;
+      syncCurrentQuantity(state.currentQuantity + delta);
+      render();
+      return;
+    }
+
+    const rowQtyButton = event.target.closest('[data-config-row-qty]');
+    if (rowQtyButton) {
+      readScrollPosition();
+      const optionValue = rowQtyButton.getAttribute('data-row-option');
+      const direction = rowQtyButton.getAttribute('data-config-row-qty');
+      const delta = direction === 'increase' ? 1 : -1;
+      syncOptionQuantity(optionValue, Number(state.quantityByOption[optionValue] || 0) + delta);
+      state.validationMessage = '';
+      render();
+    }
+  }
+
+  function handleModalInput(event) {
+    const currentQtyInput = event.target.closest('[data-config-base-qty-input]');
+    if (currentQtyInput) {
+      readScrollPosition();
+      syncCurrentQuantity(currentQtyInput.value);
+      state.validationMessage = '';
+      render();
+      return;
+    }
+
+    const rowQtyInput = event.target.closest('[data-config-row-input]');
+    if (rowQtyInput) {
+      readScrollPosition();
+      syncOptionQuantity(rowQtyInput.getAttribute('data-row-option'), rowQtyInput.value);
+      state.validationMessage = '';
+      render();
+    }
+  }
+
+  function handleKeydown(event) {
+    if (!modalRoot.classList.contains('is-open')) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      close();
+    }
+  }
+
+  function render() {
+    const missingRequired = getMissingRequired(false);
+    const quantityRows = getQuantityRows();
+    const variants = getVariants().filter(variant => variant.qty > 0);
+    const totalItems = variants.reduce((sum, variant) => sum + Number(variant.qty || 0), 0);
+    const total = variants.reduce((sum, variant) => sum + (Number(product?.price || 0) * Number(variant.qty || 0)), 0);
+    const quantityBlocked = Boolean(layout.quantityAttribute && missingRequired.length);
+    const blockerMessage = quantityBlocked
+      ? `Select ${formatList(missingRequired)} to enable ${layout.quantityAttribute.name.toLowerCase()} quantities.`
+      : '';
+
+    modalBody.innerHTML = buildModalMarkup({
+      product,
+      attributes,
+      layout,
+      selectedAttributes: state.selectedAttributes,
+      quantityRows,
+      currentQuantity: state.currentQuantity,
+      validationMessage: state.validationMessage,
+      total,
+      totalItems,
+      quantityBlocked,
+      blockerMessage,
+      canSubmit: variants.length > 0 && !missingRequired.length,
+      preferredAction: state.action
+    });
+    restoreScrollPosition();
+  }
+
+  function open({ action = 'add', initialQuantity = 1 } = {}) {
+    state.action = action;
+    state.initialQuantity = Math.max(1, Number(initialQuantity) || 1);
+    state.currentQuantity = state.initialQuantity;
+    state.selectedAttributes = {};
+    state.quantityByOption = {};
+    state.validationMessage = '';
+    state.scrollTop = 0;
+    render();
+    modalRoot.hidden = false;
+    modalRoot.classList.add('is-open');
+    lockPageScroll();
+    modalRoot.setAttribute('aria-hidden', 'false');
+  }
+
+  modalRoot.addEventListener('click', handleModalClick);
+  modalRoot.addEventListener('input', handleModalInput);
+  document.addEventListener('keydown', handleKeydown);
+
+  return { open, close };
+}

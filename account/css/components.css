@@ -1,0 +1,190 @@
+/*
+  Account Components CSS
+  Purpose: modern, premium UI components for Account Dashboard
+  - Glassmorphism cards
+  - Order / Feature / Product cards
+  - List items for settings/services
+  - Buttons (primary / secondary)
+  - Circular icon buttons
+  - Animations & responsive tweaks
+
+  Note: This file enhances component styling only and avoids layout changes.
+*/
+
+:root{
+  /* Color system */
+  --bg-glass: rgba(255,255,255,0.06);
+  --bg-glass-strong: rgba(255,255,255,0.10);
+  --glass-border: rgba(255,255,255,0.12);
+  --glass-border-2: rgba(255,255,255,0.06);
+  --accent: #5b8cff; /* bluish */
+  --accent-2: #7c5cff; /* secondary */
+  --accent-grad: linear-gradient(135deg,var(--accent),var(--accent-2));
+  --text: rgba(255,255,255,0.95);
+  --muted: rgba(255,255,255,0.7);
+  --danger: #ff6b6b;
+  --shadow: 0 6px 18px rgba(8,12,20,0.55);
+  --soft-shadow: 0 8px 30px rgba(8,12,20,0.35);
+  --glass-blur: 10px;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+
+/* Base component reset */
+.component {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- CARD (glassmorphism) ---------- */
+.card {
+  background: var(--bg-glass);
+  border-radius: var(--radius);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  padding: 1rem;
+  box-shadow: var(--soft-shadow);
+  color: var(--text);
+  transition: transform 220ms cubic-bezier(.2,.9,.3,1), box-shadow 220ms ease, background 220ms ease;
+  will-change: transform;
+}
+.card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 14px 40px rgba(8,12,20,0.45);
+}
+.card--flat { box-shadow: 0 4px 10px rgba(8,12,20,0.22); }
+.card--padded { padding: 1.25rem; }
+.card--sm { padding: 0.75rem; border-radius: var(--radius-sm); }
+
+/* Card heading and meta */
+.card__title {
+  font-weight: 600;
+  font-size: 0.98rem;
+  color: var(--text);
+  margin: 0 0 0.35rem 0;
+}
+.card__meta { color: var(--muted); font-size: 0.86rem; }
+
+/* ---------- ORDER CARD ---------- */
+.order-card { text-align: center; padding: 1.5rem; }
+.order-card .order-icon {
+  width: 56px; height: 56px; display:inline-flex; align-items:center; justify-content:center;
+  border-radius: 14px; margin: 0 auto 0.75rem auto;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  border: 1px solid var(--glass-border-2);
+  box-shadow: 0 6px 18px rgba(8,12,20,0.25);
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.order-card .order-icon svg { width:28px; height:28px; color:var(--accent); }
+.order-card .order-label { display:block; margin-top:0.25rem; font-weight:600; color:var(--text); }
+.order-card .badge {
+  display:inline-block; min-width:24px; padding:0 7px; height:24px; border-radius:999px;
+  background: var(--accent); color:#fff; font-size:0.78rem; line-height:24px; margin-top:0.5rem;
+  box-shadow: 0 6px 18px rgba(91,140,255,0.14);
+}
+.order-card:hover .order-icon { transform: translateY(-4px) scale(1.03); box-shadow: 0 12px 30px rgba(8,12,20,0.32); }
+
+/* ---------- FEATURE CARD ---------- */
+.feature-card { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:1.25rem; }
+.feature-card .feature-icon { width:60px; height:60px; display:flex; align-items:center; justify-content:center; border-radius:14px; margin-bottom:0.6rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border:1px solid var(--glass-border-2);
+}
+.feature-card .feature-title { font-weight:600; margin:0; color:var(--text); }
+.feature-card .feature-desc { font-size:0.86rem; color:var(--muted); margin-top:0.18rem; }
+.feature-card:hover { transform: translateY(-6px) scale(1.02); }
+
+/* ---------- LIST ITEM (services/settings) ---------- */
+.list-item {
+  display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; cursor:pointer; transition: background 160ms ease, transform 160ms ease;
+  color:var(--text);
+}
+.list-item:hover { background: rgba(255,255,255,0.02); transform: translateY(-2px); }
+.list-item:active { transform: translateY(0); }
+.list-item .li-icon { width:40px; height:40px; flex:0 0 40px; display:flex; align-items:center; justify-content:center; border-radius:10px; background: rgba(255,255,255,0.02); border:1px solid var(--glass-border-2); }
+.list-item .li-title { flex:1; font-weight:600; }
+.list-item .li-sub { color:var(--muted); font-size:0.9rem; }
+.list-item .li-arrow { flex:0 0 18px; color:var(--muted); }
+
+/* Make entire list item keyboard accessible */
+.list-item[role="button"], .list-item.button-like { outline: none; }
+.list-item:focus { box-shadow: 0 0 0 4px rgba(91,140,255,0.12); }
+
+/* ---------- BUTTONS ---------- */
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 14px; font-weight:600; border-radius:999px; cursor:pointer; border:none; transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+.btn:active { transform: translateY(1px); }
+.btn:focus { outline: none; box-shadow: 0 0 0 4px rgba(124,92,255,0.12); }
+
+.btn-primary {
+  background-image: var(--accent-grad);
+  color: #fff; box-shadow: 0 8px 26px rgba(91,140,255,0.18); padding:10px 18px;
+}
+.btn-primary:hover { transform: translateY(-2px); filter:brightness(1.03); }
+
+.btn-ghost {
+  background: transparent; border:1px solid rgba(255,255,255,0.06); color:var(--text);
+}
+.btn-secondary {
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+  color: var(--text); border:1px solid var(--glass-border-2);
+}
+
+/* Small variant */
+.btn--sm { padding:6px 10px; font-size:0.9rem; border-radius:10px; }
+
+/* ---------- PRODUCT CARD ---------- */
+.product-card { display:flex; flex-direction:column; gap:10px; border-radius:14px; overflow:hidden; }
+.product-card .product-media { position:relative; width:100%; height:180px; overflow:hidden; border-radius:12px; background: rgba(255,255,255,0.02); }
+.product-card .product-media img { width:100%; height:100%; object-fit:cover; transition: transform 380ms cubic-bezier(.2,.9,.3,1); }
+.product-card:hover .product-media img { transform: scale(1.06); }
+.product-card .product-body { padding:0.6rem 0; display:flex; flex-direction:column; gap:4px; }
+.product-card .product-name { font-weight:600; color:var(--text); font-size:0.95rem; }
+.product-card .product-price { color:var(--accent); font-weight:700; }
+
+/* Quick badge for sale / stock */
+.product-card .p-badge { position:absolute; top:10px; left:10px; z-index:6; background:var(--danger); color:#fff; padding:6px 8px; font-size:0.78rem; border-radius:8px; }
+
+/* ---------- ICON BUTTONS ---------- */
+.icon-btn { width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background: rgba(255,255,255,0.03); border:1px solid var(--glass-border-2); cursor:pointer; transition: transform 160ms ease, box-shadow 160ms ease; }
+.icon-btn:hover { transform: scale(1.06); box-shadow: 0 10px 24px rgba(8,12,20,0.28); }
+.icon-btn:active { transform: scale(0.98); }
+
+/* Notification dot on icon button */
+.icon-btn .dot { position:absolute; top:8px; right:8px; width:10px; height:10px; background:var(--danger); border-radius:50%; box-shadow:0 6px 14px rgba(255,107,107,0.22); }
+
+/* ---------- ANIMATIONS ---------- */
+.fade-in { animation:fadeIn 420ms cubic-bezier(.2,.9,.3,1) both; }
+@keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+.slow-fade { animation: fadeIn 680ms ease both; }
+
+/* ---------- UTILITIES ---------- */
+.row { display:flex; gap:12px; }
+.col { flex:1; }
+.center { display:flex; align-items:center; justify-content:center; }
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+  .product-card .product-media { height:160px; }
+  .order-card .order-icon { width:48px; height:48px; }
+}
+@media (max-width: 600px) {
+  .row { flex-direction:column; }
+  .card { padding:0.85rem; }
+  .product-card .product-media { height:140px; }
+  .order-card { padding:1rem; }
+}
+
+/* Dark/light adaptability: prefer subtle contrast on darker UI */
+@media (prefers-color-scheme: light) {
+  :root { --bg-glass: rgba(255,255,255,0.7); --bg-glass-strong: rgba(255,255,255,0.85); --glass-border: rgba(0,0,0,0.06); --glass-border-2: rgba(0,0,0,0.04); --text: #111; --muted: rgba(17,17,17,0.65); --shadow: 0 8px 28px rgba(11,21,40,0.06); }
+  .card { background-clip: padding-box; }
+}
+
+/* Small accessibility helper for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* End of components.css */

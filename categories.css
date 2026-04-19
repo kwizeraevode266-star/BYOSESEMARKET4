@@ -1,0 +1,103 @@
+/* categories.css
+	 Modern, responsive categories grid
+	 Mobile-first, CSS Grid, hover animations, accessible styles
+*/
+
+:root{
+	--bg: #ffffff;
+	--muted: #6b7280;
+	--accent: #0ea5a4; /* soft teal accent */
+	--card-shadow: 0 6px 18px rgba(16,24,40,0.06);
+	--card-shadow-hover: 0 12px 30px rgba(16,24,40,0.12);
+	--radius: 12px;
+	--max-width: 1200px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+	margin:0;
+	font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+	background:var(--bg);
+	color:#0f172a;
+	-webkit-font-smoothing:antialiased;
+}
+.container{
+	width:100%;
+	max-width:var(--max-width);
+	margin:0 auto;
+	padding:0 16px;
+}
+
+/* Header */
+.site-header{padding:20px 0 8px}
+.header-row{display:flex;align-items:center;justify-content:space-between}
+.brand-link{font-weight:700;font-size:1.125rem;color:var(--accent);text-decoration:none}
+.breadcrumb ol{list-style:none;display:flex;gap:8px;padding:0;margin:0;color:var(--muted);font-size:0.95rem}
+.breadcrumb a{color:var(--muted);text-decoration:none}
+.breadcrumb li+li:before{content:'›';margin:0 8px;color:#cbd5e1}
+
+.page-hero{padding:18px 0 28px}
+.page-title{font-size:1.6rem;margin:0 0 6px}
+.page-sub{margin:0 0 12px;color:var(--muted)}
+.search-wrap{max-width:540px}
+.search-wrap input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e6eef0;background:#fff;color:var(--muted);box-shadow:0 2px 6px rgba(2,6,23,0.03);font-size:0.95rem}
+
+/* Categories grid */
+.categories-grid{display:grid;gap:16px;padding-bottom:40px}
+
+/* Mobile-first: 2 columns */
+.categories-grid{grid-template-columns:repeat(2,1fr)}
+
+/* Tablet: 3 columns */
+@media (min-width:720px){
+	.categories-grid{grid-template-columns:repeat(3,1fr);gap:20px}
+}
+
+/* Desktop: 4 columns */
+@media (min-width:1100px){
+	.categories-grid{grid-template-columns:repeat(4,1fr);gap:24px}
+}
+
+.category-card{
+	position:relative;overflow:hidden;border-radius:var(--radius);background:#fff;cursor:pointer;
+	transition:transform .28s cubic-bezier(.2,.9,.2,1),box-shadow .28s ease,opacity .4s ease;
+	box-shadow:var(--card-shadow);display:flex;flex-direction:column;min-height:160px;
+}
+.category-card:focus{outline:3px solid rgba(14,165,164,0.15);outline-offset:4px}
+.category-media{display:block;height:124px;background:#f8fafb;overflow:hidden;flex-shrink:0}
+.category-media img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s ease}
+
+.category-content{padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+.category-title{font-weight:600;font-size:1rem;margin:0;color:#0f172a}
+.category-count{font-size:0.85rem;color:var(--muted)}
+
+.category-overlay{
+	pointer-events:none;position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.0),rgba(2,6,23,0.06));transition:opacity .3s ease;opacity:0
+}
+
+.category-card:hover,.category-card:focus{transform:translateY(-6px) scale(1.01);box-shadow:var(--card-shadow-hover)}
+.category-card:hover .category-media img{transform:scale(1.06)}
+.category-card:hover .category-overlay{opacity:1}
+
+/* subtle top-right badge */
+.category-badge{position:absolute;right:10px;top:10px;background:rgba(255,255,255,0.9);padding:6px 8px;border-radius:999px;font-size:0.8rem;color:var(--muted);box-shadow:0 4px 12px rgba(2,6,23,0.06)}
+
+/* Fade-in animation for cards */
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.category-card.animate{animation:fadeUp .45s ease both}
+
+/* Footer */
+.site-footer{border-top:1px solid #f1f5f9;padding:20px 0;background:transparent}
+.footer-inner{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:0.95rem}
+
+/* Utilities */
+.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+.sr-only{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap}
+
+/* Responsive tweaks */
+@media (max-width:479px){
+	.page-title{font-size:1.25rem}
+	.categories-grid{gap:12px}
+}
+

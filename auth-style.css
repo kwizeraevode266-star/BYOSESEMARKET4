@@ -1,0 +1,192 @@
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ================= BODY ================= */
+body {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a, #1e293b, #3b82f6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ================= CONTAINER ================= */
+form, .form-container, .auth-box, .container {
+  width: 100%;
+  max-width: 400px;
+  padding: 35px 25px;
+  border-radius: 20px;
+
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow: 
+    0 20px 50px rgba(0,0,0,0.5),
+    inset 0 0 10px rgba(255,255,255,0.1);
+
+  text-align: center;
+  animation: fadeIn 0.6s ease;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================= TITLES ================= */
+h1, h2 {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+p {
+  color: #cbd5f5;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+/* ================= LABEL ================= */
+label {
+  display: block;
+  text-align: left;
+  color: #e2e8f0;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+/* ================= INPUT ================= */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  border-radius: 12px;
+  border: none;
+  outline: none;
+
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 14px;
+
+  transition: 0.3s;
+}
+
+/* focus effect */
+input:focus, select:focus {
+  background: rgba(255,255,255,0.25);
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* placeholder */
+input::placeholder {
+  color: #cbd5f5;
+}
+
+/* ================= DROPDOWN FIX ================= */
+select {
+  cursor: pointer;
+}
+
+/* options */
+select option {
+  background: #ffffff;
+  color: #111827;
+}
+
+/* hover option */
+select option:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+/* selected option */
+select option:checked {
+  background: #3b82f6;
+  color: white;
+}
+
+/* ================= BUTTON ================= */
+button, input[type="submit"] {
+  width: 100%;
+  padding: 13px;
+  margin-top: 18px;
+  border: none;
+  border-radius: 12px;
+
+  background: linear-gradient(45deg, #3b82f6, #6366f1);
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+/* hover */
+button:hover, input[type="submit"]:hover {
+  transform: scale(1.05);
+  background: linear-gradient(45deg, #2563eb, #4f46e5);
+}
+
+/* click effect */
+button:active {
+  transform: scale(0.98);
+}
+
+/* ================= LINKS ================= */
+a {
+  display: inline-block;
+  margin-top: 15px;
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ================= OTP INPUT ================= */
+input[maxlength="1"] {
+  width: 50px;
+  height: 50px;
+  margin: 6px;
+  text-align: center;
+  font-size: 18px;
+  border-radius: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 500px) {
+  form, .form-container, .auth-box, .container {
+    padding: 25px 20px;
+  }
+}
+
+/* ================= EXTRA POLISH ================= */
+
+/* smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* subtle glow */
+.container:hover {
+  box-shadow: 
+    0 25px 60px rgba(0,0,0,0.6),
+    inset 0 0 12px rgba(255,255,255,0.15);
+}

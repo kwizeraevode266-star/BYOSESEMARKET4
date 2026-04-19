@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Byose Market - Premium E-commerce</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  
+  <!-- Global Styles -->
+  <link rel="stylesheet" href="css/global.css">
+  <link rel="stylesheet" href="css/header.css">
+</head>
+<body>
+
+<!-- HEADER COMPONENT -->
+<header class="main-header" id="mainHeader" role="banner">
+  <div class="container">
+    <div class="header-wrapper">
+      
+      <!-- LOGO -->
+      <a href="index.html" class="logo" aria-label="Byose Market - Home">
+        <i class="fas fa-shopping-bag"></i>
+        <span>Byose Market</span>
+      </a>
+
+      <!-- HAMBURGER MENU (Mobile) -->
+      <button class="hamburger-btn" id="mobileMenuBtn" aria-label="Toggle mobile menu" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <!-- NAVIGATION -->
+      <nav class="nav-menu" id="navMenu">
+        <a href="index.html" class="nav-link" data-page="home">Home</a>
+        <a href="shop.html" class="nav-link" data-page="shop">Shop</a>
+        <a href="contact.html" class="nav-link" data-page="contact">Contact</a>
+      </nav>
+
+      <!-- SEARCH BAR -->
+      <form class="search-bar" id="searchForm" role="search">
+        <input type="text" class="search-input" id="searchInput" placeholder="Search products..." aria-label="Search">
+        <button type="submit" class="search-btn" aria-label="Search"><i class="fas fa-search"></i></button>
+      </form>
+
+      <!-- HEADER ICONS -->
+      <div class="header-icons">
+        
+        <!-- ACCOUNT ICON -->
+        <a href="#" id="accountBtn" class="icon-btn" aria-label="Account">
+          <i class="fas fa-user"></i>
+        </a>
+
+        <!-- WISHLIST ICON -->
+        <button class="icon-btn wishlist-btn" id="wishlistBtn" aria-label="Wishlist">
+          <i class="far fa-heart"></i>
+          <span class="icon-badge" id="wishlistBadge">0</span>
+        </button>
+
+        <!-- CART ICON -->
+        <button class="icon-btn cart-btn" id="cartBtn" aria-label="Shopping Cart">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="icon-badge" id="cartBadge">0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOBILE MENU (Hidden by default) -->
+  <div class="mobile-menu" id="mobileMenu">
+    <nav class="mobile-nav">
+      <a href="index.html" class="mobile-nav-link">Home</a>
+      <a href="shop.html" class="mobile-nav-link">Shop</a>
+      <a href="contact.html" class="mobile-nav-link">Contact</a>
+      <a href="#" class="mobile-nav-link" id="mobileAccountLink">Account</a>
+    </nav>
+  </div>
+</header>
+
+<!-- CART SIDEBAR -->
+<aside class="cart-sidebar" id="cartSidebar">
+  <div class="cart-header">
+    <h2>Shopping Cart</h2>
+    <button class="cart-close" id="cartClose" aria-label="Close cart"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="cart-body" id="cartBody">
+    <div class="cart-empty" id="cartEmpty">
+      <i class="fas fa-shopping-bag"></i>
+      <p>Your cart is empty</p>
+      <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display: none;">
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Subtotal:</span>
+        <span id="cartSubtotal">RWF 0</span>
+      </div>
+      <div class="summary-row">
+        <span>Shipping:</span>
+        <span id="cartShipping">RWF 0</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span id="cartTotal">RWF 0</span>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-lg" id="checkoutBtn">Proceed to Checkout</button>
+    <a href="cart.html" class="btn btn-outline btn-lg">View Cart</a>
+  </div>
+</aside>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay"></div>
+
+<!-- FOOTER COMPONENT -->
+<footer class="main-footer">
+  <div class="container">
+    <div class="footer-grid">
+      
+      <!-- ABOUT SECTION -->
+      <div class="footer-section">
+        <h4>About Byose Market</h4>
+        <p>Your trusted online marketplace for quality products delivered to your doorstep. Premium quality, affordable prices, and excellent service.</p>
+        <div class="social-links">
+          <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+          <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div class="footer-section">
+        <h4>Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="shop.html">Shop</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+          <li><a href="#">About Us</a></li>
+        </ul>
+      </div>
+
+      <!-- CUSTOMER SERVICE -->
+      <div class="footer-section">
+        <h4>Customer Service</h4>
+        <ul class="footer-links">
+          <li><a href="#">Returns & Exchanges</a></li>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Track Order</a></li>
+        </ul>
+      </div>
+
+      <!-- POLICIES -->
+      <div class="footer-section">
+        <h4>Policies</h4>
+        <ul class="footer-links">
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms & Conditions</a></li>
+          <li><a href="#">Refund Policy</a></li>
+          <li><a href="#">Disclaimer</a></li>
+        </ul>
+      </div>
+
+      <!-- CONTACT INFO -->
+      <div class="footer-section">
+        <h4>Get in Touch</h4>
+        <ul class="footer-contact">
+          <li><i class="fas fa-map-marker-alt"></i> Kigali, Rwanda</li>
+          <li><i class="fas fa-phone"></i> +250 798 000 000</li>
+          <li><i class="fas fa-envelope"></i> support@byosemarket.rw</li>
+          <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <!-- FOOTER BOTTOM -->
+    <div class="footer-bottom">
+      <p>&copy; 2024-2025 Byose Market. All rights reserved. | Made with ❤️ for Rwanda</p>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS -->
+<script src="js/utils.js"></script>
+<script src="js/cart.js"></script>
+<script src="/shared/storage.js"></script>
+<script src="js/header.js"></script>
+
+<!-- Mobile bottom navigation (mobile & tablet only) -->
+<link rel="stylesheet" href="/mobile-nav.css">
+<script src="/js/mobile-nav.js" defer></script>
+
+</body>
+</html>

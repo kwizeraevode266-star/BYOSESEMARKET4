@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Details | Byose Market</title>
+  <meta name="description" content="Explore product details, gallery, specifications, and related products on Byose Market.">
+  <link rel="icon" href="../img/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/home.css">
+  <link rel="stylesheet" href="../css/home-mobile.css">
+  <link rel="stylesheet" href="../css/home-desktop.css">
+  <link rel="stylesheet" href="./css/product-details.css">
+  <link rel="stylesheet" href="./gallery.css">
+  <link rel="stylesheet" href="./css/product-info.css">
+  <link rel="stylesheet" href="./css/buttons.css">
+  <link rel="stylesheet" href="./css/product-modal.css">
+  <link rel="stylesheet" href="./css/related-products.css">
+  <link rel="stylesheet" href="./css/product-details-desktop.css">
+  <link rel="stylesheet" href="./bottom-bar.css">
+</head>
+<body class="home-page details-page">
+  <header class="main-header" id="mainHeader" data-sticky-header>
+    <div class="container header-shell">
+      <div class="header-mobile-top">
+        <a class="brand brand-mobile" href="../index.html" aria-label="Byose Market Home">
+          <img class="brand-logo" src="../img/logo.png" alt="Byose Market logo">
+        </a>
+        <a href="../messages.html" class="icon-btn mobile-messages-btn" aria-label="Messages">
+          <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <a class="brand header-desktop-brand" href="../index.html" aria-label="Byose Market Home">
+        <img class="brand-logo" src="../img/logo.png" alt="Byose Market logo">
+      </a>
+
+      <nav class="header-nav nav header-desktop-nav" aria-label="Main navigation">
+        <a href="../index.html" class="nav-link" data-page="home">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+          <span>Home</span>
+        </a>
+        <a href="../shop.html" class="nav-link" data-page="shop">
+          <i class="fa-solid fa-store" aria-hidden="true"></i>
+          <span>Shop</span>
+        </a>
+        <a href="../contact.html" class="nav-link" data-page="contact">
+          <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+
+      <div class="header-actions header-desktop-actions">
+        <div class="header-search-hover">
+          <a href="../search.html" class="icon-btn header-search-toggle" aria-label="Open search page">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </a>
+          <form class="header-search header-search-preview site-search" id="desktopSearchPreview" role="search" action="../search.html">
+            <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+            <input id="searchInput" name="q" type="search" placeholder="Search products..." aria-label="Search products">
+            <button id="searchBtn" type="submit" aria-label="Submit search">
+              <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
+            </button>
+          </form>
+        </div>
+        <a href="../cart.html" class="icon-btn desktop-cart-btn" id="cartBtn" aria-label="Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </a>
+        <a href="../login.html" class="icon-btn" id="accountBtn" aria-label="Account">
+          <i class="fa-regular fa-user"></i>
+        </a>
+      </div>
+
+      <div class="header-search header-search-mobile-redirect" id="homeSearchRedirect" role="button" tabindex="0" aria-label="Open search page">
+        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+        <input id="homeSearchInput" type="search" placeholder="Search products" aria-label="Search products" readonly tabindex="-1" inputmode="none">
+      </div>
+    </div>
+  </header>
+
+  <main class="details-main">
+    <section class="container details-overview">
+      <div class="details-grid">
+        <article class="details-panel gallery-panel" data-gallery-root>
+          <div class="gallery-stage-shell" id="productGalleryRoot">
+            <div class="gallery-stage-header">
+              <span class="gallery-stage-badge">Premium gallery</span>
+              <div class="gallery-counter" id="galleryCounter">1 / 1</div>
+            </div>
+
+            <div class="gallery-stage" id="galleryViewport" tabindex="0" aria-label="Product image gallery">
+              <div class="gallery-track" id="galleryTrack"></div>
+            </div>
+
+            <button class="gallery-control gallery-control-prev" type="button" id="galleryPrev" aria-label="Previous image">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button class="gallery-control gallery-control-next" type="button" id="galleryNext" aria-label="Next image">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+            <button class="gallery-zoom" type="button" id="galleryZoom" aria-label="Open fullscreen image viewer">
+              <i class="fa-solid fa-expand"></i>
+            </button>
+
+            <div class="gallery-mobile-hint" aria-hidden="true">
+              <i class="fa-solid fa-arrows-left-right"></i>
+              <span>Swipe to browse</span>
+            </div>
+          </div>
+
+          <div class="gallery-thumb-row" id="galleryThumbs" aria-label="Product thumbnails"></div>
+        </article>
+
+        <article class="details-panel info-panel">
+          <div class="product-eyebrow-row">
+            <span class="product-kicker" id="productCategory">Featured</span>
+            <span class="product-badge" id="productBadge">New</span>
+          </div>
+
+          <div class="product-title-block">
+            <h1 id="productName">Product Name</h1>
+            <div class="product-rating-row">
+              <div class="product-stars" id="productStars" aria-label="Product rating"></div>
+              <span id="productRatingText">4.8 rating</span>
+            </div>
+          </div>
+
+          <div class="product-price-block">
+            <div class="price-stack">
+              <strong class="current-price" id="productPrice">RWF 0</strong>
+              <span class="old-price" id="productOldPrice"></span>
+            </div>
+            <div class="price-meta">
+              <span class="savings-pill" id="productSavings">Save</span>
+              <span class="stock-pill" id="productStock">In stock</span>
+            </div>
+          </div>
+
+          <p class="product-short-copy" id="productShortDescription"></p>
+
+          <ul class="highlights-list" id="productHighlights"></ul>
+
+          <div class="purchase-card">
+            <div id="productOptionsPreview"></div>
+
+            <div class="purchase-header">
+              <div>
+                <span class="purchase-label">Quantity</span>
+                <p class="purchase-caption" id="purchaseCaption">Adjust quantity before adding to cart.</p>
+              </div>
+              <div class="quantity-stepper" aria-label="Quantity selector">
+                <button type="button" class="qty-btn" id="qtyDecrease" aria-label="Decrease quantity">-</button>
+                <input type="number" id="quantityInput" min="1" value="1" inputmode="numeric" aria-label="Quantity">
+                <button type="button" class="qty-btn" id="qtyIncrease" aria-label="Increase quantity">+</button>
+              </div>
+            </div>
+
+            <div class="cta-grid">
+              <button type="button" class="action-btn action-btn-primary" id="addToCartBtn">
+                <i class="fa-solid fa-cart-plus" aria-hidden="true"></i>
+                <span>Add to Cart</span>
+              </button>
+              <button type="button" class="action-btn action-btn-secondary" id="buyNowBtn">
+                <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                <span>Buy Now</span>
+              </button>
+            </div>
+
+            <div class="trust-grid" id="trustGrid"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="container details-content-grid">
+      <article class="details-panel story-panel">
+        <div class="section-head">
+          <span class="section-kicker">Overview</span>
+          <h2>What makes this item worth buying</h2>
+        </div>
+        <div class="story-copy" id="productDescription"></div>
+      </article>
+
+      <article class="details-panel accordion-panel">
+        <div class="section-head">
+          <span class="section-kicker">More details</span>
+          <h2>Specifications and policies</h2>
+        </div>
+        <div class="accordion-list" id="detailsAccordion"></div>
+      </article>
+    </section>
+
+    <section class="container related-section" aria-labelledby="relatedTitle">
+      <div class="section-heading compact-heading related-heading">
+        <div>
+          <span class="section-kicker">You may also like</span>
+          <h2 id="relatedTitle">Related products</h2>
+        </div>
+        <a href="../shop.html" class="text-link">Shop more</a>
+      </div>
+      <div class="related-grid" id="relatedProducts" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <div class="details-bottom-bar" id="detailsBottomBar" aria-label="Quick purchase actions">
+    <div class="details-bottom-bar__shell">
+      <a href="../shop.html" class="details-bottom-bar__icon-link" aria-label="Go to shop">
+        <span class="details-bottom-bar__icon" aria-hidden="true">
+          <i class="fa-solid fa-store"></i>
+        </span>
+        <span class="details-bottom-bar__label">Shop</span>
+      </a>
+
+      <button type="button" class="details-bottom-bar__icon-link" id="detailsChatButton" aria-label="Chat on WhatsApp">
+        <span class="details-bottom-bar__icon" aria-hidden="true">
+          <i class="fa-brands fa-whatsapp"></i>
+        </span>
+        <span class="details-bottom-bar__label">Chat</span>
+      </button>
+
+      <a href="../cart.html" class="details-bottom-bar__icon-link details-bottom-bar__cart-link" aria-label="Open cart">
+        <span class="details-bottom-bar__icon" aria-hidden="true">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </span>
+        <span class="details-bottom-bar__label">Cart</span>
+        <span class="details-bottom-bar__badge" id="detailsCartBadge" role="status" aria-live="polite">0</span>
+      </a>
+
+      <button type="button" class="details-bottom-bar__button details-bottom-bar__button--add" id="stickyAddToCartBtn">Add to Cart</button>
+      <button type="button" class="details-bottom-bar__button details-bottom-bar__button--buy" id="stickyBuyNowBtn">Buy Now</button>
+    </div>
+  </div>
+
+  <div class="gallery-lightbox" id="galleryLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Fullscreen product gallery">
+    <button type="button" class="lightbox-close" id="lightboxClose" aria-label="Close image zoom">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    <button type="button" class="lightbox-nav lightbox-prev" id="lightboxPrev" aria-label="Previous image">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="lightbox-shell">
+      <div class="lightbox-toolbar">
+        <div class="lightbox-counter" id="lightboxCounter">1 / 1</div>
+        <div class="lightbox-hint">Tap image to zoom</div>
+      </div>
+      <div class="lightbox-stage" id="lightboxStage"></div>
+    </div>
+    <button type="button" class="lightbox-nav lightbox-next" id="lightboxNext" aria-label="Next image">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+
+  <div class="details-toast" id="detailsToast" role="status" aria-live="polite"></div>
+
+  <div class="product-config-modal" id="productConfigModal" hidden aria-hidden="true">
+    <div class="product-config-modal__backdrop" data-config-close></div>
+    <section class="product-config-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="productName">
+      <div class="product-config-modal__mount" id="productConfigModalBody"></div>
+    </section>
+  </div>
+
+  <footer class="site-footer">
+    <div class="container footer-shell">
+      <div class="footer-grid">
+        <section class="footer-card footer-column footer-brand footer-about-card" aria-labelledby="footer-about-title">
+          <span class="footer-eyebrow">Byose Market</span>
+          <h3 id="footer-about-title">About</h3>
+          <p>Byose Market ni shopping platform ikora neza kandi isa neza, igufasha kugura fashion, electronics n'ibindi by'ingenzi mu buryo bworoshye kandi bwihuse.</p>
+        </section>
+
+        <nav class="footer-card footer-column footer-links-card" aria-labelledby="footer-links-title">
+          <span class="footer-eyebrow">Quick access</span>
+          <h3 id="footer-links-title">Links</h3>
+          <div class="footer-links-list">
+            <a href="../index.html">Home</a>
+            <a href="../shop.html">Shop</a>
+            <a href="../contact.html">Contact</a>
+            <a href="../search.html">Search</a>
+          </div>
+        </nav>
+
+        <section class="footer-card footer-column footer-contact-card" aria-labelledby="footer-contact-title">
+          <span class="footer-eyebrow">Reach us</span>
+          <h3 id="footer-contact-title">Contact</h3>
+          <div class="footer-contact-list">
+            <a href="tel:+250780430710" class="footer-contact-item" aria-label="Call 0780430710">
+              <span class="footer-contact-icon"><i class="fa-solid fa-phone-volume" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>0780430710</strong>
+                <small>Call or WhatsApp</small>
+              </span>
+            </a>
+            <a href="tel:+250723731250" class="footer-contact-item" aria-label="Call 0723731250">
+              <span class="footer-contact-icon"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>0723731250</strong>
+                <small>Call or WhatsApp</small>
+              </span>
+            </a>
+            <a href="mailto:byosemarket@gmail.com" class="footer-contact-item" aria-label="Email byosemarket@gmail.com">
+              <span class="footer-contact-icon"><i class="fa-regular fa-envelope" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>byosemarket@gmail.com</strong>
+                <small>Email support</small>
+              </span>
+            </a>
+            <div class="footer-contact-item footer-contact-static" aria-label="Location Kigali, Rwanda">
+              <span class="footer-contact-icon"><i class="fa-solid fa-location-dot" aria-hidden="true"></i></span>
+              <span class="footer-contact-copy">
+                <strong>Kigali, Rwanda</strong>
+                <small>We serve customers nationwide</small>
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="footer-card footer-column footer-subscribe-card" aria-labelledby="footer-subscribe-title">
+          <span class="footer-eyebrow">Stay updated</span>
+          <h3 id="footer-subscribe-title">Subscribe</h3>
+          <p class="footer-subscribe-copy">Shyiramo email yawe ubone deals nshya, arrivals, n'amatangazo y'ibiciro byihariye.</p>
+          <form id="footerSubscribeForm" class="footer-subscribe">
+            <label class="sr-only" for="footerEmail">Email address</label>
+            <input type="email" id="footerEmail" placeholder="Andika email yawe" aria-label="Email address">
+            <button type="submit">Join now</button>
+          </form>
+          <p class="footer-note" id="footerNote">Menya deals nshya buri cyumweru.</p>
+        </section>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Byose Market. All rights reserved.</span>
+        <span>Smart shopping experience for Rwanda.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/products.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="../cart.js"></script>
+  <script src="../js/header.js" defer></script>
+  <script src="../js/search.js" defer></script>
+  <script src="./bottom-bar.js" defer></script>
+  <script type="module" src="./js/product-details.js"></script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+// ===============================
+// 📱 MOBILE BOTTOM NAV (FIXED PRO)
+// ===============================
+(function () {
+
+  const NAV_HTML = `
+    <nav class="mobile-bottom-nav" role="navigation" aria-label="Mobile navigation">
+      
+      <a href="/index.html" class="mobile-bottom-nav__item" data-nav="home">
+        <span class="mobile-bottom-nav__icon"><i class="fa-solid fa-house"></i></span>
+        <span class="mobile-bottom-nav__label">Home</span>
+      </a>
+
+      <a href="/shop.html" class="mobile-bottom-nav__item" data-nav="shop">
+        <span class="mobile-bottom-nav__icon"><i class="fa-solid fa-store"></i></span>
+        <span class="mobile-bottom-nav__label">Shop</span>
+      </a>
+
+      <a href="/cart.html" class="mobile-bottom-nav__item" data-nav="cart">
+        <span class="mobile-bottom-nav__icon"><i class="fas fa-shopping-cart"></i></span>
+        <span class="mobile-bottom-nav__label">Cart</span>
+        <span class="mobile-bottom-nav__badge" id="mobile-nav-cart-badge"></span>
+      </a>
+
+      <!-- 🔥 ACCOUNT (NO DIRECT LINK) -->
+      <a href="#" class="mobile-bottom-nav__item nav-account" data-nav="account">
+        <span class="mobile-bottom-nav__icon"><i class="fa-regular fa-user"></i></span>
+        <span class="mobile-bottom-nav__label">Account</span>
+      </a>
+
+    </nav>
+  `;
+
+  // ===============================
+  // 🧱 CREATE NAV
+  // ===============================
+  function createNav() {
+    if (document.querySelector('.mobile-bottom-nav')) return;
+
+    const div = document.createElement('div');
+    div.innerHTML = NAV_HTML;
+    document.body.appendChild(div.firstElementChild);
+
+    updateActiveState();
+    updateBadge();
+    applyBodySpacing();
+    bindNavPressState();
+    bindAccountButton(); // 🔥 IMPORTANT
+  }
+
+  // ===============================
+  // 👤 ACCOUNT BUTTON LOGIC
+  // ===============================
+  function bindAccountButton() {
+    const acc = document.querySelector('.nav-account');
+
+    if (!acc) return;
+
+    acc.addEventListener('click', function (e) {
+      e.preventDefault();
+
+      // Use global handler from app.js
+      if (typeof window.handleAccountClick === 'function') {
+        window.handleAccountClick();
+        return;
+      }
+
+      // fallback (if app.js missing) — prefer centralized helper
+      if (typeof window.isLoggedIn === 'function') {
+        try {
+          if (window.isLoggedIn()) { window.location.href = "/account/account.html"; return; }
+          else { window.location.href = "/login.html"; return; }
+        } catch (e) { /* fallback below */ }
+      }
+
+      const logged = localStorage.getItem("bm_logged_in") === "true";
+      if (logged) window.location.href = "/account/account.html";
+      else window.location.href = "/login.html";
+    });
+  }
+
+  // ===============================
+  // 📏 BODY SPACING
+  // ===============================
+  function applyBodySpacing() {
+    const nav = document.querySelector('.mobile-bottom-nav');
+    if (!nav) return;
+
+    function update() {
+      const isDesktop = window.innerWidth >= 1025;
+
+      if (isDesktop) {
+        document.body.style.paddingBottom = '';
+      } else {
+        const h = nav.getBoundingClientRect().height || 66;
+        document.body.style.paddingBottom = (h + 14) + 'px';
+      }
+    }
+
+    update();
+    window.addEventListener('resize', update);
+  }
+
+  // ===============================
+  // 🎯 ACTIVE STATE
+  // ===============================
+  function updateActiveState() {
+    const path = (location.pathname || "").toLowerCase();
+
+    let active = null;
+
+    if (path.includes("index")) active = "home";
+    else if (path.includes("shop")) active = "shop";
+    else if (path.includes("cart")) active = "cart";
+    else if (path.includes("account") || path.includes("login")) active = "account";
+
+    document.querySelectorAll('.mobile-bottom-nav__item').forEach(item => {
+      item.classList.toggle(
+        'mobile-bottom-nav__item--active',
+        item.dataset.nav === active
+      );
+    });
+  }
+
+  function setActiveFromClick(item) {
+    document.querySelectorAll('.mobile-bottom-nav__item').forEach(node => {
+      node.classList.toggle('mobile-bottom-nav__item--active', node === item);
+    });
+  }
+
+  function bindNavPressState() {
+    document.querySelectorAll('.mobile-bottom-nav__item').forEach(item => {
+      item.addEventListener('click', function () {
+        setActiveFromClick(this);
+      });
+
+      item.addEventListener('pointerdown', function () {
+        this.classList.add('is-pressing');
+      });
+
+      item.addEventListener('pointerup', function () {
+        this.classList.remove('is-pressing');
+      });
+
+      item.addEventListener('pointerleave', function () {
+        this.classList.remove('is-pressing');
+      });
+    });
+  }
+
+  // ===============================
+  // 🛒 CART BADGE
+  // ===============================
+  function readCartCount() {
+    let count = 0;
+
+    try {
+      const cart = JSON.parse(localStorage.getItem('byose_market_cart_v1') || '[]');
+      count = cart.reduce((sum, item) => sum + (Number(item.qty) || 0), 0);
+    } catch (e) {}
+
+    return count;
+  }
+
+  function updateBadge() {
+    const el = document.getElementById('mobile-nav-cart-badge');
+    if (!el) return;
+
+    const count = readCartCount();
+
+    if (count > 0) {
+      el.style.display = "flex";
+      el.textContent = count;
+    } else {
+      el.style.display = "none";
+    }
+  }
+
+  function setupListeners() {
+    document.addEventListener('cart:updated', updateBadge);
+    window.addEventListener('storage', updateBadge);
+    window.addEventListener('popstate', updateActiveState);
+    window.addEventListener('pageshow', updateActiveState);
+  }
+
+  // ===============================
+  // 🎨 FONT AWESOME
+  // ===============================
+  function ensureFontAwesome() {
+    if (document.querySelector('link[href*="font-awesome"]')) return;
+
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css";
+    document.head.appendChild(link);
+  }
+
+  // ===============================
+  // 🚀 INIT
+  // ===============================
+  document.addEventListener("DOMContentLoaded", function () {
+    ensureFontAwesome();
+    createNav();
+    setupListeners();
+  });
+
+})();

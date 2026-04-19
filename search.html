@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="rw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search | Byose Market</title>
+  <meta name="description" content="Search products on Byose Market.">
+  <link rel="icon" href="img/logo.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/home.css">
+  <link rel="stylesheet" href="css/home-mobile.css">
+  <link rel="stylesheet" href="css/home-desktop.css">
+  <link rel="stylesheet" href="mobile-nav.css">
+  <link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="search-mobile.css">
+  <link rel="stylesheet" href="search-desktop.css">
+</head>
+<body class="home-page search-page">
+  <header class="main-header" id="mainHeader" data-sticky-header>
+    <div class="container header-shell">
+      <div class="header-mobile-top">
+        <a class="brand brand-mobile" href="index.html" aria-label="Byose Market Home">
+          <img class="brand-logo" src="img/logo.png" alt="Byose Market logo">
+        </a>
+        <a href="messages.html" class="icon-btn mobile-messages-btn" aria-label="Messages">
+          <i class="fa-regular fa-comment-dots" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <a class="brand header-desktop-brand" href="index.html" aria-label="Byose Market Home">
+        <img class="brand-logo" src="img/logo.png" alt="Byose Market logo">
+      </a>
+
+      <nav class="header-nav nav header-desktop-nav" aria-label="Main navigation">
+        <a href="index.html" class="nav-link" data-page="home">
+          <i class="fa-solid fa-house" aria-hidden="true"></i>
+          <span>Home</span>
+        </a>
+        <a href="shop.html" class="nav-link" data-page="shop">
+          <i class="fa-solid fa-store" aria-hidden="true"></i>
+          <span>Shop</span>
+        </a>
+        <a href="contact.html" class="nav-link" data-page="contact">
+          <i class="fa-regular fa-envelope" aria-hidden="true"></i>
+          <span>Contact</span>
+        </a>
+      </nav>
+
+      <div class="header-actions header-desktop-actions">
+        <a href="cart.html" class="icon-btn desktop-cart-btn" id="cartBtn" aria-label="Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+        </a>
+        <a href="login.html" class="icon-btn" id="accountBtn" aria-label="Account">
+          <i class="fa-regular fa-user"></i>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="search-page-main">
+    <section class="search-panel">
+      <form class="search-stage" id="searchPageForm" role="search" novalidate>
+        <label class="sr-only" for="searchPageInput">Search products</label>
+        <span class="search-stage__icon" aria-hidden="true">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input
+          id="searchPageInput"
+          name="q"
+          type="search"
+          placeholder="Search products"
+          autocomplete="off"
+          aria-label="Search products"
+        >
+        <button class="search-stage__camera" id="imageSearchTrigger" type="button" aria-label="Search by image">
+          <i class="fa-solid fa-camera" aria-hidden="true"></i>
+        </button>
+        <input id="imageSearchInput" type="file" accept="image/*" hidden>
+      </form>
+
+      <section class="visual-search-panel" id="visualSearchPanel" hidden aria-live="polite" aria-hidden="true" data-visible="false">
+        <div class="visual-search-panel__media">
+          <div class="visual-search-panel__preview-shell" id="imageSearchPreviewShell" hidden>
+            <img id="imageSearchPreview" alt="Uploaded image preview">
+          </div>
+        </div>
+
+        <div class="visual-search-panel__body">
+          <div class="section-heading compact-heading shop-results-head visual-search-panel__head">
+            <div class="visual-search-panel__heading-copy">
+              <span class="section-kicker">Visual search</span>
+              <h2 id="imageSearchTitle">Results for your image</h2>
+            </div>
+            <button class="visual-search-panel__reset" id="imageSearchReset" type="button" hidden>
+              Clear image
+            </button>
+          </div>
+
+          <p class="visual-search-panel__status" id="imageSearchStatus">Upload an image to search the existing product catalog.</p>
+          <div class="visual-search-panel__chips" id="imageSearchChips" hidden></div>
+        </div>
+      </section>
+
+      <section class="search-results-section" id="searchResultsSection" hidden>
+        <div class="section-heading compact-heading shop-results-head search-results-head">
+          <div>
+            <span class="section-kicker">Search results</span>
+            <h2 id="search-results-title">Matching products</h2>
+          </div>
+          <p class="shop-results" id="searchResultsSummary" aria-live="polite"></p>
+        </div>
+
+        <div class="products-grid shop-product-grid search-results-grid" id="searchResults" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+
+  <script src="js/products.js" defer></script>
+  <script src="shop.js" defer></script>
+  <script src="search-utils.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js" defer></script>
+  <script src="search-ai.js" defer></script>
+  <script src="search-image.js" defer></script>
+  <script src="search.js" defer></script>
+  <script src="js/mobile-nav.js" defer></script>
+  <script src="shared/storage.js" defer></script>
+  <script src="js/header.js" defer></script>
+</body>
+</html>

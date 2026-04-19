@@ -1,0 +1,206 @@
+<!--
+  About Us - ByoseMarket
+  Location: /account/settings/about.html
+  Mobile-first, modern, and integration-ready HTML.
+  Prepared for future styling with `theme.js` and `language.js` hooks.
+-->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>About Us — ByoseMarket</title>
+  <!-- Poppins font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-p6O1XrYqj1+6G1xv0jz4v1vKq3h3n1jM9H2z6l6Z8k1m2pQZrJd3q0Kq4Yw0V1PZfXQx6v5Yx3q2Y6+6h3w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Minimal page styles (mobile-first). Move to external CSS when ready. -->
+  <style>
+    :root{
+      --bg: #f7f9fb;
+      --card: rgba(255,255,255,0.65);
+      --accent: #0b74ff;
+      --muted:#6b7280;
+      --shadow: 0 6px 18px rgba(7,13,24,0.08);
+      --radius: 14px;
+      --glass: rgba(255,255,255,0.5);
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+
+    html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
+    a{color:inherit;text-decoration:none}
+
+    /* Sticky header */
+    header.app-header{
+      position:sticky;top:0;z-index:40;
+      backdrop-filter: blur(6px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.6));
+      display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(15,23,42,0.04);
+    }
+    .back-btn{display:inline-flex;align-items:center;gap:10px;color:var(--accent);font-weight:600}
+    .page-title{flex:1;text-align:center;font-size:16px;font-weight:600}
+
+    /* Page container */
+    .container{max-width:960px;margin:18px auto;padding:16px;}
+
+    /* Brand section */
+    .brand-card{
+      display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;border-radius:16px;box-shadow:var(--shadow);
+      background:var(--card);backdrop-filter: blur(8px);border:1px solid rgba(15,23,42,0.04);
+    }
+    .brand-logo{width:84px;height:84px;border-radius:12px;object-fit:cover;background:linear-gradient(135deg,#fff,#f1f5f9);display:block}
+    .brand-name{font-size:20px;font-weight:700}
+    .brand-tag{color:var(--muted);font-size:14px}
+
+    /* Sections */
+    section.about-section{margin-top:14px;display:grid;gap:14px}
+    .card{padding:14px;border-radius:12px;background:var(--card);box-shadow:var(--shadow);border:1px solid rgba(15,23,42,0.04)}
+
+    /* Mission & Vision layout */
+    .grid-2{display:grid;grid-template-columns:1fr;gap:12px}
+
+    /* Why choose us cards */
+    .features{display:flex;flex-direction:column;gap:10px}
+    .feature-item{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:rgba(11,116,255,0.06);color:var(--accent)}
+    .feature-icon{width:42px;height:42px;border-radius:10px;background:rgba(11,116,255,0.12);display:flex;align-items:center;justify-content:center}
+
+    /* Contact & social */
+    .contact-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    .social-links{display:flex;gap:12px;margin-top:8px}
+    .social-links a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;background:#fff;border:1px solid rgba(15,23,42,0.04);box-shadow:var(--shadow);color:var(--accent)}
+
+    /* App info */
+    .meta{font-size:13px;color:var(--muted);text-align:center;padding-top:10px}
+
+    /* Responsive: tablet and up */
+    @media (min-width:720px){
+      .grid-2{grid-template-columns:1fr 1fr}
+      .features{flex-direction:row}
+    }
+
+  </style>
+
+</head>
+<body data-page="about" class="about-page">
+
+  <!-- Sticky Header -->
+  <header class="app-header" role="banner">
+    <!-- Back link: simple anchor for integration with theme/language scripts -->
+    <a class="back-btn" href="settings.html" aria-label="Back to Settings">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span class="sr-only">Back</span>
+    </a>
+    <div class="page-title">About Us</div>
+    <div style="width:34px"></div>
+  </header>
+
+  <!-- Main content container -->
+  <main class="container" role="main">
+
+    <!-- Brand Section -->
+    <div class="brand-card" aria-labelledby="brand-heading">
+      <!-- Placeholder logo - replace with real logo file when available -->
+      <img src="/img/logo-placeholder.png" alt="ByoseMarket logo" class="brand-logo" />
+      <h1 id="brand-heading" class="brand-name">ByoseMarket</h1>
+      <p class="brand-tag">Everything you need in one place</p>
+    </div>
+
+    <!-- About description -->
+    <section class="about-section">
+      <article class="card" aria-labelledby="about-heading">
+        <h2 id="about-heading" style="margin:0 0 8px 0;font-size:16px">Who we are</h2>
+        <p style="margin:0;color:var(--muted);line-height:1.5">
+          ByoseMarket is a modern e-commerce platform dedicated to bringing a wide range of products to customers across Rwanda and beyond. We offer curated collections in fashion, shoes, electronics, home goods, beauty, and more — all selected for quality and value. Our purpose is to make shopping simple, reliable, and enjoyable by combining competitive prices, clear product information, and fast delivery.
+        </p>
+      </article>
+
+      <!-- Mission & Vision -->
+      <div class="grid-2">
+        <article class="card" aria-labelledby="mission-heading">
+          <h3 id="mission-heading" style="margin:0 0 8px 0;font-size:15px">Mission</h3>
+          <p style="margin:0;color:var(--muted);line-height:1.5">Provide affordable, high-quality products with fast and dependable delivery — empowering customers to shop confidently and conveniently.</p>
+        </article>
+
+        <article class="card" aria-labelledby="vision-heading">
+          <h3 id="vision-heading" style="margin:0 0 8px 0;font-size:15px">Vision</h3>
+          <p style="margin:0;color:var(--muted);line-height:1.5">To become a leading e-commerce destination in Rwanda and the broader region, known for trust, innovation, and exceptional customer experience.</p>
+        </article>
+      </div>
+
+      <!-- Why choose us -->
+      <article class="card">
+        <h3 style="margin:0 0 10px 0;font-size:15px">Why choose ByoseMarket</h3>
+        <div class="features" role="list">
+          <div class="feature-item" role="listitem">
+            <div class="feature-icon"><i class="fa-solid fa-truck-fast"></i></div>
+            <div>
+              <strong>Fast delivery</strong>
+              <div style="color:var(--muted);font-size:13px">Quick local shipping and reliable tracking.</div>
+            </div>
+          </div>
+
+          <div class="feature-item" role="listitem">
+            <div class="feature-icon"><i class="fa-solid fa-check-circle"></i></div>
+            <div>
+              <strong>Quality products</strong>
+              <div style="color:var(--muted);font-size:13px">Carefully selected brands and verified sellers.</div>
+            </div>
+          </div>
+
+          <div class="feature-item" role="listitem">
+            <div class="feature-icon"><i class="fa-solid fa-tags"></i></div>
+            <div>
+              <strong>Affordable prices</strong>
+              <div style="color:var(--muted);font-size:13px">Competitive pricing and regular offers.</div>
+            </div>
+          </div>
+
+          <div class="feature-item" role="listitem">
+            <div class="feature-icon"><i class="fa-solid fa-user-shield"></i></div>
+            <div>
+              <strong>Trusted service</strong>
+              <div style="color:var(--muted);font-size:13px">Secure payments and responsive support.</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Contact & Social -->
+      <article class="card">
+        <h3 style="margin:0 0 8px 0;font-size:15px">Contact</h3>
+        <ul class="contact-list">
+          <li><strong>Email:</strong> <a href="mailto:support@byosemarket.com">support@byosemarket.com</a></li>
+          <li><strong>Phone:</strong> <a href="tel:+250788000000">+250 788 000 000</a></li>
+          <li><strong>Location:</strong> Kigali, Rwanda</li>
+        </ul>
+
+        <!-- Social links: ready for integration. Update hrefs to real profiles. -->
+        <div class="social-links" aria-label="Social media links">
+          <a href="#" class="facebook" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="#" class="instagram" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://wa.me/250788000000" class="whatsapp" title="WhatsApp" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </article>
+
+      <!-- App info -->
+      <footer class="card" style="text-align:center">
+        <div class="meta">Version: <strong>1.0.0</strong></div>
+        <div class="meta" style="margin-top:6px">&copy; <span id="year">2026</span> ByoseMarket. All rights reserved.</div>
+      </footer>
+
+    </section>
+
+  </main>
+
+  <!-- Small script hook: fill dynamic year and allow future theme/language initialization. -->
+  <script>
+    // Minimal JS hooks for future integration with theme.js or language.js
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // Expose root elements for theme/language scripts
+    window.ByoseMarket = window.ByoseMarket || {};
+    window.ByoseMarket.page = 'about';
+  </script>
+
+</body>
+</html>

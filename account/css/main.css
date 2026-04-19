@@ -1,0 +1,163 @@
+/* =========================
+   🔥 GLOBAL RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* =========================
+   🌐 ROOT VARIABLES
+========================= */
+:root {
+  --primary: #3b82f6;
+  --secondary: #6366f1;
+  --bg-light: #f8fafc;
+  --bg-dark: #0f172a;
+  --text-light: #ffffff;
+  --text-dark: #0f172a;
+  --card-bg: #ffffff;
+  --border: #e5e7eb;
+  --radius: 14px;
+  --transition: 0.3s ease;
+}
+
+/* =========================
+   🧠 BODY
+========================= */
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  min-height: 100vh;
+  transition: var(--transition);
+}
+
+/* =========================
+   🎨 DARK MODE
+========================= */
+body.dark-theme {
+  background: var(--bg-dark);
+  color: var(--text-light);
+}
+
+/* =========================
+   🌈 GRADIENT MODE
+========================= */
+body.gradient-theme {
+  background: linear-gradient(135deg, #ff7e5f, #feb47b);
+  color: white;
+}
+
+/* =========================
+   📦 CONTAINER
+========================= */
+.account-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* =========================
+   🧱 CARD SYSTEM
+========================= */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 15px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+  transition: var(--transition);
+}
+
+body.dark-theme .card {
+  background: #1e293b;
+}
+
+/* =========================
+   🧩 GRID SYSTEM
+========================= */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+}
+
+/* =========================
+   🔘 BUTTONS
+========================= */
+button {
+  border: none;
+  outline: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+}
+
+button:hover {
+  transform: scale(1.03);
+}
+
+/* PRIMARY BUTTON */
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+/* =========================
+   🔤 TEXT
+========================= */
+h2, h3, h4 {
+  font-weight: 600;
+}
+
+p {
+  font-size: 14px;
+  color: gray;
+}
+
+body.dark-theme p {
+  color: #cbd5f5;
+}
+
+/* =========================
+   🧭 HEADER
+========================= */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.section-header a {
+  font-size: 13px;
+  color: var(--primary);
+  text-decoration: none;
+}
+
+/* =========================
+   ✨ ANIMATION
+========================= */
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

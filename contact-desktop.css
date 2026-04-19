@@ -1,0 +1,89 @@
+@media (min-width: 1025px) {
+  .contact-page .contact-main {
+    padding: 28px 0 88px;
+  }
+
+  .contact-page .contact-hero-panel {
+    grid-template-columns: minmax(0, 1.45fr) minmax(220px, 0.55fr);
+    align-items: center;
+    gap: 16px;
+    padding: 18px 22px;
+  }
+
+  .contact-page .contact-hero-card {
+    justify-self: end;
+    width: min(100%, 240px);
+    padding: 14px 16px;
+  }
+
+  .contact-page .contact-card-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .contact-page .contact-card {
+    padding: 22px 18px;
+  }
+
+  .contact-page .contact-content {
+    grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.72fr);
+    align-items: start;
+    gap: 22px;
+  }
+
+  .contact-page .contact-form-shell {
+    padding: 28px;
+  }
+
+  .contact-page .contact-form-card {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .contact-page .form-field-full,
+  .contact-page .contact-submit,
+  .contact-page .form-feedback {
+    grid-column: 1 / -1;
+  }
+
+  .contact-page .contact-submit {
+    justify-self: start;
+    width: auto;
+    min-width: 240px;
+    padding: 0 28px;
+  }
+
+  .contact-page .contact-side-stack {
+    position: sticky;
+    top: 108px;
+  }
+
+  .contact-page .whatsapp-section-card,
+  .contact-page .social-section-card {
+    padding: 26px 24px;
+  }
+
+  .contact-page .map-frame-shell {
+    padding: 14px;
+  }
+
+  .contact-page .map-frame-shell iframe {
+    min-height: 420px;
+  }
+
+  .contact-page .faq-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .contact-page .contact-hero-panel,
+  .contact-page .contact-form-shell {
+    padding: 34px;
+  }
+
+  .contact-page .contact-card {
+    padding: 24px 20px;
+  }
+}

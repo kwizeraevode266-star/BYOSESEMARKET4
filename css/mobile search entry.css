@@ -1,0 +1,77 @@
+/* ================= MOBILE SEARCH ENTRY ================= */
+
+/* Hidden by default (Desktop) */
+.mobile-search-entry {
+  display: none;
+}
+
+/* wrapper around header + mobile search entry that stays fixed */
+.fixed-top-group {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: var(--z-fixed, 1000);
+  background: var(--card); /* same background as header */
+}
+
+/* make header behave normally inside the fixed container */
+.fixed-top-group .main-header {
+  position: relative;
+  top: auto;
+}
+
+/* spacing beneath the fixed group; adjust values if header height changes */
+body {
+  padding-top: 0; /* default, overridden by media queries */
+}
+
+@media (min-width: 992px) {
+  /* desktop – header only */
+  body {
+    padding-top: 70px; /* approximate header height */
+  }
+  .mobile-search-entry {
+    display: none !important;
+  }
+}
+
+/* Tablet + Mobile Only */
+@media (max-width: 991px) {
+
+  .mobile-search-entry {
+    display: block;
+    position: relative;
+    top: auto;
+    z-index: auto;
+    background: white;
+    padding: 12px 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .mobile-search-entry-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f1f3f5;
+    padding: 12px 16px;
+    border-radius: 30px;
+    text-decoration: none;
+    color: #777;
+    font-size: 14px;
+    transition: 0.2s ease;
+  }
+
+  .mobile-search-entry-trigger:hover {
+    background: #e9ecef;
+  }
+
+  .mobile-search-entry-trigger i {
+    font-size: 16px;
+  }
+
+  /* ensure space for header + search bar */
+  body {
+    padding-top: 120px; /* header (~70px) + mobile search (~50px) */
+  }
+}

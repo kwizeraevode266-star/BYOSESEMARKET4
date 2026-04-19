@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Code</title>
+
+    <link rel="stylesheet" href="auth-style.css">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="auth-wrapper">
+
+    <div class="auth-card">
+
+        <h2 class="auth-title">Verify Code</h2>
+        <p class="auth-subtitle">
+            Enter the 6-digit code sent to you
+        </p>
+
+        <!-- OTP INPUTS -->
+        <div class="otp-container">
+            <input type="text" maxlength="1" class="otp-input">
+            <input type="text" maxlength="1" class="otp-input">
+            <input type="text" maxlength="1" class="otp-input">
+            <input type="text" maxlength="1" class="otp-input">
+            <input type="text" maxlength="1" class="otp-input">
+            <input type="text" maxlength="1" class="otp-input">
+        </div>
+
+        <!-- TIMER -->
+        <p class="timer">
+            Code expires in <span id="countdown">60</span>s
+        </p>
+
+        <!-- VERIFY BUTTON -->
+        <button id="verifyBtn" class="btn-primary">
+            Verify Code
+        </button>
+
+        <!-- RESEND -->
+        <p class="resend">
+            Didn't receive code? 
+            <span id="resendBtn">Resend</span>
+        </p>
+
+        <!-- BACK -->
+        <p class="auth-footer">
+            <a href="forgot-password.html">Back</a>
+        </p>
+
+    </div>
+
+</div>
+
+<!-- JS -->
+<script src="verify-code.js"></script>
+
+</body>
+</html>

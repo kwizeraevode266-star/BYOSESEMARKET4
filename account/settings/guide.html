@@ -1,0 +1,266 @@
+<!doctype html>
+<!--
+  ByoseMarket — User Guide (Help Center)
+  Location: /account/settings/guide.html
+  Notes:
+    - Mobile-first, responsive, card-based layout
+    - Minimal JS hooks only; prepared for `guide.js`
+    - Uses Poppins font and Font Awesome icons (CDN)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>User Guide — ByoseMarket</title>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Basic, scoped styles for the guide page -->
+  <style>
+    :root{
+      --bg: #f7f8fb;
+      --card: rgba(255,255,255,0.7);
+      --muted: #6b7280;
+      --accent: #075985; /* deep teal-ish */
+      --shadow: 0 6px 18px rgba(16,24,40,0.06);
+      --radius: 14px;
+      --glass: rgba(255,255,255,0.55);
+    }
+    html,body{height:100%;}
+    body{
+      margin:0;
+      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: linear-gradient(180deg, var(--bg), #ffffff);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      padding-bottom:40px;
+    }
+
+    /* Sticky header */
+    .topbar{
+      position:sticky; top:0; z-index:40;
+      display:flex; align-items:center; gap:12px;
+      padding:12px 16px; background:rgba(255,255,255,0.7);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 1px 0 rgba(15,23,42,0.04);
+    }
+    .back-btn{display:inline-flex; align-items:center; gap:10px; text-decoration:none; color:var(--accent); font-weight:600}
+    .title{flex:1; text-align:center; font-size:16px; font-weight:600}
+
+    /* Container */
+    .container{max-width:980px; margin:18px auto; padding:0 16px;}
+
+    /* Search */
+    .search-wrap{margin:12px 0 18px;}
+    .search{
+      display:flex; align-items:center; gap:8px; background:var(--card);
+      padding:10px 12px; border-radius:12px; box-shadow:var(--shadow);
+      border:1px solid rgba(15,23,42,0.04);
+    }
+    .search input{flex:1; border:0; outline:0; font-size:15px; background:transparent}
+    .search .fa-magnifying-glass{color:var(--muted)}
+
+    /* Guide sections grid */
+    .grid{display:grid; grid-template-columns:1fr; gap:12px;}
+    @media(min-width:720px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1100px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    .card{
+      display:flex; gap:12px; align-items:flex-start;
+      background:var(--glass); padding:14px; border-radius:var(--radius);
+      box-shadow:var(--shadow); border:1px solid rgba(15,23,42,0.04);
+      transition:transform .18s ease, box-shadow .18s ease; cursor:pointer;
+    }
+    .card:hover{transform:translateY(-6px); box-shadow:0 14px 40px rgba(16,24,40,0.08)}
+    .icon-wrap{width:48px;height:48px;border-radius:12px; display:flex; align-items:center; justify-content:center; color:white; flex:0 0 48px}
+    .icon--green{background:linear-gradient(180deg,#10b981,#059669)}
+    .icon--yellow{background:linear-gradient(180deg,#f59e0b,#d97706)}
+    .icon--blue{background:linear-gradient(180deg,#3b82f6,#2563eb)}
+    .icon--red{background:linear-gradient(180deg,#ef4444,#dc2626)}
+
+    .card h3{margin:0;font-size:15px}
+    .card p{margin:4px 0 0;color:var(--muted); font-size:13px}
+
+    /* FAQ section */
+    .faq{margin-top:18px}
+    .faq h2{font-size:16px;margin:8px 0}
+    .faq-list{list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+    .faq-item{
+      background:var(--card); border-radius:12px; overflow:hidden; border:1px solid rgba(15,23,42,0.04);
+      box-shadow:var(--shadow);
+    }
+    .faq-question{
+      display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%;
+      padding:12px 14px; font-weight:600; background:transparent; border:0; text-align:left; cursor:pointer;
+    }
+    .faq-question:focus{outline:2px solid rgba(3,105,161,0.12); outline-offset:2px}
+
+    .faq-answer{
+      max-height:0; overflow:hidden; transition:max-height .28s cubic-bezier(.2,.9,.2,1), padding .22s ease;
+      padding:0 14px;
+    }
+    .faq-item.open .faq-answer{max-height:480px; padding:12px 14px 16px}
+    .faq-answer p{margin:0;color:var(--muted);line-height:1.5}
+
+    /* Contact support */
+    .support{margin:18px 0;padding:14px;border-radius:12px;background:linear-gradient(180deg,#fff, #fbfdff);box-shadow:var(--shadow);border:1px solid rgba(15,23,42,0.04)}
+    .support .row{display:flex;flex-direction:column;gap:8px}
+    @media(min-width:720px){.support .row{flex-direction:row;justify-content:space-between;align-items:center}}
+    .support a.btn{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;text-decoration:none;color:white;background:var(--accent)}
+
+    /* footer spacing */
+    .meta{font-size:12px;color:var(--muted);margin-top:8px}
+
+  </style>
+
+</head>
+<body>
+
+  <!-- Sticky header -->
+  <header class="topbar">
+    <a class="back-btn" href="settings.html" aria-label="Back to settings">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span class="visually-hidden">Back</span>
+    </a>
+    <div class="title">User Guide</div>
+    <!-- spacer for center alignment -->
+    <div style="width:34px"></div>
+  </header>
+
+  <main class="container" id="main">
+
+    <!-- Search prepared for future JS search -->
+    <div class="search-wrap">
+      <div class="search" role="search" aria-label="Search help">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="searchInput" type="search" placeholder="Search for help..." aria-label="Search for help" />
+      </div>
+    </div>
+
+    <!-- Guide sections -->
+    <section aria-labelledby="guide-sections">
+      <h2 id="guide-sections" style="font-size:13px;color:var(--muted);margin:0 0 8px">Browse topics</h2>
+      <div class="grid">
+
+        <article class="card guide-section" data-section="how-to-order" tabindex="0">
+          <div class="icon-wrap icon--green" aria-hidden="true"><i class="fa-solid fa-bag-shopping"></i></div>
+          <div>
+            <h3>How to Order</h3>
+            <p>Learn how to find and buy products quickly and safely.</p>
+          </div>
+        </article>
+
+        <article class="card guide-section" data-section="payment-methods" tabindex="0">
+          <div class="icon-wrap icon--yellow" aria-hidden="true"><i class="fa-solid fa-wallet"></i></div>
+          <div>
+            <h3>Payment Methods</h3>
+            <p>How to pay using Mobile Money, card, and other options.</p>
+          </div>
+        </article>
+
+        <article class="card guide-section" data-section="shipping-delivery" tabindex="0">
+          <div class="icon-wrap icon--blue" aria-hidden="true"><i class="fa-solid fa-truck-fast"></i></div>
+          <div>
+            <h3>Shipping & Delivery</h3>
+            <p>Track and receive your orders — shipping times and policies.</p>
+          </div>
+        </article>
+
+        <article class="card guide-section" data-section="account-help" tabindex="0">
+          <div class="icon-wrap icon--red" aria-hidden="true"><i class="fa-solid fa-user"></i></div>
+          <div>
+            <h3>Account Help</h3>
+            <p>Login, signup, password reset, and updating your profile.</p>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq" aria-labelledby="faq-heading">
+      <h2 id="faq-heading">Frequently Asked Questions</h2>
+      <ul class="faq-list" id="faq-list">
+
+        <!-- FAQ item skeleton — prepared for JS toggle. Use .faq-item.open to expand -->
+        <li class="faq-item" data-faq-index="1">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq1-answer" id="faq1-question">
+            <span>How do I track my order?</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="faq-answer" id="faq1-answer" role="region" aria-labelledby="faq1-question">
+            <p>Open your Orders page, select the order you want to track, and tap 'Track Package' to see the latest status and expected delivery date.</p>
+          </div>
+        </li>
+
+        <li class="faq-item" data-faq-index="2">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq2-answer" id="faq2-question">
+            <span>Can I cancel an order?</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="faq-answer" id="faq2-answer" role="region" aria-labelledby="faq2-question">
+            <p>Orders can be cancelled if they haven't entered the shipping process. Go to the order details and choose 'Cancel Order' if the option is available.</p>
+          </div>
+        </li>
+
+        <li class="faq-item" data-faq-index="3">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq3-answer" id="faq3-question">
+            <span>How do I change my address?</span>
+            <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+          </button>
+          <div class="faq-answer" id="faq3-answer" role="region" aria-labelledby="faq3-question">
+            <p>Update your shipping addresses from your Profile &gt; Addresses. For existing orders, contact support as soon as possible to request a change.</p>
+          </div>
+        </li>
+
+      </ul>
+      <p class="meta">Tip: Tap or click a question to reveal the answer. This list is prepared for JS accordion behavior.</p>
+    </section>
+
+    <!-- Contact Support -->
+    <section class="support" aria-labelledby="support-heading">
+      <h2 id="support-heading">Contact Support</h2>
+      <div class="row">
+        <div>
+          <div style="font-weight:600">We're here to help</div>
+          <div style="margin-top:6px;color:var(--muted)">
+            <div>Email: <a href="mailto:support@byosemarket.com">support@byosemarket.com</a></div>
+            <div>Phone: <a href="tel:+1234567890">+1 (234) 567-890</a></div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:8px">
+          <a class="btn" href="mailto:support@byosemarket.com" style="background:#0ea5a4">Email Us <i class="fa-solid fa-envelope"></i></a>
+          <a class="btn" href="#chat" style="background:#2563eb">Chat with us <i class="fa-solid fa-comments"></i></a>
+        </div>
+      </div>
+    </section>
+
+    <p class="meta" style="text-align:center;margin-top:22px">Last updated: April 2026</p>
+
+  </main>
+
+  <!-- Minimal notes for future JS: guide.js should attach handlers to elements with these classes/IDs -->
+  <script>
+    /*
+      guide.js (future)
+      - Hook search: #searchInput
+      - Hook guide cards: .guide-section (data-section)
+      - Hook FAQs: .faq-question to toggle parent .faq-item.open and aria-expanded
+
+      Example (for later use):
+        document.querySelectorAll('.faq-question').forEach(btn => {
+          btn.addEventListener('click', () => { ... });
+        });
+
+      Intentionally no interactive JS is executed here — structure and ARIA attributes are prepared.
+    */
+  </script>
+
+</body>
+</html>

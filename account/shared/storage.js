@@ -1,0 +1,197 @@
+// ===============================
+// 💾 STORAGE SYSTEM (GLOBAL)
+// ===============================
+
+// ===============================
+// 🔑 KEYS
+// ===============================
+const STORAGE_KEYS = {
+  USER: "bm_user",
+  THEME: "bm_theme",
+  LANG: "bm_lang"
+};
+
+// ===============================
+// 💾 SAVE DATA
+// ===============================
+function saveData(key, value) {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error("Save Error:", error);
+  }
+}
+
+// ===============================
+// 📥 GET DATA
+// ===============================
+function getData(key) {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error("Get Error:", error);
+    return null;
+  }
+}
+
+// ===============================
+// ❌ REMOVE DATA
+// ===============================
+function removeData(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (error) {
+    console.error("Remove Error:", error);
+  }
+}
+
+// ===============================
+// 🧹 CLEAR ALL
+// ===============================
+function clearAll() {
+  localStorage.clear();
+}
+
+// ===============================
+// 👤 USER HELPERS
+// ===============================
+function saveUser(user) {
+  saveData(STORAGE_KEYS.USER, user);
+}
+
+function getUser() {
+  return getData(STORAGE_KEYS.USER);
+}
+
+function removeUser() {
+  removeData(STORAGE_KEYS.USER);
+}
+
+// ===============================
+// 🎨 THEME HELPERS
+// ===============================
+function saveTheme(theme) {
+  saveData(STORAGE_KEYS.THEME, theme);
+}
+
+function getTheme() {
+  return getData(STORAGE_KEYS.THEME);
+}
+
+// ===============================
+// 🌍 LANGUAGE HELPERS
+// ===============================
+function saveLanguage(lang) {
+  saveData(STORAGE_KEYS.LANG, lang);
+}
+
+function getLanguage() {
+  return getData(STORAGE_KEYS.LANG);
+}
+
+// ===============================
+// 🔐 LOGOUT SYSTEM
+// ===============================
+function logoutUser() {
+  // Legacy helper: clear local user record but do not perform navigation.
+  removeUser();
+  clearSession();
+}
+
+// ===============================
+// 🔐 SESSION HELPERS
+// ===============================
+STORAGE_KEYS.SESSION = "bm_session";
+
+function saveSession(session) {
+  saveData(STORAGE_KEYS.SESSION, session);
+}
+
+function getSession() {
+  return getData(STORAGE_KEYS.SESSION);
+}
+
+function clearSession() {
+  removeData(STORAGE_KEYS.SESSION);
+  try { localStorage.removeItem('bm_logged_in'); } catch (e) {}
+}
+
+// ===============================
+// ⏱ SESSION VALIDATION
+// ===============================
+function isSessionValid() {
+  const s = getSession();
+  if (!s) return false;
+  // if explicit expiresAt provided, respect it
+  if (s.expiresAt) return Date.now() < s.expiresAt;
+  // default: consider session valid for 30 days
+  if (s.createdAt) return (Date.now() - s.createdAt) < (1000 * 60 * 60 * 24 * 30);
+  return true;
+}
+
+// ===============================
+// 👥 AUTH HELPERS (public API)
+// ===============================
+function isLoggedIn() {
+  const user = getUser();
+  const session = getSession();
+  // prefer explicit session flag, else fall back to presence of user
+  if (session && typeof session.loggedIn !== 'undefined') {
+    if (!isSessionValid()) { clearSession(); removeUser(); return false; }
+    return !!session.loggedIn;
+  }
+  return !!user;
+}
+
+function loginUser(userData) {
+  if (!userData) return null;
+  // persist user info and session
+  saveUser(userData);
+  try { localStorage.setItem('bm_logged_in', 'true'); } catch (e) {}
+  const session = { loggedIn: true, createdAt: Date.now() };
+  saveSession(session);
+  return session;
+}
+
+function logoutUserFull() {
+  // Clear user and session state. Centralized logout page handles redirects.
+  removeUser();
+  clearSession();
+}
+
+function redirectIfNotAuth(options) {
+  options = options || {};
+  const allow = options.allow || [];
+  const path = window.location.pathname || '';
+  // if current path is allowed, skip
+  for (let i = 0; i < allow.length; i++) if (path.includes(allow[i])) return;
+  if (!isLoggedIn()) {
+    // replace to avoid back-loop to protected page
+    window.location.replace('/login.html');
+  }
+}
+
+function handleAccountClick() {
+  if (isLoggedIn()) {
+    window.location.href = '/account/account.html';
+  } else {
+    window.location.href = '/login.html';
+  }
+}
+
+// compatibility aliases for legacy code
+window.saveData = saveData;
+window.getData = getData;
+window.removeData = removeData;
+window.saveUser = saveUser;
+window.getUser = getUser;
+window.removeUser = removeUser;
+window.saveSession = saveSession;
+window.getSession = getSession;
+window.clearSession = clearSession;
+window.isLoggedIn = isLoggedIn;
+window.loginUser = loginUser;
+window.logoutUser = logoutUserFull;
+window.redirectIfNotAuth = redirectIfNotAuth;
+window.handleAccountClick = handleAccountClick;

@@ -1,0 +1,90 @@
+  <link rel="stylesheet" href="css/header.css" />
+  <link rel="stylesheet" href="css/search.css" />
+  <link rel="stylesheet" href="css/categories.css" />
+
+<!-- ===== MOBILE CATEGORIES PAGE ===== -->
+<section id="categories-page">
+  <h2 class="page-title">Categories</h2>
+
+  <div class="categories-grid">
+    <div class="category-card" data-category="shoes">
+      <img src="icons/shoes.png" alt="Shoes">
+      <span>Shoes</span>
+    </div>
+
+    <div class="category-card" data-category="clothing">
+      <img src="icons/clothing.png" alt="Clothing">
+      <span>Clothing</span>
+    </div>
+
+    <div class="category-card" data-category="bags">
+      <img src="icons/bags.png" alt="Bags">
+      <span>Bags</span>
+    </div>
+
+    <div class="category-card" data-category="watches">
+      <img src="icons/watches.png" alt="Watches">
+      <span>Watches</span>
+    </div>
+
+    <div class="category-card" data-category="phones">
+      <img src="icons/phones.png" alt="Phones">
+      <span>Phones</span>
+    </div>
+
+    <div class="category-card" data-category="accessories">
+      <img src="icons/accessories.png" alt="Accessories">
+      <span>Accessories</span>
+    </div>
+
+    <div class="category-card" data-category="electronics">
+      <img src="icons/electronics.png" alt="Electronics">
+      <span>Electronics</span>
+    </div>
+
+    <div class="category-card" data-category="tools">
+      <img src="icons/tools.png" alt="Tools">
+      <span>Tools</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PRODUCT LIST PAGE ===== -->
+<section id="products-page" class="hidden">
+  <div class="products-header">
+    <button id="backBtn">← Back</button>
+    <h2 id="categoryTitle"></h2>
+  </div>
+
+  <div class="products-grid">
+    <!-- Example products -->
+    <div class="product-card" data-category="shoes">
+      <img src="products/shoe1.jpg">
+      <p>Sport Shoes</p>
+    </div>
+
+    <div class="product-card" data-category="clothing">
+      <img src="products/cloth1.jpg">
+      <p>T-Shirt</p>
+    </div>
+
+    <div class="product-card" data-category="bags">
+      <img src="products/bag1.jpg">
+      <p>Leather Bag</p>
+    </div>
+
+    <div class="product-card" data-category="phones">
+      <img src="products/phone1.jpg">
+      <p>Smart Phone</p>
+    </div>
+  </div>
+</section>
+
+<!-- Mobile bottom navigation (mobile & tablet only) -->
+<link rel="stylesheet" href="/mobile-nav.css">
+<script src="/js/mobile-nav.js" defer></script>
+<script src="/js/categories.js" defer></script>
+<script src="/js/header.js" defer></script>
+</head>
+
+<body>

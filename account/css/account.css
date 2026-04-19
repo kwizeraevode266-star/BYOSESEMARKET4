@@ -1,0 +1,272 @@
+/* ===============================
+🔥 GLOBAL RESET
+=============================== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg,#f5f7fa,#e4ecf7);
+  color:#333;
+}
+
+/* ===============================
+👤 HEADER (GLASS STYLE)
+=============================== */
+.account-header{
+  padding:20px;
+  background:  #00B894;
+  backdrop-filter: blur(10px);
+  color:#fff;
+  border-bottom-left-radius:20px;
+  border-bottom-right-radius:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+}
+
+.profile-box{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+
+.profile-box img{
+  width:65px;
+  height:65px;
+  border-radius:50%;
+  border:3px solid #fff;
+  object-fit:cover;
+}
+
+/* New avatar-box for account header (initial or image) */
+.account-header-inner{ display:flex; align-items:center; gap:15px; }
+.avatar-box{ width:72px; height:72px; border-radius:50%; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; overflow:hidden; border:3px solid rgba(255,255,255,0.12); }
+.avatar-box img{ width:100%; height:100%; object-fit:cover; display:block; }
+.avatar-initial{ font-size:28px; font-weight:700; color:#fff; }
+.user-info h2{ margin:0; font-size:18px; color:#fff; }
+.user-info .muted{ color:rgba(255,255,255,0.9); margin-top:6px; font-size:13px; }
+.id-text{ display:block; margin-top:4px; font-size:12px; opacity:0.9; }
+
+.profile-info h2{
+  font-size:18px;
+  font-weight:600;
+}
+
+.profile-info p{
+  font-size:13px;
+  opacity:0.9;
+}
+
+/* ===============================
+📦 MAIN
+=============================== */
+.account-main{
+  padding:15px;
+}
+
+/* ===============================
+🧊 CARD (GLASS EFFECT)
+=============================== */
+.card{
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(12px);
+  border-radius:15px;
+  padding:15px;
+  margin-bottom:15px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.05);
+  transition:0.3s;
+}
+
+.card:hover{
+  transform: translateY(-3px);
+}
+
+/* ===============================
+📌 SECTION HEADER
+=============================== */
+.section-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px;
+}
+
+.section-header h3{
+  font-size:16px;
+  font-weight:600;
+}
+
+/* ===============================
+📦 ORDERS
+=============================== */
+.orders-grid{
+  display:flex;
+  justify-content:space-between;
+  text-align:center;
+}
+
+.order-item{
+  flex:1;
+  text-decoration:none;
+  color:#333;
+  transition:0.3s;
+}
+
+.order-item i{
+  font-size:22px;
+  color:#00B894;
+  margin-bottom:5px;
+}
+
+.order-item span{
+  font-size:12px;
+}
+
+.order-item:hover{
+  transform:scale(1.1);
+  color:#00B894;
+}
+
+/* ===============================
+⭐ FEATURES
+=============================== */
+.features-grid{
+  display:grid;
+  grid-template-columns: repeat(4,1fr);
+  gap:10px;
+  text-align:center;
+}
+
+.feature-item{
+  text-decoration:none;
+  color:#333;
+  padding:10px;
+  border-radius:10px;
+  transition:0.3s;
+}
+
+.feature-item i{
+  font-size:20px;
+  color:#00B894;
+  margin-bottom:5px;
+}
+
+.feature-item span{
+  font-size:12px;
+}
+
+.feature-item:hover{
+  background:#fff;
+  transform:scale(1.05);
+}
+
+/* ===============================
+⚙️ SERVICES
+=============================== */
+.services-list{
+  display:flex;
+  flex-direction:column;
+}
+
+.service-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid rgba(0,0,0,0.05);
+  text-decoration:none;
+  color:#333;
+  transition:0.3s;
+}
+
+.service-row div{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.service-row:hover{
+  color:#00B894;
+  transform:translateX(5px);
+}
+
+.logout{
+  color:red;
+}
+
+/* ===============================
+🛍️ PRODUCTS
+=============================== */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+
+.products-grid div{
+  background:#fff;
+  padding:10px;
+  border-radius:10px;
+  text-align:center;
+  font-size:13px;
+  box-shadow:0 5px 10px rgba(0,0,0,0.05);
+}
+
+/* ===============================
+✨ ANIMATIONS
+=============================== */
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.card{
+  animation:fadeIn 0.4s ease;
+}
+
+/* ===============================
+📱 RESPONSIVE
+=============================== */
+@media (max-width:768px){
+
+  .profile-box img{
+    width:55px;
+    height:55px;
+  }
+
+  .features-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+
+}
+
+@media (min-width:1024px){
+
+  .account-main{
+    max-width:800px;
+    margin:auto;
+  }
+
+}
+
+.logout{
+  width:100%;
+  border:none;
+  background:none;
+  cursor:pointer;
+  text-align:left;
+  font-size:14px;
+}
+
+.logout:active{
+  transform:scale(0.98);
+  opacity:0.8;
+}

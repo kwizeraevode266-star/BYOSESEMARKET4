@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Account - ByoseMarket</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- ICONS -->
+  <link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/account-mobile.css">
+  <link rel="stylesheet" href="css/account-desktop.css">
+  <link rel="stylesheet" href="/mobile-nav.css">
+</head>
+
+<body class="account-page">
+
+<!-- HEADER -->
+<header class="account-header">
+
+  <div class="account-header-inner">
+    <div class="account-notification-wrap">
+      <button
+        id="notificationToggle"
+        class="account-notification"
+        type="button"
+        aria-label="Open notifications"
+        aria-expanded="false"
+        aria-controls="notificationPanel"
+      >
+        <i class="fa-regular fa-bell" aria-hidden="true"></i>
+        <span id="notificationBadge" class="notification-badge" aria-live="polite">0</span>
+      </button>
+
+      <section id="notificationPanel" class="notification-panel" aria-label="Notifications" hidden>
+        <div class="notification-panel-header">
+          <div>
+            <p class="notification-panel-kicker">Updates</p>
+            <h2>Notifications</h2>
+          </div>
+          <button id="markAllNotificationsRead" class="notification-panel-action" type="button">Mark all read</button>
+        </div>
+
+        <div id="notificationList" class="notification-list" role="list"></div>
+      </section>
+    </div>
+
+    <div class="profile-cluster">
+      <div id="userAvatar" class="avatar-box" aria-hidden="true"></div>
+
+      <div class="user-info">
+        <h1 id="userName">Guest User</h1>
+        <p id="userContact" class="profile-contact">example@byosemarket.com</p>
+        <span id="userId" class="profile-id-badge">ID: BM00000</span>
+      </div>
+    </div>
+
+    <div class="account-quick-stats" aria-label="Account highlights">
+      <div class="quick-stat">
+        <strong>24/7</strong>
+        <span>Support</span>
+      </div>
+
+      <div class="quick-stat">
+        <strong>Fast</strong>
+        <span>Delivery</span>
+      </div>
+    </div>
+  </div>
+
+</header>
+
+<!-- MAIN -->
+<main class="account-main">
+
+  <section class="account-intro card" data-reveal>
+    <div>
+      <p class="section-kicker">Dashboard</p>
+      <h2>Your shopping hub</h2>
+      <p class="section-copy">Track orders, save favorites, manage your settings, and access support from one clean account workspace.</p>
+    </div>
+
+    <div class="intro-badges" aria-label="Account benefits">
+      <span class="intro-badge"><i class="fa-solid fa-shield-heart"></i> Secure account</span>
+      <span class="intro-badge"><i class="fa-solid fa-bolt"></i> Faster checkout</span>
+      <span class="intro-badge"><i class="fa-solid fa-gift"></i> Member perks</span>
+    </div>
+  </section>
+
+  <div class="dashboard-grid">
+
+  <!-- ORDERS -->
+  <section class="card orders-section" data-reveal>
+
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">Tracking</p>
+        <h3>My Orders</h3>
+      </div>
+      <span class="section-chip">4 status views</span>
+    </div>
+
+    <div class="orders-grid">
+
+      <a href="/account/orders/pending.html" class="order-item">
+        <i class="fa-solid fa-credit-card"></i>
+        <strong>Pending</strong>
+        <span>Awaiting confirmation</span>
+      </a>
+
+      <a href="/account/orders/shipping.html" class="order-item">
+        <i class="fa-solid fa-truck"></i>
+        <strong>Shipping</strong>
+        <span>On the way to you</span>
+      </a>
+
+      <a href="/account/orders/delivered.html" class="order-item">
+        <i class="fa-solid fa-box-open"></i>
+        <strong>Delivered</strong>
+        <span>Completed purchases</span>
+      </a>
+
+      <a href="/account/orders/returns.html" class="order-item">
+        <i class="fa-solid fa-rotate-left"></i>
+        <strong>Returns</strong>
+        <span>Exchanges and refunds</span>
+      </a>
+
+    </div>
+
+  </section>
+
+  <!-- FEATURES -->
+  <section class="card features-section" data-reveal>
+
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">Shortcuts</p>
+        <h3>Features</h3>
+      </div>
+      <span class="section-chip">Quick access</span>
+    </div>
+
+    <div class="features-grid">
+
+      <a href="/account/pages/wishlist.html" class="feature-item">
+        <i class="fa-regular fa-heart"></i>
+        <strong>Wishlist</strong>
+        <span>Saved products</span>
+      </a>
+
+      <a href="/account/pages/recent.html" class="feature-item">
+        <i class="fa-regular fa-clock"></i>
+        <strong>Recent</strong>
+        <span>Viewed items</span>
+      </a>
+
+      <a href="/account/pages/coupons.html" class="feature-item">
+        <i class="fa-regular fa-ticket"></i>
+        <strong>Coupons</strong>
+        <span>Discount codes</span>
+      </a>
+
+      <a href="/account/pages/stores.html" class="feature-item">
+        <i class="fa-solid fa-store"></i>
+        <strong>Stores</strong>
+        <span>Favorite sellers</span>
+      </a>
+
+    </div>
+
+  </section>
+
+  <!-- SERVICES -->
+  <section class="card services-section" data-reveal>
+
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">Support</p>
+        <h3>Services</h3>
+      </div>
+      <span class="section-chip">Manage account</span>
+    </div>
+
+    <div class="services-list">
+
+      <a href="/account/settings/address.html" class="service-row">
+        <div><i class="fa-solid fa-location-dot"></i> Address</div>
+        <small>Delivery locations</small>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+
+      <a href="/account/settings/settings.html" class="service-row">
+        <div><i class="fa-solid fa-gear"></i> Settings</div>
+        <small>Preferences and privacy</small>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+
+      <a href="/account/settings/guide.html" class="service-row">
+        <div><i class="fa-solid fa-circle-question"></i> Help</div>
+        <small>Guides and support</small>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+
+      <a href="/logout/logout.html" id="logoutBtn" class="service-row logout">
+        <div>
+          <i class="fa-solid fa-right-from-bracket"></i>
+          Logout
+        </div>
+        <small>Sign out safely</small>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+
+    </div>
+
+  </section>
+
+  </div>
+
+
+  <!-- PRODUCTS -->
+  <section class="card products-section" data-reveal>
+
+    <div class="section-header">
+      <div>
+        <p class="section-kicker">For you</p>
+        <h3>Recommended</h3>
+      </div>
+      <span class="section-chip">Curated picks</span>
+    </div>
+
+    <div class="products-grid" id="products"></div>
+
+  </section>
+
+</main>
+
+<!-- JS -->
+<script src="/services/authService.js"></script>
+<script src="js/account.js"></script>
+<script src="/js/mobile-nav.js"></script>
+
+</body>
+</html>

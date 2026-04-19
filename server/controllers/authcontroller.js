@@ -1,0 +1,149 @@
+// ===============================
+// AUTH CONTROLLER (signup, login, profile, forgot/reset) - DB-backed
+// ===============================
+
+const { hashPassword, comparePasswords } = require('../utils/hash');
+const { generateToken } = require('../utils/token');
+const { generateOTP, saveOTP, verifyOTP } = require('../utils/otp');
+const { sendSMS } = require('../utils/sms');
+const User = require('../models/User');
+
+function sanitizeUserForClient(u) {
+    if (!u) return null;
+    return {
+        id: u.id,
+        name: u.name,
+        email: u.email || '',
+        phone: u.phone || '',
+        avatar: u.avatar || '',
+        createdAt: u.createdAt || 0
+    };
+}
+
+async function generateUserId() {
+    const users = await User.find({}, 'id').lean();
+    if (!users || !users.length) return 'BM00001';
+    const nums = users.map(u => {
+        try { return parseInt((u.id || '').replace(/^BM0*/, '') || '0', 10); } catch { return 0; }
+    });
+    const max = Math.max(...nums, 0);
+    return 'BM' + String(max + 1).padStart(5, '0');
+}
+
+// ===============================
+// Signup
+// ===============================
+exports.signup = async (req, res) => {
+    try {
+        const { name, email, phone, password } = req.body || {};
+        if (!name) return res.status(400).json({ success: false, message: 'Name required' });
+        if (!email && !phone) return res.status(400).json({ success: false, message: 'Email or phone required' });
+        if (!password || String(password).length < 6) return res.status(400).json({ success: false, message: 'Password too weak' });
+
+        if (email) {
+            const ex = await User.findOne({ email: String(email).toLowerCase() });
+            if (ex) return res.status(409).json({ success: false, message: 'Email exists' });
+        }
+        if (phone) {
+            const ex2 = await User.findOne({ phone: String(phone) });
+            if (ex2) return res.status(409).json({ success: false, message: 'Phone exists' });
+        }
+
+        const hashed = await hashPassword(String(password));
+        const id = await generateUserId();
+        const avatar = req.body.avatar || '';
+
+        const newUser = new User({
+            id,
+            name: String(name),
+            email: email ? String(email).toLowerCase() : '',
+            phone: phone ? String(phone) : '',
+            password: hashed,
+            avatar
+        });
+
+        await newUser.save();
+
+        return res.json({ success: true, user: sanitizeUserForClient(newUser) });
+    } catch (err) {
+        console.error('Signup error', err);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// ===============================
+// Login
+// ===============================
+exports.login = async (req, res) => {
+    try {
+        const { identifier, password } = req.body || {};
+        if (!identifier || !password) return res.status(400).json({ success: false, message: 'Identifier and password required' });
+
+        const id = String(identifier).trim().toLowerCase();
+        const user = await User.findOne({
+            $or: [ { email: id }, { phone: id } ]
+        });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+        const ok = await comparePasswords(String(password), user.password);
+        if (!ok) return res.status(401).json({ success: false, message: 'Invalid credentials' });
+
+        const token = generateToken({ id: user.id, email: user.email, phone: user.phone });
+
+        return res.json({ success: true, token, user: sanitizeUserForClient(user) });
+    } catch (err) {
+        console.error('Login error', err);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// ===============================
+// Get current user (requires auth middleware)
+// ===============================
+exports.me = async (req, res) => {
+    try {
+        const uid = req.user && req.user.id;
+        if (!uid) return res.status(401).json({ success: false, message: 'Unauthorized' });
+        const user = await User.findOne({ id: uid });
+        if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+        return res.json({ success: true, user: sanitizeUserForClient(user) });
+    } catch (err) {
+        console.error('Me error', err);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// ===============================
+// FORGOT / VERIFY / RESET (keeps previous OTP behavior)
+// ===============================
+exports.forgotPassword = async (req, res) => {
+    const { method, identifier } = req.body;
+    if (!identifier) return res.status(400).json({ success: false, message: 'Identifier required' });
+    const otp = generateOTP();
+    saveOTP(identifier, otp);
+    console.log('OTP:', otp);
+    if (method === 'phone') {
+        const result = await sendSMS(identifier, `Your OTP code is ${otp}`);
+        if (!result.success) return res.status(500).json({ success: false, message: 'SMS failed' });
+    } else {
+        console.log(`Email OTP for ${identifier}: ${otp}`);
+    }
+    return res.json({ success: true });
+};
+
+exports.verifyCode = (req, res) => {
+    const { identifier, otp } = req.body;
+    const result = verifyOTP(identifier, otp);
+    if (!result.success) return res.status(400).json({ success: false, message: result.message });
+    return res.json({ success: true });
+};
+
+exports.resetPassword = async (req, res) => {
+    const { identifier, newPassword } = req.body;
+    if (!identifier || !newPassword) return res.status(400).json({ success: false, message: 'Identifier and new password required' });
+    const user = await User.findOne({ $or: [ { email: identifier }, { phone: identifier } ] });
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.password = await hashPassword(String(newPassword));
+    await user.save();
+    return res.json({ success: true });
+};
