@@ -1,0 +1,1 @@
+// Product create page placeholder.

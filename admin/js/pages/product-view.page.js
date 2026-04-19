@@ -1,0 +1,1 @@
+// Product view page placeholder.

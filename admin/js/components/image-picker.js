@@ -1,0 +1,1 @@
+// Image picker component placeholder.

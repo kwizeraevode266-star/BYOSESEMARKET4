@@ -1,0 +1,1 @@
+// Products list page placeholder.

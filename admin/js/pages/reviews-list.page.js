@@ -1,0 +1,1 @@
+// Reviews list page placeholder.
