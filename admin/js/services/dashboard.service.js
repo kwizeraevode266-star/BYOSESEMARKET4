@@ -32,7 +32,12 @@
 	}
 
 	function readProducts() {
-		const products = Array.isArray(window.products) ? window.products : [];
+		const catalogService = window.ByoseProductCatalog;
+		const products = catalogService && typeof catalogService.getStorefrontCatalog === 'function'
+			? catalogService.getStorefrontCatalog()
+			: Array.isArray(window.products)
+				? window.products
+				: [];
 		const seen = new Set();
 
 		return products.filter((item) => {

@@ -198,4 +198,15 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderRelatedProducts(document.getElementById('relatedProducts'), getRelatedProducts(product));
+
+  let reloadTimerId = 0;
+  function queueReload() {
+    window.clearTimeout(reloadTimerId);
+    reloadTimerId = window.setTimeout(() => {
+      window.location.reload();
+    }, 60);
+  }
+
+  window.addEventListener('storage', queueReload);
+  window.addEventListener('byose:products-changed', queueReload);
 });

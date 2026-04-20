@@ -133,4 +133,37 @@ const products = [
 	}
 ];
 
-window.products = products;
+(function initializeStorefrontCatalog() {
+	const catalogService = window.ByoseProductCatalog;
+
+	function mapStorefrontProduct(product) {
+		const id = Number(product && product.id) || 0;
+		const image = String(product && (product.mainImage || product.image) ? (product.mainImage || product.image) : 'img/logo.png').trim();
+
+		return {
+			...product,
+			id,
+			image,
+			mainImage: image,
+			page: 'product-details1.html',
+			url: `product-details1.html?id=${encodeURIComponent(String(id || ''))}`
+		};
+	}
+
+	function syncProducts() {
+		const source = catalogService && typeof catalogService.registerSeed === 'function'
+			? catalogService.registerSeed(products)
+			: products;
+
+		window.products = source.map(mapStorefrontProduct);
+		window.dispatchEvent(new CustomEvent('byose:storefront-products-updated', {
+			detail: {
+				products: window.products.slice()
+			}
+		}));
+	}
+
+	syncProducts();
+	window.addEventListener('storage', syncProducts);
+	window.addEventListener('byose:products-changed', syncProducts);
+})();

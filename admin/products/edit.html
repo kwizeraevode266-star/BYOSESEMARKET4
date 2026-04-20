@@ -4,11 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Edit Product | Byose Market Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/tokens.css">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/layout.css">
+  <link rel="stylesheet" href="../css/pages/products.css">
 </head>
-<body>
-  <main>
-    <h1>Edit Product</h1>
-    <p>Admin structure placeholder.</p>
-  </main>
+<body class="admin-dashboard-page">
+  <div class="dashboard-shell">
+    <div class="dashboard-orb dashboard-orb-primary" aria-hidden="true"></div>
+    <div class="dashboard-orb dashboard-orb-secondary" aria-hidden="true"></div>
+    <div class="admin-app-shell">
+      <div class="admin-sidebar-backdrop" data-sidebar-backdrop hidden></div>
+      <aside class="admin-sidebar" id="adminSidebar" aria-label="Admin navigation" data-sidebar-root></aside>
+      <div class="admin-main-shell">
+        <header class="admin-topbar dashboard-panel">
+          <div class="admin-topbar-leading">
+            <button class="sidebar-toggle-button" type="button" aria-label="Open navigation" aria-controls="adminSidebar" aria-expanded="false" data-sidebar-toggle>
+              <span></span>
+              <span></span>
+              <span></span>
+            </button>
+            <div>
+              <p class="dashboard-eyebrow">Admin Products</p>
+              <h1 class="admin-topbar-title">Edit Product</h1>
+            </div>
+          </div>
+          <div class="admin-topbar-meta"><span class="admin-status-dot"></span><span>Update once, refresh everywhere</span></div>
+        </header>
+
+        <main class="dashboard-grid products-dashboard-grid">
+          <section class="products-editor-layout">
+            <article class="dashboard-panel products-editor-panel">
+              <div class="products-form-header">
+                <p class="dashboard-eyebrow">Shared catalog entry</p>
+                <h2 id="productEditorTitle">Edit product</h2>
+                <p id="productEditorSubtitle">Loading product details...</p>
+              </div>
+              <form id="productEditorForm" class="products-editor-form">
+                <div class="products-form-grid">
+                  <label><span>Name</span><input name="name" type="text" required></label>
+                  <label><span>Category</span><select name="category"><option value="fashion">Fashion</option><option value="shoes">Shoes</option><option value="electronics">Electronics</option><option value="general">General</option></select></label>
+                  <label><span>Price</span><input name="price" type="number" min="0" step="1" required></label>
+                  <label><span>Old Price</span><input name="oldPrice" type="number" min="0" step="1"></label>
+                  <label><span>Stock</span><input name="stock" type="number" min="0" step="1"></label>
+                  <label><span>Badge</span><input name="badge" type="text"></label>
+                </div>
+                <label><span>Main Image Path</span><input name="mainImage" type="text" required></label>
+                <label><span>Gallery Images</span><textarea name="gallery" rows="4"></textarea></label>
+                <label><span>Keywords</span><textarea name="keywords" rows="3"></textarea></label>
+                <label><span>Short Description</span><textarea name="shortDescription" rows="4" required></textarea></label>
+                <label><span>Long Description</span><textarea name="longDescription" rows="5"></textarea></label>
+                <label><span>Highlights</span><textarea name="highlights" rows="4"></textarea></label>
+                <label><span>Trust Messages</span><textarea name="trust" rows="4"></textarea></label>
+                <label><span>Specifications</span><textarea name="specs" rows="5" placeholder="Label: Value"></textarea></label>
+                <div class="products-form-actions">
+                  <a class="products-secondary-link" href="index.html">Back to catalog</a>
+                  <button class="products-primary-button" type="submit">Save changes</button>
+                </div>
+                <p class="products-form-status" id="productEditorStatus" aria-live="polite"></p>
+              </form>
+            </article>
+
+            <aside class="dashboard-panel products-preview-panel" id="productEditorPreview"></aside>
+          </section>
+        </main>
+      </div>
+    </div>
+  </div>
+  <script src="../js/services/catalog.service.js"></script>
+  <script src="../../js/products.js"></script>
+  <script src="../js/services/products.service.js"></script>
+  <script src="../js/components/sidebar.js"></script>
+  <script src="../js/pages/product-edit.page.js"></script>
 </body>
 </html>

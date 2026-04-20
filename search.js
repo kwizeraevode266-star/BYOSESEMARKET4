@@ -177,6 +177,22 @@
       }
     }
 
+    function refreshCatalog() {
+      state.catalog = utils.getCatalog(window.products);
+
+      if (state.activeImageAnalysis) {
+        runCombinedSearch(elements.input.value);
+        return;
+      }
+
+      if (elements.input.value.trim()) {
+        runTextSearch(elements.input.value);
+        return;
+      }
+
+      hideResults();
+      }
+
     async function runCombinedSearch(query) {
       const trimmedQuery = String(query || '').trim();
       const currentRequest = ++state.requestId;
@@ -308,6 +324,9 @@
     if (elements.imageReset) {
       elements.imageReset.addEventListener('click', resetVisualSearch);
     }
+
+    window.addEventListener('storage', refreshCatalog);
+    window.addEventListener('byose:products-changed', refreshCatalog);
 
     const initialQuery = new URLSearchParams(window.location.search).get('q') || '';
 

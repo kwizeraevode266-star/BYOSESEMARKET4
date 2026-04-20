@@ -311,7 +311,7 @@
   }
 
   function initializeShopPage() {
-    state.products = getCatalog(window.products);
+    syncProducts();
     state.filteredCache.clear();
     state.markupCache.clear();
 
@@ -329,6 +329,16 @@
     });
 
     setFilter(state.currentFilter, { skipUrlUpdate: true });
+
+    window.addEventListener("storage", syncProducts);
+    window.addEventListener("byose:products-changed", syncProducts);
+  }
+
+  function syncProducts() {
+    state.products = getCatalog(window.products);
+    state.filteredCache.clear();
+    state.markupCache.clear();
+    renderShopPage();
   }
 
   window.ByoseShop = {

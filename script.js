@@ -55,12 +55,21 @@ if (document.readyState === 'loading') {
 }
 
 function initializeHomePage() {
-  state.catalog = getAllProductContent().map(normalizeProduct);
-  renderProductGrid(state.currentFilter);
-  renderSpotlightGrid();
+  syncCatalog();
   setupFilterControls();
   setupHeroSlider();
   setupFooterSubscribe();
+
+  window.addEventListener('storage', syncCatalog);
+  window.addEventListener('byose:products-changed', syncCatalog);
+}
+
+function syncCatalog() {
+  state.catalog = getAllProductContent().map(normalizeProduct);
+  state.filterCache.clear();
+  state.markupCache.clear();
+  renderProductGrid(state.currentFilter);
+  renderSpotlightGrid();
 }
 
 function escapeHtml(value) {

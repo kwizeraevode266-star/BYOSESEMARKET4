@@ -503,9 +503,20 @@ export const productContent = [
 ];
 
 export function getProductContentById(productId) {
+  const service = window.ByoseProductCatalog;
+  if (service && typeof service.registerSeed === 'function') {
+    const catalog = service.registerSeed(productContent);
+    return catalog.find(item => Number(item.id) === Number(productId)) || null;
+  }
+
   return productContent.find(item => Number(item.id) === Number(productId)) || null;
 }
 
 export function getAllProductContent() {
+  const service = window.ByoseProductCatalog;
+  if (service && typeof service.registerSeed === 'function') {
+    return service.registerSeed(productContent);
+  }
+
   return productContent.slice();
 }
