@@ -110,7 +110,7 @@ function currency(value) {
 
 function isSafePath(value) {
   const path = String(value || '').trim();
-  return Boolean(path) && !/^(?:javascript|data):/i.test(path);
+  return Boolean(path) && !/^javascript:/i.test(path);
 }
 
 function getProductHref(productId) {

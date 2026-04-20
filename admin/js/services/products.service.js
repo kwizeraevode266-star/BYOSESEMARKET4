@@ -103,6 +103,94 @@
 		return `../../${value.replace(/^\/+/, "")}`;
 	}
 
+	function uniqueStrings(values) {
+		return Array.from(new Set((Array.isArray(values) ? values : []).map((value) => String(value || "").trim()).filter(Boolean)));
+	}
+
+	function parseParagraphs(value) {
+		return String(value || "")
+			.split(/\r?\n\s*\r?\n|\r?\n/)
+			.map((entry) => entry.trim())
+			.filter(Boolean);
+	}
+
+	function serializeParagraphs(values) {
+		return Array.isArray(values) ? values.map((value) => String(value || "").trim()).filter(Boolean).join("\n") : "";
+	}
+
+	function normalizeEditorAttributes(attributes) {
+		return Array.isArray(attributes)
+			? attributes.map((attribute) => ({
+				name: String(attribute?.name || "Option").trim() || "Option",
+				type: String(attribute?.type || "text").trim() === "image" ? "image" : "text",
+				options: Array.isArray(attribute?.options)
+					? attribute.options.map((option) => ({
+						value: String(option?.value || "").trim(),
+						stock: Number(option?.stock || 0) || 0,
+						image: String(option?.image || "").trim()
+					})).filter((option) => option.value || option.image)
+					: []
+			}))
+			: [];
+	}
+
+	function createAttributeTemplate(category) {
+		const normalizedCategory = String(category || "general").toLowerCase();
+
+		if (normalizedCategory === "shoes") {
+			return [
+				{
+					name: "Color",
+					type: "image",
+					options: [{ value: "Default", stock: 0, image: "" }]
+				},
+				{
+					name: "Size",
+					type: "text",
+					options: ["39", "40", "41", "42"].map((value) => ({ value, stock: 0, image: "" }))
+				}
+			];
+		}
+
+		if (normalizedCategory === "fashion") {
+			return [
+				{
+					name: "Color",
+					type: "image",
+					options: [{ value: "Default", stock: 0, image: "" }]
+				},
+				{
+					name: "Size",
+					type: "text",
+					options: ["S", "M", "L", "XL"].map((value) => ({ value, stock: 0, image: "" }))
+				}
+			];
+		}
+
+		if (normalizedCategory === "electronics") {
+			return [
+				{
+					name: "Finish",
+					type: "image",
+					options: [{ value: "Default", stock: 0, image: "" }]
+				},
+				{
+					name: "Variant",
+					type: "text",
+					options: [{ value: "Standard", stock: 0, image: "" }]
+				}
+			];
+		}
+
+		return [
+			{
+				name: "Option",
+				type: "text",
+				options: [{ value: "Default", stock: 0, image: "" }]
+			}
+		];
+	}
+
 	function parseLineList(value) {
 		return String(value || "")
 			.split(/\r?\n|,/)
@@ -178,20 +266,27 @@
 			return;
 		}
 
-		form.elements.namedItem("name").value = product.name || "";
-		form.elements.namedItem("category").value = product.category || "general";
-		form.elements.namedItem("price").value = Number(product.price || 0);
-		form.elements.namedItem("oldPrice").value = Number(product.oldPrice || 0);
-		form.elements.namedItem("stock").value = Number(product.stock || 0);
-		form.elements.namedItem("badge").value = product.badge || "";
-		form.elements.namedItem("mainImage").value = product.mainImage || product.image || "";
-		form.elements.namedItem("gallery").value = Array.isArray(product.gallery) ? product.gallery.join("\n") : "";
-		form.elements.namedItem("keywords").value = Array.isArray(product.keywords) ? product.keywords.join(", ") : "";
-		form.elements.namedItem("shortDescription").value = product.shortDescription || product.description || "";
-		form.elements.namedItem("longDescription").value = Array.isArray(product.longDescription) ? product.longDescription.join("\n") : "";
-		form.elements.namedItem("highlights").value = Array.isArray(product.highlights) ? product.highlights.join("\n") : "";
-		form.elements.namedItem("trust").value = Array.isArray(product.trust) ? product.trust.join("\n") : "";
-		form.elements.namedItem("specs").value = serializeSpecs(product.specs);
+		function setFieldValue(name, value) {
+			const field = form.elements.namedItem(name);
+			if (field) {
+				field.value = value;
+			}
+		}
+
+		setFieldValue("name", product.name || "");
+		setFieldValue("category", product.category || "general");
+		setFieldValue("price", Number(product.price || 0));
+		setFieldValue("oldPrice", Number(product.oldPrice || 0));
+		setFieldValue("stock", Number(product.stock || 0));
+		setFieldValue("badge", product.badge || "");
+		setFieldValue("mainImage", product.mainImage || product.image || "");
+		setFieldValue("gallery", Array.isArray(product.gallery) ? product.gallery.join("\n") : "");
+		setFieldValue("keywords", Array.isArray(product.keywords) ? product.keywords.join(", ") : "");
+		setFieldValue("shortDescription", product.shortDescription || product.description || "");
+		setFieldValue("longDescription", Array.isArray(product.longDescription) ? product.longDescription.join("\n") : "");
+		setFieldValue("highlights", Array.isArray(product.highlights) ? product.highlights.join("\n") : "");
+		setFieldValue("trust", Array.isArray(product.trust) ? product.trust.join("\n") : "");
+		setFieldValue("specs", serializeSpecs(product.specs));
 	}
 
 	function getProductIdFromLocation() {
@@ -245,6 +340,7 @@
 
 	global.AdminProductsService = {
 		CATEGORY_OPTIONS,
+		createAttributeTemplate,
 		createProduct,
 		deleteProduct,
 		escapeHtml,
@@ -255,11 +351,15 @@
 		getProductIdFromLocation,
 		getProducts,
 		getStats,
+		normalizeEditorAttributes,
 		normalizeCategoryLabel,
+		parseParagraphs,
 		populateProductForm,
 		readProductForm,
 		resolveStorefrontImagePath,
 		serializeSpecs,
+		serializeParagraphs,
+		uniqueStrings,
 		updateProduct
 	};
 })(window);

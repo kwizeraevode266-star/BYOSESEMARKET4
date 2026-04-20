@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="../css/tokens.css">
   <link rel="stylesheet" href="../css/base.css">
   <link rel="stylesheet" href="../css/layout.css">
@@ -44,22 +45,127 @@
                 <p id="productEditorSubtitle">Loading product details...</p>
               </div>
               <form id="productEditorForm" class="products-editor-form">
-                <div class="products-form-grid">
-                  <label><span>Name</span><input name="name" type="text" required></label>
-                  <label><span>Category</span><select name="category"><option value="fashion">Fashion</option><option value="shoes">Shoes</option><option value="electronics">Electronics</option><option value="general">General</option></select></label>
-                  <label><span>Price</span><input name="price" type="number" min="0" step="1" required></label>
-                  <label><span>Old Price</span><input name="oldPrice" type="number" min="0" step="1"></label>
-                  <label><span>Stock</span><input name="stock" type="number" min="0" step="1"></label>
-                  <label><span>Badge</span><input name="badge" type="text"></label>
-                </div>
-                <label><span>Main Image Path</span><input name="mainImage" type="text" required></label>
-                <label><span>Gallery Images</span><textarea name="gallery" rows="4"></textarea></label>
-                <label><span>Keywords</span><textarea name="keywords" rows="3"></textarea></label>
-                <label><span>Short Description</span><textarea name="shortDescription" rows="4" required></textarea></label>
-                <label><span>Long Description</span><textarea name="longDescription" rows="5"></textarea></label>
-                <label><span>Highlights</span><textarea name="highlights" rows="4"></textarea></label>
-                <label><span>Trust Messages</span><textarea name="trust" rows="4"></textarea></label>
-                <label><span>Specifications</span><textarea name="specs" rows="5" placeholder="Label: Value"></textarea></label>
+                <section class="editor-section-card">
+                  <div class="editor-section-heading">
+                    <div>
+                      <p class="dashboard-eyebrow">Section A</p>
+                      <h3>Basic Info</h3>
+                      <p>Front display data used on home and shop cards.</p>
+                    </div>
+                  </div>
+                  <div class="products-form-grid">
+                    <label><span>Product Name</span><input name="name" type="text" required></label>
+                    <label><span>Category</span><select name="category" id="productCategorySelect"><option value="fashion">Fashion</option><option value="shoes">Shoes</option><option value="electronics">Electronics</option><option value="general">General</option></select></label>
+                    <label><span>Price</span><input name="price" type="number" min="0" step="1" required></label>
+                    <label><span>Old Price</span><input name="oldPrice" type="number" min="0" step="1"></label>
+                    <label><span>Stock</span><input name="stock" type="number" min="0" step="1"></label>
+                    <label><span>Badge</span><input name="badge" type="text" placeholder="Top Pick"></label>
+                  </div>
+                </section>
+
+                <section class="editor-section-card">
+                  <div class="editor-section-heading">
+                    <div>
+                      <p class="dashboard-eyebrow">Section B</p>
+                      <h3>Main Image</h3>
+                      <p>Replace the primary image used across admin, home, shop, and product details.</p>
+                    </div>
+                  </div>
+                  <div class="editor-media-grid">
+                    <div class="editor-main-image-stage">
+                      <img id="mainImagePreview" alt="Main product preview">
+                    </div>
+                    <div class="editor-main-image-controls">
+                      <label><span>Main Image Path or Uploaded Image</span><input name="mainImage" id="mainImageInput" type="text" required></label>
+                      <div class="editor-upload-row">
+                        <label class="products-secondary-link products-file-button" for="mainImageUploadInput"><i class="fa-solid fa-upload"></i><span>Upload From Device</span></label>
+                        <input id="mainImageUploadInput" type="file" accept="image/*" hidden>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <section class="editor-section-card">
+                  <div class="editor-section-heading editor-section-heading--split">
+                    <div>
+                      <p class="dashboard-eyebrow">Section C</p>
+                      <h3>Gallery Management</h3>
+                      <p>Manage the multiple images used on the product details page.</p>
+                    </div>
+                    <div class="editor-header-actions">
+                      <label class="products-secondary-link products-file-button" for="galleryUploadInput"><i class="fa-solid fa-images"></i><span>Add Images</span></label>
+                      <input id="galleryUploadInput" type="file" accept="image/*" multiple hidden>
+                    </div>
+                  </div>
+                  <div class="editor-inline-add">
+                    <input id="galleryPathInput" type="text" placeholder="Add gallery image path from existing project assets">
+                    <button class="products-secondary-link" type="button" id="addGalleryPathButton">Add Path</button>
+                  </div>
+                  <div class="editor-gallery-grid" id="galleryManager"></div>
+                </section>
+
+                <section class="editor-section-card">
+                  <div class="editor-section-heading">
+                    <div>
+                      <p class="dashboard-eyebrow">Section D</p>
+                      <h3>Description</h3>
+                      <p>Control the short storefront summary and the longer detail-page copy.</p>
+                    </div>
+                  </div>
+                  <label><span>Short Description</span><textarea name="shortDescription" id="shortDescriptionInput" rows="4" required></textarea></label>
+                  <label><span>Long Description</span><textarea name="longDescription" id="longDescriptionInput" rows="6" placeholder="One paragraph per line"></textarea></label>
+                </section>
+
+                <section class="editor-section-card">
+                  <div class="editor-section-heading editor-section-heading--split">
+                    <div>
+                      <p class="dashboard-eyebrow">Section E</p>
+                      <h3>Attributes</h3>
+                      <p id="attributeSectionHint">Editable size, color, and stock options for the product details page.</p>
+                    </div>
+                    <div class="editor-header-actions">
+                      <button class="products-secondary-link" type="button" id="resetAttributesButton">Use Category Template</button>
+                      <button class="products-secondary-link" type="button" id="addAttributeGroupButton">Add Attribute</button>
+                    </div>
+                  </div>
+                  <div class="editor-attribute-groups" id="attributeGroups"></div>
+                </section>
+
+                <section class="editor-section-card">
+                  <div class="editor-section-heading">
+                    <div>
+                      <p class="dashboard-eyebrow">Section F</p>
+                      <h3>Full Product Data</h3>
+                      <p>Everything the full product page uses beyond the front display card.</p>
+                    </div>
+                  </div>
+                  <label><span>Keywords</span><textarea name="keywords" id="keywordsInput" rows="3" placeholder="Comma separated keywords"></textarea></label>
+
+                  <div class="editor-subsection">
+                    <div class="editor-subsection-heading">
+                      <h4>Highlights</h4>
+                      <button class="products-secondary-link" type="button" id="addHighlightButton">Add Highlight</button>
+                    </div>
+                    <div id="highlightsRepeater"></div>
+                  </div>
+
+                  <div class="editor-subsection">
+                    <div class="editor-subsection-heading">
+                      <h4>Trust Info</h4>
+                      <button class="products-secondary-link" type="button" id="addTrustButton">Add Trust Item</button>
+                    </div>
+                    <div id="trustRepeater"></div>
+                  </div>
+
+                  <div class="editor-subsection">
+                    <div class="editor-subsection-heading">
+                      <h4>Specifications</h4>
+                      <button class="products-secondary-link" type="button" id="addSpecButton">Add Spec</button>
+                    </div>
+                    <div id="specsRepeater"></div>
+                  </div>
+                </section>
+
                 <div class="products-form-actions">
                   <a class="products-secondary-link" href="index.html">Back to catalog</a>
                   <button class="products-primary-button" type="submit">Save changes</button>
@@ -76,6 +182,8 @@
   </div>
   <script src="../js/services/catalog.service.js"></script>
   <script src="../../js/products.js"></script>
+  <script src="../js/components/image-picker.js"></script>
+  <script src="../js/components/form-repeater.js"></script>
   <script src="../js/services/products.service.js"></script>
   <script src="../js/components/sidebar.js"></script>
   <script src="../js/pages/product-edit.page.js"></script>
