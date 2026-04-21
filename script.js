@@ -65,7 +65,10 @@ function initializeHomePage() {
 }
 
 function syncCatalog() {
-  state.catalog = getAllProductContent().map(normalizeProduct);
+  state.catalog = getAllProductContent()
+    .map(normalizeProduct)
+    .filter(product => shouldShowOnSurface(product, 'home'))
+    .sort(sortProductsByDisplay);
   state.filterCache.clear();
   state.markupCache.clear();
   renderProductGrid(state.currentFilter);
@@ -98,6 +101,49 @@ function normalizeCategory(category) {
   return CATEGORY_ALIASES[normalized] || normalized.replace(/\s+/g, '-');
 }
 
+function normalizeVisibility(value) {
+  const normalized = normalizeText(value).replace(/\s+/g, '-');
+  if (normalized === 'home' || normalized === 'shop' || normalized === 'both') {
+    return normalized;
+  }
+
+  if (normalized === 'home-only') {
+    return 'home';
+  }
+
+  if (normalized === 'shop-only') {
+    return 'shop';
+  }
+
+  return 'both';
+}
+
+function normalizePriority(value) {
+  return normalizeText(value) === 'top' ? 'top' : 'normal';
+}
+
+function normalizeHighlightTag(value) {
+  const normalized = normalizeText(value).replace(/\s+/g, '-');
+  if (normalized === 'featured' || normalized === 'trending' || normalized === 'new') {
+    return normalized;
+  }
+
+  return '';
+}
+
+function getHighlightTagLabel(value) {
+  if (value === 'featured') {
+    return 'Featured';
+  }
+  if (value === 'trending') {
+    return 'Trending';
+  }
+  if (value === 'new') {
+    return 'New';
+  }
+  return '';
+}
+
 function formatCategoryLabel(category) {
   return String(category || DEFAULT_CATEGORY)
     .replace(/-/g, ' ')
@@ -123,8 +169,13 @@ function normalizeProduct(product, index) {
   const name = String(product && product.name ? product.name : '').trim() || `Product ${fallbackId}`;
   const category = normalizeCategory(product && product.category);
   const badge = String(product && product.badge ? product.badge : '').trim();
+  const visibility = normalizeVisibility(product && product.visibility);
+  const priority = normalizePriority(product && product.priority);
+  const orderIndex = Math.max(0, Number(product && product.orderIndex) || 0);
+  const highlightTag = normalizeHighlightTag(product && product.highlightTag);
   const shortDescription = String(product && product.shortDescription ? product.shortDescription : '').trim();
-  const image = isSafePath(product && product.mainImage) ? String(product.mainImage).trim() : FALLBACK_IMAGE;
+  const imageSource = product && (product.mainImage || product.image);
+  const image = isSafePath(imageSource) ? String(imageSource).trim() : FALLBACK_IMAGE;
   const price = Number(product && product.price) || 0;
   const oldPrice = Number(product && product.oldPrice) || 0;
   const searchText = normalizeText([
@@ -142,7 +193,12 @@ function normalizeProduct(product, index) {
     name,
     badge,
     category,
+    visibility,
+    priority,
+    orderIndex,
+    highlightTag,
     shortDescription,
+    defaultIndex: index,
     mainImage: image,
     oldPrice: oldPrice > price ? oldPrice : 0,
     price,
@@ -151,8 +207,32 @@ function normalizeProduct(product, index) {
   };
 }
 
+function shouldShowOnSurface(product, surface) {
+  const visibility = normalizeVisibility(product && product.visibility);
+  return visibility === 'both' || visibility === surface;
+}
+
+function sortProductsByDisplay(left, right) {
+  const leftPriority = left && left.priority === 'top' ? 1 : 0;
+  const rightPriority = right && right.priority === 'top' ? 1 : 0;
+
+  if (leftPriority !== rightPriority) {
+    return rightPriority - leftPriority;
+  }
+
+  const leftOrder = Math.max(0, Number(left && left.orderIndex) || 0);
+  const rightOrder = Math.max(0, Number(right && right.orderIndex) || 0);
+  if (leftOrder !== rightOrder) {
+    return rightOrder - leftOrder;
+  }
+
+  return Math.max(0, Number(left && left.defaultIndex) || 0) - Math.max(0, Number(right && right.defaultIndex) || 0);
+}
+
 function createProductCard(product) {
   const categoryLabel = escapeHtml(formatCategoryLabel(product.category));
+  const highlightLabel = getHighlightTagLabel(product.highlightTag);
+  const metaLabel = highlightLabel ? `${categoryLabel} · ${escapeHtml(highlightLabel)}` : categoryLabel;
   const name = escapeHtml(product.name);
   const shortDescription = escapeHtml(product.shortDescription);
   const href = escapeHtml(product.href);
@@ -167,7 +247,7 @@ function createProductCard(product) {
         ${badge}
       </div>
       <div class="product-content">
-        <div class="product-meta">${categoryLabel}</div>
+        <div class="product-meta">${metaLabel}</div>
         <h3 class="product-title">${name}</h3>
         <div class="product-subtitle">${shortDescription}</div>
         <div class="product-pricing">
@@ -175,7 +255,7 @@ function createProductCard(product) {
           ${oldPrice}
         </div>
         <div class="product-footer">
-          <span class="product-meta">${categoryLabel}</span>
+          <span class="product-meta">${metaLabel}</span>
           <span class="tiny-link">Reba</span>
         </div>
       </div>

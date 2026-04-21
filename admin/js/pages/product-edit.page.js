@@ -19,6 +19,8 @@
 	const preview = document.getElementById('productEditorPreview');
 	const title = document.getElementById('productEditorTitle');
 	const subtitle = document.getElementById('productEditorSubtitle');
+	const saveProductButton = document.getElementById('saveProductButton');
+	const openEditedProductButton = document.getElementById('openEditedProductButton');
 	const categorySelect = document.getElementById('productCategorySelect');
 	const mainImageInput = document.getElementById('mainImageInput');
 	const mainImagePreview = document.getElementById('mainImagePreview');
@@ -39,18 +41,98 @@
 		status.textContent = 'The selected product could not be found in the shared catalog.';
 		status.dataset.state = 'error';
 		form.hidden = true;
+		if (openEditedProductButton) {
+			openEditedProductButton.hidden = true;
+		}
 		return;
 	}
 
 	const state = {
+		productId: Number(product.id),
 		mainImage: String(product.mainImage || product.image || '').trim(),
 		gallery: service.uniqueStrings(Array.isArray(product.gallery) ? product.gallery : []),
-		attributes: service.normalizeEditorAttributes(product.attributes),
+		attributes: Array.isArray(product.attributes) && product.attributes.length
+			? product.attributes
+			: service.createAttributeTemplate(product.category),
 		previousCategory: String(product.category || 'general')
 	};
 
-	if (!state.attributes.length) {
-		state.attributes = service.createAttributeTemplate(product.category);
+	function createEmptyOption(value = '') {
+		return {
+			value: String(value || '').trim(),
+			stock: 0,
+			image: ''
+		};
+	}
+
+	function createEmptyAttribute(name = 'New Attribute', type = 'text') {
+		return {
+			name,
+			type: type === 'image' ? 'image' : 'text',
+			options: []
+		};
+	}
+
+	function normalizeEditableAttributes(attributes) {
+		return Array.isArray(attributes)
+			? attributes.map((attribute) => ({
+				name: String(attribute?.name || '').trim(),
+				type: String(attribute?.type || 'text').trim() === 'image' ? 'image' : 'text',
+				options: Array.isArray(attribute?.options)
+					? attribute.options.map((option) => ({
+						value: String(option?.value || '').trim(),
+						stock: Math.max(0, Number(option?.stock || 0) || 0),
+						image: String(option?.image || '').trim()
+					}))
+					: []
+			}))
+			: [];
+	}
+
+	function buildCleanAttributesForSave(attributes) {
+		return normalizeEditableAttributes(attributes)
+			.map((attribute) => ({
+				name: attribute.name,
+				type: attribute.type,
+				options: attribute.options.filter((option) => option.value)
+			}))
+			.filter((attribute) => attribute.name && attribute.options.length);
+	}
+
+	function parseBulkValues(value) {
+		return service.uniqueStrings(String(value || '').split(/[\n,]+/).map((entry) => entry.trim()).filter(Boolean));
+	}
+
+	function getAttributeSuggestions(category, attributeName) {
+		const normalizedCategory = String(category || 'general').toLowerCase();
+		const normalizedName = String(attributeName || '').toLowerCase();
+
+		if (/color|colour|finish/.test(normalizedName)) {
+			if (normalizedCategory === 'electronics') {
+				return ['Black', 'Silver', 'White', 'Blue'];
+			}
+			return ['Black', 'White', 'Red', 'Blue'];
+		}
+
+		if (/size|shoe|foot/.test(normalizedName)) {
+			if (normalizedCategory === 'shoes') {
+				return ['39', '40', '41', '42', '43', '44'];
+			}
+			if (normalizedCategory === 'fashion') {
+				return ['S', 'M', 'L', 'XL'];
+			}
+			return ['Standard'];
+		}
+
+		if (/material/.test(normalizedName)) {
+			return ['Leather', 'Cotton', 'Mesh', 'Synthetic'];
+		}
+
+		if (/variant|storage|capacity|memory|ram/.test(normalizedName)) {
+			return ['64GB', '128GB', '256GB'];
+		}
+
+		return [];
 	}
 
 	const highlightsRepeater = repeaterApi.createTextRepeater({
@@ -80,8 +162,15 @@
 
 	title.textContent = `Edit ${product.name}`;
 	subtitle.textContent = `Product ID ${product.id} controls both storefront cards and the full details page.`;
+	if (saveProductButton) {
+		saveProductButton.textContent = 'Save changes';
+	}
+	if (openEditedProductButton) {
+		openEditedProductButton.href = `view.html?id=${encodeURIComponent(product.id)}`;
+	}
 	service.populateProductForm(form, product);
 	keywordsInput.value = Array.isArray(product.keywords) ? product.keywords.join(', ') : '';
+	shortDescriptionInput.value = product.shortDescription || product.description || '';
 	longDescriptionInput.value = service.serializeParagraphs(product.longDescription);
 	mainImageInput.value = state.mainImage;
 
@@ -99,19 +188,12 @@
 			return 'Shoes usually use numeric sizes plus a color selector.';
 		}
 		if (normalized === 'fashion') {
-			return 'Fashion products usually use size options like S, M, L, XL plus colors.';
+			return 'Clothes and fashion products usually use size options like S, M, L, XL plus colors.';
 		}
 		if (normalized === 'electronics') {
-			return 'Electronics usually use finish and variant attributes.';
+			return 'Electronics usually use finish, color, storage, or variant attributes instead of sizes.';
 		}
 		return 'General products can use any custom option set.';
-	}
-
-	function normalizeAttributeState() {
-		state.attributes = service.normalizeEditorAttributes(state.attributes).map((attribute) => ({
-			...attribute,
-			options: attribute.options.length ? attribute.options : [{ value: '', stock: 0, image: '' }]
-		}));
 	}
 
 	function createOptionMarkup(groupIndex, option, optionIndex, type) {
@@ -149,16 +231,20 @@
 	}
 
 	function renderAttributeGroups() {
-		normalizeAttributeState();
+		state.attributes = normalizeEditableAttributes(state.attributes);
 		attributeSectionHint.textContent = getCategoryHint(categorySelect.value);
 
 		attributeGroups.innerHTML = state.attributes.map((attribute, groupIndex) => `
 			<section class="editor-attribute-card">
 				<div class="editor-attribute-head">
+					<div class="editor-attribute-meta">
+						<span class="editor-attribute-title">${service.escapeHtml(attribute.name || `Attribute ${groupIndex + 1}`)}</span>
+						<span class="editor-attribute-count">${attribute.options.length} option${attribute.options.length === 1 ? '' : 's'}</span>
+					</div>
 					<div class="editor-attribute-grid">
 						<label>
 							<span>Attribute Name</span>
-							<input type="text" data-attribute-field="name" data-group-index="${groupIndex}" value="${service.escapeHtml(attribute.name)}">
+							<input type="text" data-attribute-field="name" data-group-index="${groupIndex}" value="${service.escapeHtml(attribute.name)}" placeholder="Color, Size, Material...">
 						</label>
 						<label>
 							<span>Display Type</span>
@@ -173,11 +259,61 @@
 						<button class="products-secondary-link editor-destructive-link" type="button" data-remove-group="${groupIndex}">Remove Attribute</button>
 					</div>
 				</div>
+				<div class="editor-quick-add" data-bulk-add-group="${groupIndex}">
+					<input type="text" data-bulk-add-input="${groupIndex}" placeholder="Add multiple options: Black, Red, Blue">
+					<button class="products-secondary-link" type="button" data-bulk-add-button="${groupIndex}">Add Values</button>
+				</div>
+				${getAttributeSuggestions(categorySelect.value, attribute.name).length ? `
+					<div class="editor-suggestion-list">
+						${getAttributeSuggestions(categorySelect.value, attribute.name).map((value) => `
+							<button class="editor-suggestion-chip" type="button" data-suggest-option="${groupIndex}" data-suggest-value="${service.escapeHtml(value)}">${service.escapeHtml(value)}</button>
+						`).join('')}
+					</div>
+				` : ''}
 				<div class="editor-option-list">
-					${attribute.options.map((option, optionIndex) => createOptionMarkup(groupIndex, option, optionIndex, attribute.type)).join('')}
+					${attribute.options.length
+						? attribute.options.map((option, optionIndex) => createOptionMarkup(groupIndex, option, optionIndex, attribute.type)).join('')
+						: '<div class="editor-option-empty">No options yet. Add one or paste multiple values above.</div>'}
 				</div>
 			</section>
 		`).join('');
+	}
+
+	function updateOptionPreview(groupIndex, optionIndex) {
+		const option = state.attributes?.[groupIndex]?.options?.[optionIndex];
+		const row = attributeGroups.querySelector(`[data-option-index="${groupIndex}:${optionIndex}"]`);
+		const previewImage = row?.querySelector('.editor-option-image-tools img');
+		const imageInput = row?.querySelector('[data-option-field="image"]');
+		if (imageInput) {
+			imageInput.value = option?.image || '';
+		}
+		if (previewImage) {
+			previewImage.src = resolvePreviewImage(option?.image || state.mainImage);
+			previewImage.alt = option?.value || 'Option preview';
+		}
+	}
+
+	function addOptionValues(groupIndex, values) {
+		const nextValues = Array.isArray(values) ? values : [];
+		if (!nextValues.length || !state.attributes[groupIndex]) {
+			return;
+		}
+
+		const existingValues = new Set(
+			(state.attributes[groupIndex].options || []).map((option) => String(option.value || '').trim().toLowerCase()).filter(Boolean)
+		);
+
+		nextValues.forEach((value) => {
+			const normalizedValue = String(value || '').trim();
+			if (!normalizedValue || existingValues.has(normalizedValue.toLowerCase())) {
+				return;
+			}
+			existingValues.add(normalizedValue.toLowerCase());
+			state.attributes[groupIndex].options.push(createEmptyOption(normalizedValue));
+		});
+
+		renderAttributeGroups();
+		renderPreview();
 	}
 
 	function renderGalleryManager() {
@@ -210,12 +346,7 @@
 	function buildPayload() {
 		const raw = service.readProductForm(form);
 		const gallery = service.uniqueStrings([state.mainImage || raw.mainImage, ...state.gallery]);
-		const attributes = service.normalizeEditorAttributes(state.attributes)
-			.map((attribute) => ({
-				...attribute,
-				options: attribute.options.filter((option) => String(option.value || '').trim() || String(option.image || '').trim())
-			}))
-			.filter((attribute) => attribute.name && attribute.options.length);
+		const attributes = buildCleanAttributesForSave(state.attributes);
 
 		return {
 			...raw,
@@ -237,6 +368,7 @@
 		const oldPriceMarkup = Number(payload.oldPrice || 0) > Number(payload.price || 0)
 			? `<span class="product-preview-old-price">${service.formatCurrency(payload.oldPrice)}</span>`
 			: '';
+		const shortDescription = payload.shortDescription || product.shortDescription || product.description || 'This product preview updates live while you edit the storefront card.';
 
 		preview.innerHTML = `
 			<div class="product-preview-stack">
@@ -245,7 +377,7 @@
 					<div>
 						<p class="product-preview-eyebrow">Front Display Preview</p>
 						<h3>${service.escapeHtml(payload.name || product.name)}</h3>
-						<p>${service.escapeHtml(payload.shortDescription || product.shortDescription || '')}</p>
+						<p>${service.escapeHtml(shortDescription)}</p>
 						<div class="product-preview-meta">
 							<span>${service.escapeHtml(service.normalizeCategoryLabel(payload.category || product.category || 'general'))}</span>
 							<div class="product-preview-price-group">
@@ -269,7 +401,7 @@
 						</ul>
 					</div>
 					<div class="product-preview-gallery-strip">
-						${payload.gallery.slice(0, 4).map((image) => `<img src="${service.escapeHtml(resolvePreviewImage(image))}" alt="Gallery preview">`).join('') || '<div class="editor-gallery-empty">No gallery images.</div>'}
+						${payload.gallery.slice(0, 4).map((image) => `<img src="${service.escapeHtml(resolvePreviewImage(image))}" alt="Gallery preview">`).join('') || '<div class="editor-gallery-empty">No gallery images yet.</div>'}
 					</div>
 				</section>
 			</div>
@@ -290,8 +422,8 @@
 
 	mainImageInput.addEventListener('input', () => {
 		state.mainImage = String(mainImageInput.value || '').trim();
-		renderPreview();
 		refreshMainImagePreview();
+		renderPreview();
 	});
 
 	mainImageUploadInput.addEventListener('change', async () => {
@@ -385,8 +517,9 @@
 
 	resetAttributesButton.addEventListener('click', applyCategoryTemplate);
 	addAttributeGroupButton.addEventListener('click', () => {
-		state.attributes.push({ name: 'New Attribute', type: 'text', options: [{ value: '', stock: 0, image: '' }] });
-		refreshEverything();
+		state.attributes.push(createEmptyAttribute());
+		renderAttributeGroups();
+		renderPreview();
 	});
 
 	attributeGroups.addEventListener('input', (event) => {
@@ -396,10 +529,21 @@
 			const field = groupField.dataset.attributeField;
 			state.attributes[groupIndex][field] = field === 'type' ? String(groupField.value || 'text') : String(groupField.value || '').trim();
 			if (field === 'type') {
-				refreshEverything();
+				renderAttributeGroups();
+				renderPreview();
 				return;
 			}
+			const card = groupField.closest('.editor-attribute-card');
+			const titleNode = card?.querySelector('.editor-attribute-title');
+			if (titleNode && field === 'name') {
+				titleNode.textContent = state.attributes[groupIndex][field] || `Attribute ${groupIndex + 1}`;
+			}
 			renderPreview();
+			return;
+		}
+
+		const bulkInput = event.target.closest('[data-bulk-add-input]');
+		if (bulkInput) {
 			return;
 		}
 
@@ -419,17 +563,53 @@
 			? Math.max(0, Number(optionField.value || 0) || 0)
 			: String(optionField.value || '').trim();
 		if (field === 'image') {
-			renderAttributeGroups();
+			updateOptionPreview(groupIndex, optionIndex);
+		}
+		if (field === 'value') {
+			updateOptionPreview(groupIndex, optionIndex);
 		}
 		renderPreview();
 	});
 
+	attributeGroups.addEventListener('keydown', (event) => {
+		const bulkInput = event.target.closest('[data-bulk-add-input]');
+		if (!bulkInput || event.key !== 'Enter') {
+			return;
+		}
+
+		event.preventDefault();
+		const groupIndex = Number(bulkInput.dataset.bulkAddInput || 0);
+		const values = parseBulkValues(bulkInput.value);
+		addOptionValues(groupIndex, values);
+		bulkInput.value = '';
+	});
+
 	attributeGroups.addEventListener('click', (event) => {
+		const bulkAddButton = event.target.closest('[data-bulk-add-button]');
+		if (bulkAddButton) {
+			const groupIndex = Number(bulkAddButton.dataset.bulkAddButton || 0);
+			const input = attributeGroups.querySelector(`[data-bulk-add-input="${groupIndex}"]`);
+			const values = parseBulkValues(input?.value);
+			addOptionValues(groupIndex, values);
+			if (input) {
+				input.value = '';
+			}
+			return;
+		}
+
+		const suggestionButton = event.target.closest('[data-suggest-option]');
+		if (suggestionButton) {
+			const groupIndex = Number(suggestionButton.dataset.suggestOption || 0);
+			addOptionValues(groupIndex, [suggestionButton.dataset.suggestValue || '']);
+			return;
+		}
+
 		const addOptionButton = event.target.closest('[data-add-option]');
 		if (addOptionButton) {
 			const groupIndex = Number(addOptionButton.dataset.addOption || 0);
-			state.attributes[groupIndex].options.push({ value: '', stock: 0, image: '' });
-			refreshEverything();
+			state.attributes[groupIndex].options.push(createEmptyOption());
+			renderAttributeGroups();
+			renderPreview();
 			return;
 		}
 
@@ -437,7 +617,8 @@
 		if (removeGroupButton) {
 			const groupIndex = Number(removeGroupButton.dataset.removeGroup || 0);
 			state.attributes.splice(groupIndex, 1);
-			refreshEverything();
+			renderAttributeGroups();
+			renderPreview();
 			return;
 		}
 
@@ -445,7 +626,8 @@
 		if (removeOptionButton) {
 			const [groupIndex, optionIndex] = String(removeOptionButton.dataset.removeOption || '0:0').split(':').map(Number);
 			state.attributes[groupIndex].options.splice(optionIndex, 1);
-			refreshEverything();
+			renderAttributeGroups();
+			renderPreview();
 		}
 	});
 
@@ -458,7 +640,8 @@
 		const [groupIndex, optionIndex] = String(uploadInput.dataset.optionUpload || '0:0').split(':').map(Number);
 		const result = await imagePicker.readFileAsDataUrl(uploadInput.files[0]);
 		state.attributes[groupIndex].options[optionIndex].image = result.dataUrl;
-		refreshEverything();
+		updateOptionPreview(groupIndex, optionIndex);
+		renderPreview();
 		uploadInput.value = '';
 	});
 
@@ -467,24 +650,24 @@
 		event.preventDefault();
 		const payload = buildPayload();
 
-		if (!payload.name || !payload.mainImage || !payload.shortDescription || Number(payload.price) <= 0) {
-			status.textContent = 'Name, main image, short description, and a valid price are required.';
+		if (!payload.name || !payload.mainImage || Number(payload.price) <= 0) {
+			status.textContent = 'Product name, main image, and a valid price are required.';
 			status.dataset.state = 'error';
 			return;
 		}
 
 		const updated = service.updateProduct(product.id, payload);
 		if (!updated) {
-			status.textContent = 'The product could not be updated.';
+			status.textContent = 'The product details could not be saved.';
 			status.dataset.state = 'error';
 			return;
 		}
 
-		status.textContent = `${updated.name} was updated across storefront cards and the product details page.`;
+		status.textContent = `${updated.name} details were saved across the website and product details system.`;
 		status.dataset.state = 'success';
-		window.setTimeout(() => {
-			window.location.href = `view.html?id=${encodeURIComponent(updated.id)}`;
-		}, 800);
+		if (openEditedProductButton) {
+			openEditedProductButton.href = `view.html?id=${encodeURIComponent(updated.id)}`;
+		}
 	});
 
 	refreshEverything();

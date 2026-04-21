@@ -225,6 +225,10 @@
 		return field ? String(field.value || "").trim() : "";
 	}
 
+	function hasFormField(form, name) {
+		return Boolean(form?.elements?.namedItem(name));
+	}
+
 	function readProductForm(form) {
 		const name = getFormValue(form, "name");
 		const category = getFormValue(form, "category") || "general";
@@ -241,7 +245,7 @@
 		const trust = parseLineList(getFormValue(form, "trust"));
 		const specs = parseSpecs(getFormValue(form, "specs"));
 
-		return {
+		const payload = {
 			name,
 			category,
 			price,
@@ -259,6 +263,24 @@
 			trust,
 			specs
 		};
+
+		if (hasFormField(form, "visibility")) {
+			payload.visibility = getFormValue(form, "visibility") || "both";
+		}
+
+		if (hasFormField(form, "priority")) {
+			payload.priority = getFormValue(form, "priority") || "normal";
+		}
+
+		if (hasFormField(form, "orderIndex")) {
+			payload.orderIndex = Number(getFormValue(form, "orderIndex")) || 0;
+		}
+
+		if (hasFormField(form, "highlightTag")) {
+			payload.highlightTag = getFormValue(form, "highlightTag");
+		}
+
+		return payload;
 	}
 
 	function populateProductForm(form, product) {
@@ -279,6 +301,10 @@
 		setFieldValue("oldPrice", Number(product.oldPrice || 0));
 		setFieldValue("stock", Number(product.stock || 0));
 		setFieldValue("badge", product.badge || "");
+		setFieldValue("visibility", product.visibility || "both");
+		setFieldValue("priority", product.priority || "normal");
+		setFieldValue("orderIndex", Number(product.orderIndex || 0));
+		setFieldValue("highlightTag", product.highlightTag || "");
 		setFieldValue("mainImage", product.mainImage || product.image || "");
 		setFieldValue("gallery", Array.isArray(product.gallery) ? product.gallery.join("\n") : "");
 		setFieldValue("keywords", Array.isArray(product.keywords) ? product.keywords.join(", ") : "");

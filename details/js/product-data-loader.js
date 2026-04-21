@@ -113,6 +113,28 @@ function normalizeGallery(mainImage, gallery) {
   ].filter(Boolean).map(resolveAssetPath)));
 }
 
+function normalizeSpecEntries(specs) {
+  if (!Array.isArray(specs)) {
+    return [];
+  }
+
+  return specs
+    .map(entry => {
+      if (!Array.isArray(entry) || entry.length < 2) {
+        return null;
+      }
+
+      const label = String(entry[0] || '').trim();
+      const value = String(entry[1] || '').trim();
+      if (!label || !value) {
+        return null;
+      }
+
+      return [label, value];
+    })
+    .filter(Boolean);
+}
+
 function computeRating(product) {
   const base = 4.2 + ((Number(product.id) * 7) % 7) * 0.1;
   return Math.min(4.9, Number(base.toFixed(1)));
@@ -133,14 +155,18 @@ function computeStock(product) {
 
 function buildSpecs(product, profile) {
   const discount = getDiscount(product.price, product.oldPrice);
-  const baseSpecs = [
+  const derivedSpecs = [
     ['SKU', `BM-${String(product.id).padStart(4, '0')}`],
     ['Category', profile.label],
     ['Availability', `${computeStock(product)} units ready`],
     ['Discount', discount > 0 ? `${discount}% off` : 'Best value pricing']
   ];
 
-  return [...baseSpecs, ...profile.specs].slice(0, 8);
+  const configuredSpecs = normalizeSpecEntries(profile.specs);
+  const usedLabels = new Set(configuredSpecs.map(([label]) => String(label).toLowerCase()));
+  const supplementalSpecs = derivedSpecs.filter(([label]) => !usedLabels.has(String(label).toLowerCase()));
+
+  return [...configuredSpecs, ...supplementalSpecs].slice(0, 8);
 }
 
 function mergeProductContent(product) {
@@ -149,17 +175,17 @@ function mergeProductContent(product) {
     ...product,
     ...detailContent
   };
-  const mainImage = resolveAssetPath(detailContent.mainImage || product.image);
-  const gallery = normalizeGallery(mainImage, detailContent.gallery);
+  const mainImage = resolveAssetPath(mergedProduct.mainImage || mergedProduct.image || product.mainImage || product.image);
+  const gallery = normalizeGallery(mainImage, mergedProduct.gallery || product.gallery);
 
   return {
     ...mergedProduct,
-    name: detailContent.name || product.name,
-    category: detailContent.category || product.category,
-    badge: detailContent.badge || product.badge,
-    price: Number(detailContent.price ?? product.price ?? 0),
-    oldPrice: Number(detailContent.oldPrice ?? product.oldPrice ?? 0),
-    stock: Number(detailContent.stock ?? product.stock ?? 0),
+    name: mergedProduct.name || product.name,
+    category: mergedProduct.category || product.category,
+    badge: mergedProduct.badge || product.badge,
+    price: Number(mergedProduct.price ?? product.price ?? 0),
+    oldPrice: Number(mergedProduct.oldPrice ?? product.oldPrice ?? 0),
+    stock: Number(mergedProduct.stock ?? product.stock ?? 0),
     mainImage,
     gallery,
     image: mainImage
@@ -228,7 +254,7 @@ export function loadProductData() {
   }
 
   const mergedProduct = mergeProductContent(product);
-  const profile = getCategoryProfile(product.category);
+  const profile = getCategoryProfile(mergedProduct.category);
   const rating = computeRating(mergedProduct);
   const reviewCount = computeReviewCount(mergedProduct);
   const stockCount = computeStock(mergedProduct);

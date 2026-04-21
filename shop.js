@@ -73,6 +73,47 @@
     return CATEGORY_ALIASES[normalized] || normalized.replace(/\s+/g, "-");
   }
 
+  function normalizeVisibility(value) {
+    const normalized = normalizeText(value).replace(/\s+/g, "-");
+    if (normalized === "home" || normalized === "shop" || normalized === "both") {
+      return normalized;
+    }
+
+    if (normalized === "home-only") {
+      return "home";
+    }
+
+    if (normalized === "shop-only") {
+      return "shop";
+    }
+
+    return "both";
+  }
+
+  function normalizePriority(value) {
+    return normalizeText(value) === "top" ? "top" : "normal";
+  }
+
+  function normalizeHighlightTag(value) {
+    const normalized = normalizeText(value).replace(/\s+/g, "-");
+    return normalized === "featured" || normalized === "trending" || normalized === "new"
+      ? normalized
+      : "";
+  }
+
+  function getHighlightTagLabel(value) {
+    if (value === "featured") {
+      return "Featured";
+    }
+    if (value === "trending") {
+      return "Trending";
+    }
+    if (value === "new") {
+      return "New";
+    }
+    return "";
+  }
+
   function createCategoryLabel(category) {
     return String(category || DEFAULT_CATEGORY)
       .replace(/-/g, " ")
@@ -111,7 +152,11 @@
     const name = String(product && product.name ? product.name : "").trim() || `Product ${id}`;
     const badge = String(product && product.badge ? product.badge : "").trim();
     const category = normalizeCategory(product && product.category);
-    const image = String(product && product.image ? product.image : "").trim() || FALLBACK_IMAGE;
+    const image = String(product && (product.mainImage || product.image) ? (product.mainImage || product.image) : "").trim() || FALLBACK_IMAGE;
+    const visibility = normalizeVisibility(product && product.visibility);
+    const priority = normalizePriority(product && product.priority);
+    const orderIndex = toPositiveNumber(product && product.orderIndex, 0);
+    const highlightTag = normalizeHighlightTag(product && product.highlightTag);
     const keywords = Array.isArray(product && product.keywords)
       ? product.keywords.map(item => String(item || "").trim()).filter(Boolean)
       : [];
@@ -127,6 +172,11 @@
       name,
       badge,
       category,
+      visibility,
+      priority,
+      orderIndex,
+      highlightTag,
+      defaultIndex: index,
       image,
       keywords,
       oldPrice: oldPrice > price ? oldPrice : 0,
@@ -137,18 +187,47 @@
     };
   }
 
+  function shouldShowOnSurface(product, surface) {
+    const visibility = normalizeVisibility(product && product.visibility);
+    return visibility === "both" || visibility === surface;
+  }
+
+  function sortProductsByDisplay(items) {
+    return items.slice().sort((left, right) => {
+      const leftPriority = left && left.priority === "top" ? 1 : 0;
+      const rightPriority = right && right.priority === "top" ? 1 : 0;
+
+      if (leftPriority !== rightPriority) {
+        return rightPriority - leftPriority;
+      }
+
+      const leftOrder = toPositiveNumber(left && left.orderIndex, 0);
+      const rightOrder = toPositiveNumber(right && right.orderIndex, 0);
+      if (leftOrder !== rightOrder) {
+        return rightOrder - leftOrder;
+      }
+
+      return toPositiveNumber(left && left.defaultIndex, 0) - toPositiveNumber(right && right.defaultIndex, 0);
+    });
+  }
+
   function getCatalog(source) {
     const items = Array.isArray(source) ? source : Array.isArray(window.products) ? window.products : [];
-    return items.map(normalizeProduct);
+    return sortProductsByDisplay(
+      items
+        .map(normalizeProduct)
+        .filter(product => shouldShowOnSurface(product, "shop"))
+    );
   }
 
   function buildProductCard(product) {
     const name = escapeHtml(product && product.name);
     const category = escapeHtml(createCategoryLabel(product && product.category));
+    const highlightLabel = getHighlightTagLabel(product && product.highlightTag);
     const href = escapeHtml((product && product.href) || getProductHref(product));
     const image = escapeHtml(product && product.image);
     const badge = product && product.badge ? `<span class="shop-card-badge">${escapeHtml(product.badge)}</span>` : "";
-    const meta = escapeHtml((product && product.badge) || "Featured");
+    const meta = escapeHtml(highlightLabel || (product && product.badge) || "Featured");
     const hasOldPrice = Number(product && product.oldPrice) > Number(product && product.price);
 
     return `

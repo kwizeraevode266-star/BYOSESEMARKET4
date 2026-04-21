@@ -61,6 +61,34 @@
 		return CATEGORY_ALIASES[normalized] || normalized.replace(/\s+/g, "-");
 	}
 
+	function normalizeVisibility(value) {
+		const normalized = normalizeText(value).replace(/\s+/g, "-");
+		if (normalized === "home" || normalized === "shop" || normalized === "both") {
+			return normalized;
+		}
+
+		if (normalized === "home-only") {
+			return "home";
+		}
+
+		if (normalized === "shop-only") {
+			return "shop";
+		}
+
+		return "both";
+	}
+
+	function normalizePriority(value) {
+		return normalizeText(value) === "top" ? "top" : "normal";
+	}
+
+	function normalizeHighlightTag(value) {
+		const normalized = normalizeText(value).replace(/\s+/g, "-");
+		return normalized === "featured" || normalized === "trending" || normalized === "new"
+			? normalized
+			: "";
+	}
+
 	function toNonNegativeNumber(value, fallbackValue) {
 		const parsed = Number(value);
 		if (Number.isFinite(parsed) && parsed >= 0) {
@@ -186,6 +214,10 @@
 		const oldPrice = toNonNegativeNumber(rawProduct.oldPrice, 0);
 		const stock = toNonNegativeNumber(rawProduct.stock, 0);
 		const badge = toTrimmedString(rawProduct.badge, "");
+		const visibility = normalizeVisibility(rawProduct.visibility);
+		const priority = normalizePriority(rawProduct.priority);
+		const orderIndex = toNonNegativeNumber(rawProduct.orderIndex, 0);
+		const highlightTag = normalizeHighlightTag(rawProduct.highlightTag);
 		const mainImage = isSafePath(rawProduct.mainImage)
 			? String(rawProduct.mainImage).trim()
 			: isSafePath(rawProduct.image)
@@ -209,6 +241,10 @@
 			title: name,
 			category,
 			badge,
+			visibility,
+			priority,
+			orderIndex,
+			highlightTag,
 			price,
 			oldPrice: oldPrice > price ? oldPrice : 0,
 			stock,

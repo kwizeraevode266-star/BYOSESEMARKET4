@@ -37,10 +37,10 @@
         </header>
 
         <main class="dashboard-grid products-dashboard-grid">
-          <section class="products-editor-layout">
+          <section class="products-create-flow">
             <article class="dashboard-panel products-editor-panel">
               <div class="products-form-header">
-                <p class="dashboard-eyebrow">Shared catalog entry</p>
+                <p class="dashboard-eyebrow">Edit Product</p>
                 <h2 id="productEditorTitle">Edit product</h2>
                 <p id="productEditorSubtitle">Loading product details...</p>
               </div>
@@ -62,6 +62,8 @@
                     <label><span>Badge</span><input name="badge" type="text" placeholder="Top Pick"></label>
                   </div>
                 </section>
+
+                <section class="dashboard-panel products-preview-panel products-preview-panel--full" id="productEditorPreview"></section>
 
                 <section class="editor-section-card">
                   <div class="editor-section-heading">
@@ -112,7 +114,7 @@
                       <p>Control the short storefront summary and the longer detail-page copy.</p>
                     </div>
                   </div>
-                  <label><span>Short Description</span><textarea name="shortDescription" id="shortDescriptionInput" rows="4" required></textarea></label>
+                  <label><span>Short Description</span><textarea name="shortDescription" id="shortDescriptionInput" rows="4"></textarea></label>
                   <label><span>Long Description</span><textarea name="longDescription" id="longDescriptionInput" rows="6" placeholder="One paragraph per line"></textarea></label>
                 </section>
 
@@ -166,18 +168,18 @@
                   </div>
                 </section>
 
-                <div class="products-form-actions">
+                <div class="products-form-actions products-form-actions--split">
                   <a class="products-secondary-link" href="index.html">Back to catalog</a>
-                  <button class="products-primary-button" type="submit">Save changes</button>
+                  <div class="products-action-stack">
+                    <a class="products-secondary-link" id="openEditedProductButton" href="view.html">Open Product</a>
+                    <button class="products-primary-button" type="submit" id="saveProductButton">Save changes</button>
+                  </div>
                 </div>
                 <p class="products-form-status" id="productEditorStatus" aria-live="polite"></p>
               </form>
             </article>
-
-            <aside class="dashboard-panel products-preview-panel" id="productEditorPreview"></aside>
           </section>
         </main>
-      </div>
     </div>
   </div>
   <script src="../js/services/catalog.service.js"></script>
