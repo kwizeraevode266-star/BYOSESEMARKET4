@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shipping Details | Byose Market Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+  <div class="orders-shell orders-shell--compact orders-shell--shipping">
+    <main class="orders-layout">
+      <section class="orders-main">
+        <div class="orders-progress" id="checkoutProgress"></div>
+
+        <article class="orders-panel">
+          <header class="orders-panel-head">
+            <p>Step 1</p>
+            <h2>Shipping location</h2>
+            <p>Save the customer destination, then continue to the order review page.</p>
+          </header>
+
+          <div class="orders-step-message" id="shippingMessage" hidden></div>
+
+          <form id="shippingForm" class="orders-step-stack" novalidate>
+            <div class="orders-form-grid">
+              <label class="orders-field orders-field--full">
+                <span>Full Name *</span>
+                <input type="text" name="fullName" autocomplete="name" placeholder="Customer full name">
+              </label>
+              <label class="orders-field">
+                <span>Phone Number *</span>
+                <input type="text" name="phone" autocomplete="tel" placeholder="07XXXXXXXX">
+              </label>
+              <label class="orders-field">
+                <span>District / City *</span>
+                <input type="text" name="city" autocomplete="address-level2" placeholder="Kigali">
+              </label>
+              <label class="orders-field">
+                <span>District *</span>
+                <input type="text" name="district" autocomplete="address-level1" placeholder="Gasabo">
+              </label>
+              <label class="orders-field">
+                <span>Sector *</span>
+                <input type="text" name="sector" autocomplete="address-level3" placeholder="Kimironko">
+              </label>
+              <label class="orders-field orders-field--full">
+                <span>Street *</span>
+                <input type="text" name="street" autocomplete="street-address" placeholder="Street or landmark">
+              </label>
+              <label class="orders-field orders-field--full">
+                <span>Optional Note</span>
+                <textarea name="note" rows="4" placeholder="Delivery note, nearby landmark, or contact instruction"></textarea>
+              </label>
+            </div>
+
+            <div class="orders-step-actions">
+              <a class="orders-back-button" href="../cart.html">Back</a>
+              <button type="submit" class="orders-next-button">Continue to Checkout</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <aside class="orders-sidebar" id="checkoutSidebar"></aside>
+    </main>
+  </div>
+
+  <script src="../services/authservice.js"></script>
+  <script type="module" src="shipping.js"></script>
+</body>
+</html>

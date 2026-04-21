@@ -51,6 +51,14 @@ img {
   padding: 28px 0 48px;
 }
 
+.orders-shell--compact {
+  padding-top: 16px;
+}
+
+.orders-shell--compact .orders-layout {
+  margin-top: 0;
+}
+
 .orders-header {
   display: flex;
   align-items: center;
@@ -134,44 +142,87 @@ img {
 
 .orders-progress {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
 }
 
 .orders-progress-step {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
   border: 1px solid var(--orders-border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.62);
-  padding: 14px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 10px 12px;
+  min-height: 54px;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+  overflow: visible;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.orders-progress-step::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -10px;
+  width: 10px;
+  height: 10px;
+  border-top: 1.5px solid rgba(148, 163, 184, 0.6);
+  border-right: 1.5px solid rgba(148, 163, 184, 0.6);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.orders-progress-step:last-child::after {
+  display: none;
 }
 
 .orders-progress-step span {
   display: inline-flex;
-  width: 34px;
-  height: 34px;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
-  background: rgba(217, 93, 57, 0.1);
-  color: var(--orders-accent-dark);
+  margin-bottom: 0;
+  background: rgba(148, 163, 184, 0.18);
+  color: rgba(107, 114, 128, 0.9);
+  font-size: 0.88rem;
   font-weight: 800;
 }
 
 .orders-progress-step strong {
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.1;
+  white-space: nowrap;
   text-transform: capitalize;
+  color: rgba(107, 114, 128, 0.95);
 }
 
 .orders-progress-step.is-active,
 .orders-progress-step.is-complete {
   border-color: rgba(217, 93, 57, 0.42);
   background: rgba(255, 255, 255, 0.92);
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(217, 93, 57, 0.1);
+}
+
+.orders-progress-step.is-active {
+  border-color: rgba(217, 93, 57, 0.52);
+}
+
+.orders-progress-step.is-active span {
+  background: rgba(217, 93, 57, 0.12);
+  color: var(--orders-accent-dark);
+}
+
+.orders-progress-step.is-active strong {
+  color: var(--orders-text);
 }
 
 .orders-progress-step.is-complete span {
@@ -179,9 +230,13 @@ img {
   color: var(--orders-success);
 }
 
+.orders-progress-step.is-complete strong {
+  color: var(--orders-text);
+}
+
 .orders-progress-step:disabled {
   cursor: default;
-  opacity: 0.55;
+  opacity: 1;
 }
 
 .orders-panel,
@@ -399,9 +454,33 @@ img {
   color: var(--orders-text);
 }
 
+.orders-field textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 16px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--orders-text);
+  resize: vertical;
+  font: inherit;
+}
+
 .orders-field input:focus {
   outline: 2px solid rgba(217, 93, 57, 0.16);
   border-color: rgba(217, 93, 57, 0.35);
+}
+
+.orders-field textarea:focus {
+  outline: 2px solid rgba(217, 93, 57, 0.16);
+  border-color: rgba(217, 93, 57, 0.35);
+}
+
+.orders-inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .orders-choice-card {
@@ -588,6 +667,42 @@ img {
 
   .orders-progress {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .orders-shell--shipping .orders-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .orders-shell--shipping .orders-sidebar {
+    display: none;
+  }
+
+  .orders-shell--shipping .orders-panel {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .orders-shell--shipping .orders-form-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .orders-shell--shipping .orders-field input,
+  .orders-shell--shipping .orders-field textarea {
+    font-size: 1rem;
+    padding: 16px 18px;
+  }
+
+  .orders-shell--shipping .orders-step-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .orders-shell--shipping .orders-back-button,
+  .orders-shell--shipping .orders-next-button {
+    width: 100%;
+    min-height: 56px;
   }
 }
 
@@ -595,6 +710,10 @@ img {
   .orders-shell {
     width: min(calc(100% - 24px), var(--orders-max-width));
     padding-top: 16px;
+  }
+
+  .orders-shell--compact {
+    padding-top: 12px;
   }
 
   .orders-header,
@@ -608,7 +727,6 @@ img {
     align-items: flex-start;
   }
 
-  .orders-progress,
   .orders-form-grid,
   .orders-form-grid--two,
   .orders-choice-grid,
@@ -616,6 +734,36 @@ img {
   .orders-review-grid,
   .orders-confirmation-grid {
     grid-template-columns: 1fr;
+  }
+
+  .orders-progress {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .orders-progress-step {
+    gap: 6px;
+    min-height: 40px;
+    padding: 6px 8px;
+    border-radius: 999px;
+  }
+
+  .orders-progress-step::after {
+    right: -5px;
+    width: 6px;
+    height: 6px;
+  }
+
+  .orders-progress-step span {
+    width: 22px;
+    height: 22px;
+    flex-basis: 22px;
+    font-size: 0.72rem;
+  }
+
+  .orders-progress-step strong {
+    font-size: 0.72rem;
+    letter-spacing: -0.01em;
   }
 
   .orders-cart-item,

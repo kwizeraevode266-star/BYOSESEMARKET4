@@ -18,7 +18,7 @@ export const summaryStep = {
   id: 'summary',
   title: 'Order summary',
   description: 'Review the final order payload before it is written to the admin order store.',
-  nextLabel: 'Place order',
+  nextLabel: 'Confirm order',
   render(container, context) {
     const { state } = context;
     const paymentLabel = state.payment.paymentType === 'cod'

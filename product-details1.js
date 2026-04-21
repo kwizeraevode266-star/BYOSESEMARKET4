@@ -777,17 +777,20 @@
       qty: selected.qty,
       image: selected.image,
       color: selected.color,
-      size: selected.size
+      size: selected.size,
+      total: (Number(selected.price) || 0) * (Number(selected.qty) || 1)
     };
 
     localStorage.setItem(
       'byose_direct_checkout',
       JSON.stringify(directItem)
     );
+    localStorage.removeItem('byose_checkout_draft_v1');
+    localStorage.removeItem('byose_checkout_confirmation_v1');
 
     closeModal();
 
-    window.location.href = "orders/checkout.html";
+    window.location.href = "orders/shipping.html";
 
   } catch (e) {
     console.error("Buy now error:", e);

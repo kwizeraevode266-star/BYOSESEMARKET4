@@ -3,6 +3,9 @@ import { createProductModal } from './product-modal.js';
 import { renderProductOptionPreview } from './product-ui-renderer.js';
 
 const CART_KEY = 'byose_market_cart_v1';
+const DIRECT_CHECKOUT_KEY = 'byose_direct_checkout';
+const CHECKOUT_DRAFT_KEY = 'byose_checkout_draft_v1';
+const CHECKOUT_CONFIRMATION_KEY = 'byose_checkout_confirmation_v1';
 
 function getLegacyAttribute(attributes, name) {
   const target = String(name || '').toLowerCase();
@@ -83,6 +86,22 @@ function addItemsToCart(items) {
   fallbackAddItemsToCart(payloads);
 }
 
+function startDirectCheckout(item) {
+  if (!item) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(DIRECT_CHECKOUT_KEY, JSON.stringify(item));
+    localStorage.removeItem(CHECKOUT_DRAFT_KEY);
+    localStorage.removeItem(CHECKOUT_CONFIRMATION_KEY);
+  } catch (error) {
+    console.error('Unable to start direct checkout', error);
+  }
+
+  window.location.href = '../orders/shipping.html';
+}
+
 export function initProductActions(options) {
   const {
     product,
@@ -107,16 +126,17 @@ export function initProductActions(options) {
     showToast,
     onSubmit(action, variants) {
       const items = variants.map(variant => createCartPayload(product, variant.qty, variant.attributes));
+      if (action === 'buy') {
+        startDirectCheckout(items[0]);
+        return;
+      }
+
       addItemsToCart(items);
       showToast?.(
         action === 'buy'
           ? 'Selection added. Redirecting to checkout.'
           : `${product.name} added to cart`
       );
-
-      if (action === 'buy') {
-        window.location.href = '../orders/checkout.html';
-      }
     }
   });
 
@@ -145,16 +165,19 @@ export function initProductActions(options) {
       return;
     }
 
-    addItemsToCart([createCartPayload(product, qty)]);
+    const payload = createCartPayload(product, qty);
+    if (action === 'buy') {
+      showToast?.('Selection captured. Redirecting to shipping.');
+      startDirectCheckout(payload);
+      return;
+    }
+
+    addItemsToCart([payload]);
     showToast?.(
       action === 'buy'
         ? 'Selection added. Redirecting to checkout.'
         : `${product.name} added to cart`
     );
-
-    if (action === 'buy') {
-      window.location.href = '../orders/checkout.html';
-    }
   }
 
   decreaseButton?.addEventListener('click', () => {

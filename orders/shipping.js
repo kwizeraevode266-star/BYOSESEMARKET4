@@ -1,61 +1,110 @@
-import { escapeHtml, isValidPhone, normalizePhone } from './utils.js';
-import { validateShippingStep } from './state.js';
+import { escapeHtml, formatCurrency, normalizePhone } from './utils.js';
+import {
+  getResolvedCustomerName,
+  getStageUrl,
+  getState,
+  initializeOrderFlow,
+  resolveStageAccess,
+  setStage,
+  updateShippingDetails,
+  validateShippingStage
+} from './state.js';
 
-const FIELDS = [
-  { name: 'firstName', label: 'First name', required: true, autocomplete: 'given-name' },
-  { name: 'lastName', label: 'Last name', required: true, autocomplete: 'family-name' },
-  { name: 'phone', label: 'Phone number', required: true, autocomplete: 'tel' },
-  { name: 'city', label: 'City', required: true, autocomplete: 'address-level2' },
-  { name: 'district', label: 'District', required: true, autocomplete: 'address-level1' },
-  { name: 'sector', label: 'Sector', required: true, autocomplete: 'address-level3' },
-  { name: 'cell', label: 'Cell', required: true, autocomplete: 'address-level4' },
-  { name: 'village', label: 'Village', required: true, autocomplete: 'address-line2' },
-  { name: 'street', label: 'Street or landmark', required: false, autocomplete: 'street-address' }
+const ui = {
+  progress: document.getElementById('checkoutProgress'),
+  sidebar: document.getElementById('checkoutSidebar'),
+  form: document.getElementById('shippingForm'),
+  message: document.getElementById('shippingMessage')
+};
+
+const steps = [
+  { id: 'shipping', label: 'Shipping' },
+  { id: 'checkout', label: 'Checkout' },
+  { id: 'payment', label: 'Payment' }
 ];
 
-export const shippingStep = {
-  id: 'shipping',
-  title: 'Shipping details',
-  description: 'Capture the customer destination once and reuse it in payment, summary, and future orders.',
-  nextLabel: 'Continue to delivery',
-  render(container, context) {
-    const { state, actions } = context;
-
-    container.innerHTML = `
-      <div class="orders-step-stack">
-        <div class="orders-step-intro">
-          <span>Saved to the signed-in customer profile when available</span>
-          <p>Use the exact address the delivery team should follow. Kigali addresses unlock cash on delivery in the next steps.</p>
-        </div>
-        <form class="orders-form-grid" novalidate>
-          ${FIELDS.map((field) => `
-            <label class="orders-field ${field.name === 'street' ? 'orders-field--full' : ''}">
-              <span>${escapeHtml(field.label)}${field.required ? ' *' : ''}</span>
-              <input
-                type="text"
-                name="${field.name}"
-                value="${escapeHtml(state.shippingAddress[field.name] || '')}"
-                autocomplete="${field.autocomplete}"
-                placeholder="${escapeHtml(field.label)}"
-              >
-            </label>
-          `).join('')}
-        </form>
-        <div class="orders-inline-note ${isValidPhone(state.shippingAddress.phone) ? 'is-valid' : ''}">
-          <strong>Phone format:</strong> Rwanda numbers are normalized to +250 for admin and delivery records.
-          ${state.shippingAddress.phone ? `<span>${escapeHtml(normalizePhone(state.shippingAddress.phone))}</span>` : ''}
-        </div>
-      </div>
+function renderProgress(activeStage) {
+  ui.progress.innerHTML = steps.map((step, index) => {
+    const activeIndex = steps.findIndex((item) => item.id === activeStage);
+    const tone = index < activeIndex ? 'is-complete' : index === activeIndex ? 'is-active' : '';
+    return `
+      <button type="button" class="orders-progress-step ${tone}" disabled>
+        <span>${index + 1}</span>
+        <strong>${escapeHtml(step.label)}</strong>
+      </button>
     `;
+  }).join('');
+}
 
-    container.querySelectorAll('input[name]').forEach((input) => {
-      input.addEventListener('input', (event) => {
-        const target = event.currentTarget;
-        actions.updateShippingField(target.name, target.value);
-      });
+function renderSidebar(state) {
+  const itemCount = state.products.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+  ui.sidebar.innerHTML = `
+    <section class="orders-sidebar-card">
+      <span class="orders-sidebar-label">Order source</span>
+      <h3>${state.source === 'direct' ? 'Buy Now checkout' : 'Cart checkout'}</h3>
+      <p>${escapeHtml(getResolvedCustomerName())}</p>
+      <p>${escapeHtml(state.shippingAddress.phone ? normalizePhone(state.shippingAddress.phone) : state.customer.phone || '')}</p>
+    </section>
+    <section class="orders-sidebar-card">
+      <div class="orders-sidebar-heading">
+        <h3>Order totals</h3>
+        <span>${itemCount} item${itemCount === 1 ? '' : 's'}</span>
+      </div>
+      <div class="orders-total-row"><span>Subtotal</span><strong>${formatCurrency(state.totals.subtotal)}</strong></div>
+      <div class="orders-total-row"><span>Delivery fee</span><strong>${formatCurrency(state.totals.shippingFee)}</strong></div>
+      <div class="orders-total-row is-total"><span>Total</span><strong>${formatCurrency(state.totals.total)}</strong></div>
+    </section>
+  `;
+}
+
+function syncForm(state) {
+  ui.form.querySelectorAll('[name]').forEach((field) => {
+    const nextValue = state.shippingAddress[field.name] || '';
+    field.value = nextValue;
+  });
+}
+
+function setMessage(message) {
+  ui.message.hidden = !message;
+  ui.message.textContent = message || '';
+}
+
+function bindForm() {
+  ui.form.querySelectorAll('[name]').forEach((field) => {
+    field.addEventListener('input', (event) => {
+      updateShippingDetails({ [event.currentTarget.name]: event.currentTarget.value });
+      renderSidebar(getState());
+      setMessage('');
     });
-  },
-  validate() {
-    return validateShippingStep();
+  });
+
+  ui.form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const formData = new FormData(ui.form);
+    updateShippingDetails(Object.fromEntries(formData.entries()));
+    const validation = validateShippingStage();
+    if (!validation.valid) {
+      setMessage(validation.message);
+      return;
+    }
+
+    setStage('checkout');
+    window.location.assign(getStageUrl('checkout'));
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initializeOrderFlow('shipping');
+  const access = resolveStageAccess('shipping');
+  if (!access.valid) {
+    window.location.assign(access.redirectUrl);
+    return;
   }
-};
+
+  const state = getState();
+  renderProgress('shipping');
+  renderSidebar(state);
+  syncForm(state);
+  bindForm();
+});

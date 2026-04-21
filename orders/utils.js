@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   directCheckout: 'byose_direct_checkout',
   orders: 'byose_orders',
   draft: 'byose_checkout_draft_v1',
+  confirmation: 'byose_checkout_confirmation_v1',
   currentUser: 'bm_current_user',
   legacyUser: 'bm_user',
   storefrontUser: 'byose_market_user',
@@ -52,6 +53,12 @@ export function writeStorage(key, value) {
 
 export function removeStorage(key) {
   window.localStorage.removeItem(key);
+}
+
+export function delay(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
 }
 
 export function formatCurrency(value) {
@@ -247,14 +254,29 @@ export function persistUserAddress(address) {
 }
 
 export function readOrders() {
-  return readStorage(STORAGE_KEYS.orders, []);
+  const orders = readStorage(STORAGE_KEYS.orders, []);
+  return Array.isArray(orders) ? orders : [];
+}
+
+export function readOrderById(orderId) {
+  return readOrders().find((order) => String(order?.id || '') === String(orderId || '')) || null;
 }
 
 export function saveOrder(order) {
   const orders = readOrders();
-  orders.push(order);
-  writeStorage(STORAGE_KEYS.orders, orders);
+  const nextOrders = orders.concat([clone(order)]);
+
+  writeStorage(STORAGE_KEYS.orders, nextOrders);
+  writeStorage('orders', nextOrders);
   window.dispatchEvent(new CustomEvent('byose:orders-changed', { detail: { order } }));
+}
+
+export function saveCheckoutConfirmation(payload) {
+  writeStorage(STORAGE_KEYS.confirmation, payload);
+}
+
+export function readCheckoutConfirmation() {
+  return readStorage(STORAGE_KEYS.confirmation, null);
 }
 
 export function emitCartUpdated() {

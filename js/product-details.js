@@ -8,6 +8,31 @@ const ProductDetail = {
   selectedSize: null,
   quantity: 1,
 
+  startDirectCheckout() {
+    if (!this.selectedColor || !this.selectedSize) {
+      Util.showWarning('Please select color and size');
+      return;
+    }
+
+    const directItem = {
+      id: this.product.id,
+      productId: this.product.id,
+      name: this.product.name,
+      price: this.product.price,
+      image: this.product.image,
+      img: this.product.image,
+      color: this.selectedColor,
+      size: this.selectedSize,
+      qty: this.quantity,
+      total: this.product.price * this.quantity,
+    };
+
+    Util.setToStorage('byose_direct_checkout', directItem);
+    localStorage.removeItem('byose_checkout_draft_v1');
+    localStorage.removeItem('byose_checkout_confirmation_v1');
+    window.location.href = 'orders/shipping.html';
+  },
+
   init() {
     const productId = Util.getUrlParam('id') || 'product1';
     this.loadProduct(productId);
@@ -187,10 +212,7 @@ const ProductDetail = {
 
     // BUY NOW
     document.getElementById('buyNowBtn').addEventListener('click', () => {
-      this.addToCart();
-      setTimeout(() => {
-        window.location.href = 'orders/checkout.html';
-      }, 500);
+      this.startDirectCheckout();
     });
 
     // ADD TO WISHLIST

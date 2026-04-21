@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment | Byose Market Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+  <div class="orders-shell">
+    <header class="orders-header">
+      <div class="orders-header-copy">
+        <span>Admin System / Orders / Payment</span>
+        <h1>Payment</h1>
+        <p>Choose the payment method and payer phone number before the order is processed.</p>
+      </div>
+      <a class="orders-back-link" href="checkout.html">Back to checkout</a>
+    </header>
+
+    <main class="orders-layout">
+      <section class="orders-main">
+        <div class="orders-progress" id="checkoutProgress"></div>
+
+        <article class="orders-panel">
+          <header class="orders-panel-head">
+            <p>Step 3</p>
+            <h2>Payment details</h2>
+            <p>Loading starts only after the customer clicks Place Order on this page.</p>
+          </header>
+
+          <div class="orders-step-message" id="paymentMessage" hidden></div>
+
+          <form id="paymentForm" class="orders-step-stack" novalidate>
+            <div class="orders-choice-grid orders-choice-grid--compact" id="paymentMethodGrid">
+              <label class="orders-choice-card">
+                <input type="radio" name="method" value="mtn">
+                <div>
+                  <strong>MTN Mobile Money</strong>
+                  <p>Pay with MTN MoMo and record the sender phone number below.</p>
+                </div>
+              </label>
+              <label class="orders-choice-card">
+                <input type="radio" name="method" value="airtel">
+                <div>
+                  <strong>Airtel Money</strong>
+                  <p>Use Airtel Money and record the phone number that will be charged.</p>
+                </div>
+              </label>
+            </div>
+
+            <div class="orders-form-grid orders-form-grid--two">
+              <label class="orders-field">
+                <span>Phone Number *</span>
+                <input type="text" name="phone" autocomplete="tel" placeholder="07XXXXXXXX">
+              </label>
+            </div>
+
+            <div class="orders-step-actions">
+              <a class="orders-back-button" href="checkout.html">Back</a>
+              <button type="submit" class="orders-next-button" id="placeOrderButton">Place Order</button>
+            </div>
+          </form>
+        </article>
+      </section>
+
+      <aside class="orders-sidebar" id="checkoutSidebar"></aside>
+    </main>
+  </div>
+
+  <div class="orders-loading" id="checkoutLoading" hidden>
+    <div class="orders-loading-card">
+      <div class="orders-spinner"></div>
+      <strong>Placing order...</strong>
+      <p>The order is being saved to the admin order queue.</p>
+    </div>
+  </div>
+
+  <script src="../services/authservice.js"></script>
+  <script type="module" src="payment.js"></script>
+</body>
+</html>

@@ -2,6 +2,7 @@ import {
   STORAGE_KEYS,
   clone,
   createOrderId,
+  delay,
   emitCartUpdated,
   formatCurrency,
   getUserAddress,
@@ -9,57 +10,54 @@ import {
   normalizePhone,
   persistUserAddress,
   readCartItems,
+  readCheckoutConfirmation,
   readCurrentUser,
+  readOrderById,
   readDirectCheckout,
   readStorage,
   removeStorage,
+  saveCheckoutConfirmation,
   saveOrder,
   writeCartItems,
   writeDirectCheckout,
   writeStorage
 } from './utils.js';
 
-const DELIVERY_OPTIONS = [
-  {
-    id: 'delivery',
-    label: 'Delivery to address',
-    description: 'Ship the full order to the address provided in the shipping step.',
-    fee: 5000
-  },
-  {
-    id: 'pickup',
-    label: 'Store pickup',
-    description: 'Pick up the order directly from the store with no delivery fee.',
-    fee: 0
-  }
-];
+export const CHECKOUT_STAGE_URLS = {
+  shipping: 'shipping.html',
+  checkout: 'checkout.html',
+  payment: 'payment.html',
+  confirmation: 'confirmation.html'
+};
 
-const DEFAULT_ADDRESS = {
+const DELIVERY_FEE = 5000;
+const SUBMISSION_DELAY_MS = 700;
+const listeners = new Set();
+
+const DEFAULT_SHIPPING_ADDRESS = {
+  fullName: '',
   firstName: '',
   lastName: '',
   phone: '',
   city: '',
   district: '',
   sector: '',
+  street: '',
   cell: '',
   village: '',
-  street: ''
+  note: ''
 };
 
 const DEFAULT_PAYMENT = {
-  paymentType: 'pay_now',
-  method: '',
-  payerPhone: '',
-  transactionId: ''
+  paymentType: 'mobile_money',
+  method: 'mtn',
+  phone: ''
 };
-
-const COD_FEE = 2000;
-const listeners = new Set();
 
 const state = {
   initialized: false,
   isSubmitting: false,
-  currentStep: 0,
+  stage: 'shipping',
   source: 'cart',
   products: [],
   customer: {
@@ -69,33 +67,49 @@ const state = {
     phone: '',
     avatar: ''
   },
-  shippingAddress: clone(DEFAULT_ADDRESS),
-  delivery: clone(DELIVERY_OPTIONS[0]),
+  shippingAddress: clone(DEFAULT_SHIPPING_ADDRESS),
   payment: clone(DEFAULT_PAYMENT),
   confirmation: null,
   totals: {
     subtotal: 0,
-    shippingFee: DELIVERY_OPTIONS[0].fee,
+    shippingFee: 0,
     codFee: 0,
-    total: DELIVERY_OPTIONS[0].fee
+    total: 0
   }
 };
 
 function emit(reason) {
   const snapshot = getState();
-  listeners.forEach((listener) => listener(snapshot, reason));
+  listeners.forEach((listener) => {
+    try {
+      listener(snapshot, reason);
+    } catch (error) {
+      console.error('Checkout listener failed:', error);
+    }
+  });
+}
+
+function splitFullName(fullName) {
+  const parts = String(fullName || '').trim().split(/\s+/).filter(Boolean);
+  return {
+    firstName: parts[0] || '',
+    lastName: parts.slice(1).join(' ')
+  };
+}
+
+function joinFullName(firstName, lastName) {
+  return [firstName, lastName].filter(Boolean).join(' ').trim();
 }
 
 function calculateTotals() {
   const subtotal = state.products.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-  const shippingFee = state.products.length ? Number(state.delivery.fee || 0) : 0;
-  const codFee = state.payment.paymentType === 'cod' ? COD_FEE : 0;
+  const shippingFee = state.products.length ? DELIVERY_FEE : 0;
 
   state.totals = {
     subtotal,
     shippingFee,
-    codFee,
-    total: subtotal + shippingFee + codFee
+    codFee: 0,
+    total: subtotal + shippingFee
   };
 }
 
@@ -109,11 +123,28 @@ function buildCustomerState(user) {
   };
 }
 
-function mergeAddress(base, override) {
+function buildShippingState(userAddress, draftAddress, customer) {
+  const merged = {
+    ...clone(DEFAULT_SHIPPING_ADDRESS),
+    ...(userAddress || {}),
+    ...(draftAddress || {})
+  };
+  const inferredName = joinFullName(merged.firstName, merged.lastName) || customer.name || '';
+  const inferredParts = splitFullName(merged.fullName || inferredName);
+
   return {
-    ...clone(DEFAULT_ADDRESS),
-    ...(base || {}),
-    ...(override || {})
+    ...merged,
+    fullName: String(merged.fullName || inferredName).trim(),
+    firstName: String(merged.firstName || inferredParts.firstName).trim(),
+    lastName: String(merged.lastName || inferredParts.lastName).trim(),
+    phone: String(merged.phone || customer.phone || '').trim(),
+    city: String(merged.city || '').trim(),
+    district: String(merged.district || '').trim(),
+    sector: String(merged.sector || '').trim(),
+    street: String(merged.street || merged.line1 || '').trim(),
+    cell: String(merged.cell || '').trim(),
+    village: String(merged.village || '').trim(),
+    note: String(merged.note || '').trim()
   };
 }
 
@@ -128,27 +159,18 @@ function syncProductsToSource() {
 }
 
 function persistDraft() {
-  if (state.currentStep === 5 || !state.products.length) {
+  if (!state.products.length) {
     removeStorage(STORAGE_KEYS.draft);
     return;
   }
 
   writeStorage(STORAGE_KEYS.draft, {
-    currentStep: state.currentStep,
+    stage: state.stage,
     source: state.source,
     shippingAddress: state.shippingAddress,
-    delivery: { id: state.delivery.id },
     payment: state.payment,
     products: state.source === 'direct' ? state.products : []
   });
-}
-
-function ensureValidPaymentType() {
-  if (!isCodAvailable() && state.payment.paymentType === 'cod') {
-    state.payment.paymentType = 'pay_now';
-  }
-
-  calculateTotals();
 }
 
 function initializeProducts(draft) {
@@ -176,37 +198,84 @@ function initializeProducts(draft) {
   state.products = [];
 }
 
-export function initializeCheckoutState() {
-  const user = readCurrentUser();
-  const draft = readStorage(STORAGE_KEYS.draft, null);
-  initializeProducts(draft);
+function normalizeShippingPatch(values) {
+  const next = {
+    ...state.shippingAddress,
+    ...(values || {})
+  };
+  const fullName = values && Object.prototype.hasOwnProperty.call(values, 'fullName')
+    ? values.fullName
+    : next.fullName || joinFullName(next.firstName, next.lastName);
+  const parts = splitFullName(fullName);
 
-  state.customer = buildCustomerState(user);
+  next.fullName = String(fullName || '').trim();
+  next.firstName = String(next.firstName || parts.firstName).trim();
+  next.lastName = String(next.lastName || parts.lastName).trim();
+  next.phone = String(next.phone || '').trim();
+  next.city = String(next.city || '').trim();
+  next.district = String(next.district || '').trim();
+  next.sector = String(next.sector || '').trim();
+  next.street = String(next.street || '').trim();
+  next.note = String(next.note || '').trim();
+  next.cell = String(next.cell || '').trim();
+  next.village = String(next.village || '').trim();
 
-  const userAddress = getUserAddress(user);
-  state.shippingAddress = mergeAddress(userAddress, draft?.shippingAddress);
-  if (!state.shippingAddress.phone && state.customer.phone) {
-    state.shippingAddress.phone = state.customer.phone;
+  return next;
+}
+
+function buildStoredAddress() {
+  return {
+    ...clone(state.shippingAddress),
+    fullName: getResolvedCustomerName(),
+    firstName: state.shippingAddress.firstName,
+    lastName: state.shippingAddress.lastName,
+    phone: normalizePhone(state.shippingAddress.phone)
+  };
+}
+
+function getPaymentLabel(method) {
+  if (method === 'airtel') {
+    return 'Airtel Money';
   }
 
-  const requestedDeliveryId = draft?.delivery?.id;
-  state.delivery = clone(DELIVERY_OPTIONS.find((option) => option.id === requestedDeliveryId) || DELIVERY_OPTIONS[0]);
+  if (method === 'mtn') {
+    return 'MTN Mobile Money';
+  }
 
+  return 'Mobile Money';
+}
+
+function clearCheckoutSource() {
+  if (state.source === 'cart') {
+    writeCartItems([]);
+  } else {
+    removeStorage(STORAGE_KEYS.directCheckout);
+  }
+}
+
+export function initializeOrderFlow(requestedStage = 'shipping') {
+  const user = readCurrentUser();
+  const draft = readStorage(STORAGE_KEYS.draft, null);
+
+  initializeProducts(draft);
+  state.customer = buildCustomerState(user);
+  state.shippingAddress = buildShippingState(getUserAddress(user), draft?.shippingAddress, state.customer);
   state.payment = {
     ...clone(DEFAULT_PAYMENT),
     ...(draft?.payment || {})
   };
-
-  if (!state.payment.payerPhone && state.customer.phone) {
-    state.payment.payerPhone = state.customer.phone;
+  if (!state.payment.phone) {
+    state.payment.phone = state.customer.phone || state.shippingAddress.phone || '';
   }
 
-  state.currentStep = Math.max(0, Math.min(Number(draft?.currentStep || 0), 4));
+  state.stage = Object.prototype.hasOwnProperty.call(CHECKOUT_STAGE_URLS, draft?.stage)
+    ? draft.stage
+    : requestedStage;
   state.confirmation = null;
   state.isSubmitting = false;
   state.initialized = true;
 
-  ensureValidPaymentType();
+  calculateTotals();
   persistDraft();
   emit('initialized');
 }
@@ -220,26 +289,22 @@ export function getState() {
   return clone(state);
 }
 
-export function getDeliveryOptions() {
-  return clone(DELIVERY_OPTIONS);
+export function getStageUrl(stage) {
+  return CHECKOUT_STAGE_URLS[stage] || CHECKOUT_STAGE_URLS.shipping;
 }
 
-export function isCodAvailable() {
-  return state.delivery.id === 'delivery' && String(state.shippingAddress.city || '').trim().toLowerCase() === 'kigali';
-}
+export function setStage(stage) {
+  if (!Object.prototype.hasOwnProperty.call(CHECKOUT_STAGE_URLS, stage)) {
+    return;
+  }
 
-export function setStep(stepIndex) {
-  state.currentStep = Math.max(0, Math.min(stepIndex, state.confirmation ? 5 : 4));
+  state.stage = stage;
   persistDraft();
-  emit('step-changed');
+  emit('stage-changed');
 }
 
-export function nextStep() {
-  setStep(state.currentStep + 1);
-}
-
-export function previousStep() {
-  setStep(state.currentStep - 1);
+export function hasProducts() {
+  return state.products.length > 0;
 }
 
 export function updateProductQuantity(productId, variantKey, quantity) {
@@ -277,110 +342,111 @@ export function removeProduct(productId, variantKey) {
   emit('products-changed');
 }
 
-export function updateShippingField(field, value) {
-  state.shippingAddress = {
-    ...state.shippingAddress,
-    [field]: value
-  };
-
-  ensureValidPaymentType();
+export function updateShippingDetails(values) {
+  state.shippingAddress = normalizeShippingPatch(values);
+  if (!state.payment.phone && state.shippingAddress.phone) {
+    state.payment.phone = state.shippingAddress.phone;
+  }
   persistDraft();
   emit('shipping-changed');
 }
 
-export function selectDeliveryOption(optionId) {
-  state.delivery = clone(DELIVERY_OPTIONS.find((option) => option.id === optionId) || DELIVERY_OPTIONS[0]);
-  ensureValidPaymentType();
-  persistDraft();
-  emit('delivery-changed');
-}
-
-export function updatePaymentField(field, value) {
+export function updatePaymentDetails(values) {
   state.payment = {
     ...state.payment,
-    [field]: value
+    ...(values || {})
   };
+  state.payment.method = String(state.payment.method || 'mtn').trim() || 'mtn';
+  state.payment.phone = String(state.payment.phone || '').trim();
 
-  ensureValidPaymentType();
   persistDraft();
   emit('payment-changed');
 }
 
-export function validateCartStep() {
-  if (!state.products.length) {
-    return { valid: false, message: 'Your cart is empty. Add products before checking out.' };
+export function validateShippingStage() {
+  if (!hasProducts()) {
+    return { valid: false, message: 'Add at least one product before starting checkout.' };
   }
 
-  return { valid: true };
-}
-
-export function validateShippingStep() {
-  const requiredFields = ['firstName', 'lastName', 'phone', 'city', 'district', 'sector', 'cell', 'village'];
-  const missing = requiredFields.find((field) => !String(state.shippingAddress[field] || '').trim());
-  if (missing) {
-    return { valid: false, message: 'Complete all required shipping fields before continuing.' };
+  const shipping = normalizeShippingPatch();
+  const requiredFields = ['fullName', 'phone', 'city', 'district', 'sector', 'street'];
+  const missingField = requiredFields.find((field) => !String(shipping[field] || '').trim());
+  if (missingField) {
+    return { valid: false, message: 'Complete the shipping form before continuing to checkout.' };
   }
 
-  if (!isValidPhone(state.shippingAddress.phone)) {
+  if (!isValidPhone(shipping.phone)) {
     return { valid: false, message: 'Enter a valid Rwanda phone number for delivery updates.' };
   }
 
-  persistUserAddress({
-    ...state.shippingAddress,
-    phone: normalizePhone(state.shippingAddress.phone)
-  });
-
   return { valid: true };
 }
 
-export function validateDeliveryStep() {
-  if (!DELIVERY_OPTIONS.some((option) => option.id === state.delivery.id)) {
-    return { valid: false, message: 'Select a delivery option before continuing.' };
+export function validateCheckoutStage() {
+  if (!hasProducts()) {
+    return { valid: false, message: 'Your order has no products to review.' };
   }
 
-  return { valid: true };
+  return validateShippingStage();
 }
 
-export function validatePaymentStep() {
-  if (state.payment.paymentType === 'cod') {
-    if (!isCodAvailable()) {
-      return { valid: false, message: 'Cash on delivery is only available for Kigali address deliveries.' };
-    }
-
-    return { valid: true };
+export function validatePaymentStage() {
+  const checkoutValidation = validateCheckoutStage();
+  if (!checkoutValidation.valid) {
+    return checkoutValidation;
   }
 
-  if (!state.payment.method) {
-    return { valid: false, message: 'Choose the mobile money method the customer used to pay.' };
+  if (!String(state.payment.method || '').trim()) {
+    return { valid: false, message: 'Choose a payment method before placing the order.' };
   }
 
-  if (!isValidPhone(state.payment.payerPhone)) {
-    return { valid: false, message: 'Enter the payer phone number used for the transaction.' };
+  if (!isValidPhone(state.payment.phone)) {
+    return { valid: false, message: 'Enter the mobile money phone number that will pay for this order.' };
   }
 
   return { valid: true };
 }
 
 export function getResolvedCustomerName() {
-  const shippingName = [state.shippingAddress.firstName, state.shippingAddress.lastName].filter(Boolean).join(' ').trim();
-  return shippingName || state.customer.name || 'Guest Customer';
+  return joinFullName(state.shippingAddress.firstName, state.shippingAddress.lastName)
+    || state.shippingAddress.fullName
+    || state.customer.name
+    || 'Guest Customer';
 }
 
-export function submitOrder() {
-  const shippingValidation = validateShippingStep();
-  if (!shippingValidation.valid) {
-    return shippingValidation;
+export function resolveStageAccess(stage) {
+  if (!hasProducts()) {
+    return {
+      valid: false,
+      redirectUrl: '../shop.html',
+      message: 'No products are available for checkout.'
+    };
   }
 
-  const paymentValidation = validatePaymentStep();
+  if (stage === 'shipping') {
+    return { valid: true };
+  }
+
+  const shippingValidation = validateShippingStage();
+  if (!shippingValidation.valid) {
+    return {
+      valid: false,
+      redirectUrl: getStageUrl('shipping'),
+      message: shippingValidation.message
+    };
+  }
+
+  return { valid: true };
+}
+
+export function buildOrderPayload() {
+  const paymentValidation = validatePaymentStage();
   if (!paymentValidation.valid) {
     return paymentValidation;
   }
 
-  state.isSubmitting = true;
-  emit('submitting-changed');
-
   const customerName = getResolvedCustomerName();
+  const shippingAddress = buildStoredAddress();
   const order = {
     id: createOrderId(),
     date: new Date().toISOString(),
@@ -389,58 +455,127 @@ export function submitOrder() {
     customerId: state.customer.id,
     customerName,
     customerEmail: state.customer.email,
-    customerPhone: normalizePhone(state.shippingAddress.phone || state.customer.phone),
+    customerPhone: normalizePhone(shippingAddress.phone || state.customer.phone),
     customerImage: state.customer.avatar,
     customer: {
       id: state.customer.id,
       name: customerName,
       email: state.customer.email,
-      phone: normalizePhone(state.shippingAddress.phone || state.customer.phone),
+      phone: normalizePhone(shippingAddress.phone || state.customer.phone),
       avatar: state.customer.avatar
     },
-    shippingAddress: {
-      ...clone(state.shippingAddress),
-      phone: normalizePhone(state.shippingAddress.phone)
-    },
+    shippingAddress,
     subtotal: state.totals.subtotal,
     shippingFee: state.totals.shippingFee,
-    codFee: state.totals.codFee,
+    codFee: 0,
     total: state.totals.total,
-    deliveryMethod: state.delivery.id,
-    deliveryLabel: state.delivery.label,
-    paymentType: state.payment.paymentType,
-    paymentMethod: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
+    deliveryMethod: 'delivery',
+    deliveryLabel: 'Standard delivery',
+    paymentType: 'Mobile Money',
+    paymentMethod: state.payment.method,
     payment: {
-      type: state.payment.paymentType,
-      method: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
-      payerPhone: normalizePhone(state.payment.payerPhone),
-      transactionId: String(state.payment.transactionId || '').trim()
+      type: 'mobile_money',
+      method: state.payment.method,
+      payerPhone: normalizePhone(state.payment.phone)
     },
-    status: state.payment.paymentType === 'cod' ? 'Pending Delivery (COD)' : 'Pending Payment Verification'
+    status: 'Pending'
   };
 
-  saveOrder(order);
-  persistUserAddress(order.shippingAddress);
+  return { valid: true, order, customerName };
+}
 
-  if (state.source === 'cart') {
-    writeCartItems([]);
-  } else {
-    removeStorage(STORAGE_KEYS.directCheckout);
+export async function submitOrder() {
+  if (state.isSubmitting) {
+    return { valid: false, message: 'Order submission is already in progress.' };
   }
 
-  removeStorage(STORAGE_KEYS.draft);
-  emitCartUpdated();
+  try {
+    const prepared = buildOrderPayload();
+    if (!prepared.valid) {
+      return prepared;
+    }
 
-  state.confirmation = {
+    const { order, customerName } = prepared;
+
+    state.isSubmitting = true;
+    emit('submitting-changed');
+
+    saveOrder(order);
+    persistUserAddress(order.shippingAddress);
+    clearCheckoutSource();
+    removeStorage(STORAGE_KEYS.draft);
+    emitCartUpdated();
+
+    const confirmation = {
+      orderId: order.id,
+      customerName,
+      customerPhone: order.customerPhone,
+      total: order.total,
+      subtotal: order.subtotal,
+      shippingFee: order.shippingFee,
+      codFee: 0,
+      placedAt: order.date,
+      status: order.status,
+      products: clone(order.products),
+      shippingAddress: clone(order.shippingAddress),
+      deliveryLabel: order.deliveryLabel,
+      paymentLabel: getPaymentLabel(order.paymentMethod),
+      paymentType: order.paymentType,
+      paymentMethod: order.paymentMethod
+    };
+
+    saveCheckoutConfirmation(confirmation);
+    state.confirmation = confirmation;
+
+    await delay(SUBMISSION_DELAY_MS);
+
+    return {
+      valid: true,
+      order,
+      confirmation,
+      redirectUrl: `${getStageUrl('confirmation')}?orderId=${encodeURIComponent(order.id)}`,
+      message: `${customerName} order placed for ${formatCurrency(order.total)}.`
+    };
+  } catch (error) {
+    console.error('Checkout submission failed:', error);
+    return {
+      valid: false,
+      message: 'Unable to complete the order right now. Please try again.'
+    };
+  } finally {
+    if (state.isSubmitting) {
+      state.isSubmitting = false;
+      emit('submitting-changed');
+    }
+  }
+}
+
+export function getConfirmationState(orderId) {
+  const savedConfirmation = state.confirmation || readCheckoutConfirmation();
+  if (savedConfirmation && (!orderId || String(savedConfirmation.orderId) === String(orderId))) {
+    return clone(savedConfirmation);
+  }
+
+  const order = readOrderById(orderId);
+  if (!order) {
+    return null;
+  }
+
+  return {
     orderId: order.id,
-    customerName,
-    total: state.totals.total,
-    placedAt: order.date,
-    status: order.status
+    customerName: order.customerName || order.customer?.name || 'Customer',
+    customerPhone: order.customerPhone || order.customer?.phone || order.shippingAddress?.phone || '',
+    total: order.total || 0,
+    subtotal: order.subtotal || 0,
+    shippingFee: order.shippingFee || 0,
+    codFee: order.codFee || 0,
+    placedAt: order.date || order.createdAt || new Date().toISOString(),
+    status: order.status || 'Pending',
+    products: clone(order.products || []),
+    shippingAddress: clone(order.shippingAddress || {}),
+    deliveryLabel: order.deliveryLabel || order.deliveryMethod || 'Standard delivery',
+    paymentLabel: getPaymentLabel(order.paymentMethod),
+    paymentType: order.paymentType || 'Mobile Money',
+    paymentMethod: order.paymentMethod || 'mtn'
   };
-  state.currentStep = 5;
-  state.isSubmitting = false;
-  emit('order-submitted');
-
-  return { valid: true, order, message: `${customerName} order placed for ${formatCurrency(state.totals.total)}.` };
 }

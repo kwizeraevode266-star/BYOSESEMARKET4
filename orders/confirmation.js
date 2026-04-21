@@ -1,44 +1,104 @@
 import { escapeHtml, formatCurrency } from './utils.js';
+import { getConfirmationState } from './state.js';
 
-export const confirmationStep = {
-  id: 'confirmation',
-  title: 'Order confirmed',
-  description: 'The order is now available to the admin system and the storefront cart has been updated.',
-  render(container, context) {
-    const { state } = context;
-    const confirmation = state.confirmation;
+function renderProducts(products) {
+  return (products || []).map((item) => `
+    <div class="orders-summary-product">
+      <img src="${escapeHtml(item.image || item.img || '')}" alt="${escapeHtml(item.name || 'Product')}">
+      <div>
+        <strong>${escapeHtml(item.name || 'Product')}</strong>
+        <p>${escapeHtml(item.attributeSummary || 'Standard option')}</p>
+        <span>${Number(item.qty || 0)} x ${formatCurrency(item.price || 0)}</span>
+      </div>
+      <strong>${formatCurrency(item.total || ((Number(item.qty || 0) || 0) * (Number(item.price || 0) || 0)))}</strong>
+    </div>
+  `).join('');
+}
 
-    container.innerHTML = `
-      <div class="orders-confirmation">
-        <div class="orders-confirmation-badge">Order sent to admin</div>
-        <h2>Checkout completed</h2>
-        <p>${escapeHtml(confirmation?.customerName || 'Customer')} order has been saved successfully.</p>
-        <div class="orders-confirmation-grid">
-          <div>
-            <span>Order ID</span>
-            <strong>${escapeHtml(confirmation?.orderId || '')}</strong>
-          </div>
-          <div>
-            <span>Total</span>
-            <strong>${formatCurrency(confirmation?.total || 0)}</strong>
-          </div>
-          <div>
-            <span>Status</span>
-            <strong>${escapeHtml(confirmation?.status || 'Pending')}</strong>
-          </div>
-          <div>
-            <span>Placed at</span>
-            <strong>${escapeHtml(new Date(confirmation?.placedAt || Date.now()).toLocaleString())}</strong>
-          </div>
+function renderAddress(address) {
+  return [
+    [address?.firstName, address?.lastName].filter(Boolean).join(' '),
+    address?.phone,
+    [address?.city, address?.district, address?.sector, address?.cell, address?.village, address?.street].filter(Boolean).join(', ')
+  ].filter(Boolean).map((line) => `<p>${escapeHtml(line)}</p>`).join('');
+}
+
+function renderConfirmation(confirmation) {
+  return `
+    <div class="orders-confirmation">
+      <div class="orders-confirmation-badge">Order sent to admin</div>
+      <h2>Order placed successfully</h2>
+      <p>${escapeHtml(confirmation.customerName || 'Customer')} order is saved and visible to the admin orders system.</p>
+      <div class="orders-confirmation-grid">
+        <div>
+          <span>Order ID</span>
+          <strong>${escapeHtml(confirmation.orderId || '')}</strong>
         </div>
+        <div>
+          <span>Total</span>
+          <strong>${formatCurrency(confirmation.total || 0)}</strong>
+        </div>
+        <div>
+          <span>Status</span>
+          <strong>${escapeHtml(confirmation.status || 'Pending')}</strong>
+        </div>
+        <div>
+          <span>Placed at</span>
+          <strong>${escapeHtml(new Date(confirmation.placedAt || Date.now()).toLocaleString())}</strong>
+        </div>
+      </div>
+      <div class="orders-step-stack">
+        <section class="orders-review-card">
+          <h3>Delivery info</h3>
+          ${renderAddress(confirmation.shippingAddress || {})}
+          <p><strong>Method:</strong> ${escapeHtml(confirmation.deliveryLabel || 'Delivery')}</p>
+          <p><strong>Payment:</strong> ${escapeHtml(confirmation.paymentLabel || 'Payment pending')}</p>
+        </section>
+        <section class="orders-review-card">
+          <h3>Order summary</h3>
+          <div class="orders-summary-product-list">
+            ${renderProducts(confirmation.products)}
+          </div>
+          <div class="orders-step-stack">
+            <div class="orders-total-row"><span>Subtotal</span><strong>${formatCurrency(confirmation.subtotal || 0)}</strong></div>
+            <div class="orders-total-row"><span>Shipping</span><strong>${formatCurrency(confirmation.shippingFee || 0)}</strong></div>
+            ${(confirmation.codFee || 0) > 0 ? `<div class="orders-total-row"><span>COD fee</span><strong>${formatCurrency(confirmation.codFee || 0)}</strong></div>` : ''}
+            <div class="orders-total-row is-total"><span>Total</span><strong>${formatCurrency(confirmation.total || 0)}</strong></div>
+          </div>
+        </section>
+      </div>
+      <div class="orders-confirmation-actions">
+        <a class="orders-link-button" href="../index.html">Go Home</a>
+        <a class="orders-secondary-link" href="../admin/orders/index.html">View Orders</a>
+      </div>
+    </div>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const orderId = params.get('orderId');
+  const confirmation = getConfirmationState(orderId);
+  const root = document.getElementById('confirmationContent');
+
+  if (!root) {
+    return;
+  }
+
+  if (!confirmation) {
+    root.innerHTML = `
+      <div class="orders-confirmation">
+        <h2>No confirmation found</h2>
+        <p>The order summary could not be loaded. Return to checkout and try again.</p>
         <div class="orders-confirmation-actions">
-          <a class="orders-link-button" href="../shop.html">Continue shopping</a>
-          <a class="orders-secondary-link" href="../admin/orders.html">Open admin orders</a>
+          <a class="orders-link-button" href="shipping.html">Back to checkout</a>
+          <a class="orders-secondary-link" href="../index.html">Go Home</a>
         </div>
       </div>
     `;
-  },
-  validate() {
-    return { valid: true };
+    return;
   }
-};
+
+  document.title = `Order ${confirmation.orderId} | Byose Market`;
+  root.innerHTML = renderConfirmation(confirmation);
+});

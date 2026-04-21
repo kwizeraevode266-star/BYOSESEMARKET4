@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmation | Byose Market</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+  <div class="orders-shell">
+    <header class="orders-header">
+      <div class="orders-header-copy">
+        <span>Admin System / Orders / Confirmation</span>
+        <h1>Order confirmation</h1>
+        <p>The order is saved, synced to admin storage, and ready for fulfillment review.</p>
+      </div>
+      <a class="orders-back-link" href="../shop.html">Back to shop</a>
+    </header>
+
+    <main class="orders-layout">
+      <section class="orders-main">
+        <article class="orders-panel">
+          <div id="confirmationContent"></div>
+        </article>
+      </section>
+
+      <aside class="orders-sidebar">
+        <section class="orders-sidebar-card orders-sidebar-card--muted">
+          <span class="orders-sidebar-label">Admin visibility</span>
+          <p>Orders saved here use the same localStorage structure already read by the admin dashboard and customer services.</p>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="confirmation.js"></script>
+</body>
+</html>
