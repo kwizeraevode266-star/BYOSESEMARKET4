@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout | Byose Market Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="checkout.css">
+</head>
+<body>
+  <div class="orders-shell">
+    <header class="orders-header">
+      <div class="orders-header-copy">
+        <span>Admin System / Orders / Checkout</span>
+        <h1>Structured checkout flow</h1>
+        <p>Cart, shipping, delivery, payment, summary, and confirmation are now handled as separate modules with shared state.</p>
+      </div>
+      <a class="orders-back-link" href="../cart.html">Back to cart</a>
+    </header>
+
+    <main class="orders-layout">
+      <section class="orders-main">
+        <div class="orders-progress" id="checkoutProgress"></div>
+
+        <article class="orders-panel">
+          <header class="orders-panel-head">
+            <p id="stepNumber">Step 1</p>
+            <h2 id="stepTitle">Review cart</h2>
+            <p id="stepDescription">Confirm the products, quantities, and variants before capturing delivery details.</p>
+          </header>
+
+          <div class="orders-step-message" id="stepMessage" hidden></div>
+          <div id="stepContent"></div>
+
+          <footer class="orders-step-actions">
+            <button type="button" class="orders-back-button" id="backButton">Back</button>
+            <button type="button" class="orders-next-button" id="nextButton">Continue</button>
+          </footer>
+        </article>
+      </section>
+
+      <aside class="orders-sidebar" id="checkoutSidebar"></aside>
+    </main>
+  </div>
+
+  <div class="orders-loading" id="checkoutLoading" hidden>
+    <div class="orders-loading-card">
+      <div class="orders-spinner"></div>
+      <strong>Placing order...</strong>
+      <p>The admin order queue is being updated.</p>
+    </div>
+  </div>
+
+  <script src="../services/authservice.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        if (typeof authService !== 'undefined' && !authService.isLoggedIn()) {
+          window.location.href = '../login.html';
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    });
+  </script>
+  <script type="module" src="checkout.js"></script>
+</body>
+</html>

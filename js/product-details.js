@@ -189,7 +189,7 @@ const ProductDetail = {
     document.getElementById('buyNowBtn').addEventListener('click', () => {
       this.addToCart();
       setTimeout(() => {
-        window.location.href = 'checkout.html';
+        window.location.href = 'orders/checkout.html';
       }, 500);
     });
 

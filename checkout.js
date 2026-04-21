@@ -260,6 +260,35 @@ function saveAddress() {
   document.getElementById("editAddressBtn").style.display = "inline-block";
 }
 
+function readCurrentCustomer() {
+  try {
+    if (window.authService && typeof window.authService.getCurrentUser === "function") {
+      return window.authService.getCurrentUser() || null;
+    }
+  } catch (error) {
+    console.error(error);
+  }
+
+  try {
+    return JSON.parse(localStorage.getItem("bm_current_user") || localStorage.getItem("bm_user") || "null");
+  } catch (error) {
+    return null;
+  }
+}
+
+function readShippingAddress() {
+  return {
+    firstName: (document.getElementById("firstName")?.value || "").trim(),
+    lastName: (document.getElementById("lastName")?.value || "").trim(),
+    phone: (document.getElementById("phone")?.value || "").trim(),
+    city: (document.getElementById("city")?.value || "").trim(),
+    district: (document.getElementById("district")?.value || "").trim(),
+    sector: (document.getElementById("sector")?.value || "").trim(),
+    cell: (document.getElementById("cell")?.value || "").trim(),
+    village: (document.getElementById("village")?.value || "").trim()
+  };
+}
+
 function editAddress() {
   document.getElementById("shippingForm").classList.remove("hidden");
   document.getElementById("shippingDisplay").classList.add("hidden");
@@ -334,11 +363,27 @@ function placeOrder() {
 
     const subtotal = calculateSubtotal();
     const total = subtotal + shippingFee + codFee;
+      const currentCustomer = readCurrentCustomer();
+      const shippingAddress = readShippingAddress();
+      const customerName = [shippingAddress.firstName, shippingAddress.lastName].filter(Boolean).join(" ") || currentCustomer?.name || "Guest Customer";
 
     const orderData = {
       id: "ORD-" + Date.now(),
       date: new Date().toISOString(),
       products: cart,
+        customerId: currentCustomer?.id || "",
+        customerName,
+        customerEmail: currentCustomer?.email || "",
+        customerPhone: shippingAddress.phone || currentCustomer?.phone || "",
+        customerImage: currentCustomer?.avatar || "",
+        customer: {
+          id: currentCustomer?.id || "",
+          name: customerName,
+          email: currentCustomer?.email || "",
+          phone: shippingAddress.phone || currentCustomer?.phone || "",
+          avatar: currentCustomer?.avatar || ""
+        },
+        shippingAddress,
       subtotal,
       shippingFee,
       codFee,
@@ -374,4 +419,5 @@ function saveOrder(order) {
   let orders = JSON.parse(localStorage.getItem("byose_orders")) || [];
   orders.push(order);
   localStorage.setItem("byose_orders", JSON.stringify(orders));
+	window.dispatchEvent(new CustomEvent("byose:orders-changed", { detail: { order } }));
 }

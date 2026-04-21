@@ -280,7 +280,7 @@
 
     $('.kcart-close', panel).addEventListener('click', close);
     $('.kcart-checkout', panel).addEventListener('click', () => {
-      window.location.href = (window.KCart && KCart.checkoutUrl) || 'checkout.html';
+      window.location.href = (window.KCart && KCart.checkoutUrl) || 'orders/checkout.html';
     });
   }
 
@@ -393,7 +393,7 @@
     render,
     renderCount,
     openWhatsAppOrder,
-    checkoutUrl: 'checkout.html',
+    checkoutUrl: 'orders/checkout.html',
     load
   };
 

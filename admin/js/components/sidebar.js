@@ -272,6 +272,18 @@
 			});
 		});
 
+		const activeButton = buttons.find((button) => button.classList.contains('is-active'));
+		if (activeButton) {
+			const controls = activeButton.getAttribute('aria-controls');
+			const panel = controls ? document.getElementById(controls) : null;
+			closeAllSections(activeButton);
+			activeButton.setAttribute('aria-expanded', 'true');
+			if (panel) {
+				panel.classList.add('is-open');
+			}
+			return;
+		}
+
 		closeAllSections();
 	}
 

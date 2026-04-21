@@ -115,7 +115,7 @@ export function initProductActions(options) {
       );
 
       if (action === 'buy') {
-        window.location.href = '../checkout.html';
+        window.location.href = '../orders/checkout.html';
       }
     }
   });
@@ -153,7 +153,7 @@ export function initProductActions(options) {
     );
 
     if (action === 'buy') {
-      window.location.href = '../checkout.html';
+      window.location.href = '../orders/checkout.html';
     }
   }
 

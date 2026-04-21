@@ -787,7 +787,7 @@
 
     closeModal();
 
-    window.location.href = "checkout.html";
+    window.location.href = "orders/checkout.html";
 
   } catch (e) {
     console.error("Buy now error:", e);

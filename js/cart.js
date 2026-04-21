@@ -352,7 +352,7 @@ const Cart = {
       Util.showWarning('Your cart is empty!');
       return;
     }
-    window.location.href = 'checkout.html';
+    window.location.href = 'orders/checkout.html';
   },
 
   getItemCount() {

@@ -232,6 +232,9 @@ function bindLogin() {
                 if (err === 'user_not_found') {
                     setFieldState(isEmailMode() ? emailInput : phoneInput, 'error', 'Nta account ibonetse kuri ibyo winjije.');
                     showError('Nta account ibonetse kuri email cyangwa telefone winjije.');
+                } else if (err === 'account_blocked') {
+                    setFieldState(isEmailMode() ? emailInput : phoneInput, 'error', 'Iyi account yahagaritswe n\'ubuyobozi.');
+                    showError('Iyi account yahagaritswe. Saba ubufasha bwa support niba utekereza ko ari ikosa.');
                 } else if (err === 'invalid_password') {
                     setFieldState(passwordInputLogin, 'error', 'Password wanditse si yo.');
                     showError('Password si yo. Ongera ugerageze.');

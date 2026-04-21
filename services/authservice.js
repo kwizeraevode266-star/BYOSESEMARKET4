@@ -96,7 +96,17 @@ const authService = (function () {
             phone: user.phone || '',
             password: String(user.password),
             avatar,
-            createdAt
+                createdAt,
+                status: 'active',
+                verified: false,
+                address: {
+                    line1: '',
+                    city: '',
+                    district: '',
+                    sector: '',
+                    cell: '',
+                    village: ''
+                }
         };
 
         users.push(newUser);
@@ -116,6 +126,7 @@ const authService = (function () {
         const user = users.find(u => (u.email && u.email.toLowerCase() === id) || (u.phone && u.phone === id));
 
         if (!user) return { success: false, error: 'user_not_found' };
+	        if (String(user.status || 'active').toLowerCase() === 'blocked') return { success: false, error: 'account_blocked' };
         if (user.password && user.password !== String(password)) return { success: false, error: 'invalid_password' };
 
         _setCurrent(user);
