@@ -39,13 +39,19 @@ const DEFAULT_SHIPPING_ADDRESS = {
   firstName: '',
   lastName: '',
   phone: '',
+  provinceCity: '',
   city: '',
   district: '',
   sector: '',
-  street: '',
   cell: '',
   village: '',
-  note: ''
+  street: '',
+  note: '',
+  latitude: '',
+  longitude: '',
+  mapLink: '',
+  locationAccuracy: '',
+  locationCapturedAt: ''
 };
 
 const DEFAULT_PAYMENT = {
@@ -138,13 +144,19 @@ function buildShippingState(userAddress, draftAddress, customer) {
     firstName: String(merged.firstName || inferredParts.firstName).trim(),
     lastName: String(merged.lastName || inferredParts.lastName).trim(),
     phone: String(merged.phone || customer.phone || '').trim(),
-    city: String(merged.city || '').trim(),
+    provinceCity: String(merged.provinceCity || merged.city || '').trim(),
+    city: String(merged.city || merged.provinceCity || '').trim(),
     district: String(merged.district || '').trim(),
     sector: String(merged.sector || '').trim(),
-    street: String(merged.street || merged.line1 || '').trim(),
     cell: String(merged.cell || '').trim(),
     village: String(merged.village || '').trim(),
-    note: String(merged.note || '').trim()
+    street: String(merged.street || merged.streetLandmark || merged.line1 || '').trim(),
+    note: String(merged.note || '').trim(),
+    latitude: String(merged.latitude || '').trim(),
+    longitude: String(merged.longitude || '').trim(),
+    mapLink: String(merged.mapLink || '').trim(),
+    locationAccuracy: String(merged.locationAccuracy || '').trim(),
+    locationCapturedAt: String(merged.locationCapturedAt || '').trim()
   };
 }
 
@@ -212,13 +224,19 @@ function normalizeShippingPatch(values) {
   next.firstName = String(next.firstName || parts.firstName).trim();
   next.lastName = String(next.lastName || parts.lastName).trim();
   next.phone = String(next.phone || '').trim();
-  next.city = String(next.city || '').trim();
+  next.provinceCity = String(next.provinceCity || next.city || '').trim();
+  next.city = String(next.city || next.provinceCity || '').trim();
   next.district = String(next.district || '').trim();
   next.sector = String(next.sector || '').trim();
-  next.street = String(next.street || '').trim();
-  next.note = String(next.note || '').trim();
   next.cell = String(next.cell || '').trim();
   next.village = String(next.village || '').trim();
+  next.street = String(next.street || next.streetLandmark || '').trim();
+  next.note = String(next.note || '').trim();
+  next.latitude = String(next.latitude || '').trim();
+  next.longitude = String(next.longitude || '').trim();
+  next.mapLink = String(next.mapLink || '').trim();
+  next.locationAccuracy = String(next.locationAccuracy || '').trim();
+  next.locationCapturedAt = String(next.locationCapturedAt || '').trim();
 
   return next;
 }
@@ -229,7 +247,11 @@ function buildStoredAddress() {
     fullName: getResolvedCustomerName(),
     firstName: state.shippingAddress.firstName,
     lastName: state.shippingAddress.lastName,
-    phone: normalizePhone(state.shippingAddress.phone)
+    phone: normalizePhone(state.shippingAddress.phone),
+    provinceCity: state.shippingAddress.provinceCity || state.shippingAddress.city,
+    city: state.shippingAddress.city || state.shippingAddress.provinceCity,
+    street: state.shippingAddress.street,
+    streetLandmark: state.shippingAddress.street
   };
 }
 
@@ -369,7 +391,7 @@ export function validateShippingStage() {
   }
 
   const shipping = normalizeShippingPatch();
-  const requiredFields = ['fullName', 'phone', 'city', 'district', 'sector', 'street'];
+  const requiredFields = ['fullName', 'phone', 'provinceCity', 'district', 'sector', 'cell', 'village', 'street'];
   const missingField = requiredFields.find((field) => !String(shipping[field] || '').trim());
   if (missingField) {
     return { valid: false, message: 'Complete the shipping form before continuing to checkout.' };

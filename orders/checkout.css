@@ -440,6 +440,18 @@ img {
   font-weight: 700;
 }
 
+.orders-field-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  line-height: 1.45;
+}
+
+.orders-field-label strong {
+  color: var(--orders-accent-dark);
+}
+
 .orders-field--full {
   grid-column: 1 / -1;
 }
@@ -464,6 +476,61 @@ img {
   color: var(--orders-text);
   resize: vertical;
   font: inherit;
+}
+
+.orders-location-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+  border-radius: var(--orders-radius-lg);
+  border: 1px solid rgba(217, 93, 57, 0.18);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 247, 237, 0.96) 100%);
+}
+
+.orders-location-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orders-location-copy h3,
+.orders-location-copy p {
+  margin: 0;
+}
+
+.orders-location-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.orders-location-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(217, 93, 57, 0.1);
+  color: var(--orders-accent-dark);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.orders-location-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.orders-map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--orders-accent-dark);
+  font-weight: 800;
 }
 
 .orders-field input:focus {
@@ -692,6 +759,15 @@ img {
   .orders-shell--shipping .orders-field textarea {
     font-size: 1rem;
     padding: 16px 18px;
+  }
+
+  .orders-shell--shipping .orders-location-card {
+    flex-direction: column;
+  }
+
+  .orders-shell--shipping .orders-location-actions {
+    width: 100%;
+    min-width: 0;
   }
 
   .orders-shell--shipping .orders-step-actions {

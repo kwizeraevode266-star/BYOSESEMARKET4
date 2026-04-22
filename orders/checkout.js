@@ -51,9 +51,11 @@ function renderSidebar(state) {
       <h3>${escapeHtml(getResolvedCustomerName())}</h3>
       <p>${escapeHtml(state.shippingAddress.phone || state.customer.phone || '')}</p>
       <p>${escapeHtml([
-        state.shippingAddress.city,
+        state.shippingAddress.provinceCity || state.shippingAddress.city,
         state.shippingAddress.district,
         state.shippingAddress.sector,
+        state.shippingAddress.cell,
+        state.shippingAddress.village,
         state.shippingAddress.street
       ].filter(Boolean).join(', '))}</p>
     </section>
@@ -88,12 +90,15 @@ function renderProducts(state) {
         <p>${escapeHtml(getResolvedCustomerName())}</p>
         <p>${escapeHtml(state.shippingAddress.phone || '')}</p>
         <p>${escapeHtml([
-          state.shippingAddress.city,
+          state.shippingAddress.provinceCity || state.shippingAddress.city,
           state.shippingAddress.district,
           state.shippingAddress.sector,
+          state.shippingAddress.cell,
+          state.shippingAddress.village,
           state.shippingAddress.street
         ].filter(Boolean).join(', '))}</p>
         ${state.shippingAddress.note ? `<p>${escapeHtml(state.shippingAddress.note)}</p>` : ''}
+        ${state.shippingAddress.mapLink ? `<p><a class="orders-map-link" href="${escapeHtml(state.shippingAddress.mapLink)}" target="_blank" rel="noreferrer noopener">Open Google Maps</a></p>` : ''}
       </section>
       <div class="orders-cart-list">
         ${state.products.map((item) => `

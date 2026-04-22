@@ -169,15 +169,23 @@
 				: record || {};
 
 		return {
+			fullName: String(source.fullName || [source.firstName, source.lastName].filter(Boolean).join(" ") || "").trim(),
 			firstName: String(source.firstName || "").trim(),
 			lastName: String(source.lastName || "").trim(),
 			phone: normalizePhone(source.phone || record?.customerPhone || ""),
-			street: String(source.street || source.line1 || "").trim(),
-			city: String(source.city || "").trim(),
+			street: String(source.street || source.streetLandmark || source.line1 || "").trim(),
+			provinceCity: String(source.provinceCity || source.city || "").trim(),
+			city: String(source.city || source.provinceCity || "").trim(),
 			district: String(source.district || "").trim(),
 			sector: String(source.sector || "").trim(),
 			cell: String(source.cell || "").trim(),
-			village: String(source.village || "").trim()
+			village: String(source.village || "").trim(),
+			note: String(source.note || "").trim(),
+			latitude: String(source.latitude || "").trim(),
+			longitude: String(source.longitude || "").trim(),
+			mapLink: String(source.mapLink || "").trim(),
+			locationAccuracy: String(source.locationAccuracy || "").trim(),
+			locationCapturedAt: String(source.locationCapturedAt || "").trim()
 		};
 	}
 

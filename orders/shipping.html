@@ -19,7 +19,7 @@
           <header class="orders-panel-head">
             <p>Step 1</p>
             <h2>Shipping location</h2>
-            <p>Save the customer destination, then continue to the order review page.</p>
+            <p>Capture the Rwanda delivery address and GPS location, then continue to the order review page.</p>
           </header>
 
           <div class="orders-step-message" id="shippingMessage" hidden></div>
@@ -27,34 +27,56 @@
           <form id="shippingForm" class="orders-step-stack" novalidate>
             <div class="orders-form-grid">
               <label class="orders-field orders-field--full">
-                <span>Full Name *</span>
+                <span class="orders-field-label">Amazina / Full Name <strong>*</strong></span>
                 <input type="text" name="fullName" autocomplete="name" placeholder="Customer full name">
               </label>
               <label class="orders-field">
-                <span>Phone Number *</span>
-                <input type="text" name="phone" autocomplete="tel" placeholder="07XXXXXXXX">
+                <span class="orders-field-label">Telefoni / Phone Number <strong>*</strong></span>
+                <input type="tel" name="phone" autocomplete="tel" inputmode="tel" placeholder="07XXXXXXXX">
               </label>
               <label class="orders-field">
-                <span>District / City *</span>
-                <input type="text" name="city" autocomplete="address-level2" placeholder="Kigali">
+                <span class="orders-field-label">Intara cyangwa Umujyi / Province or City <strong>*</strong></span>
+                <input type="text" name="provinceCity" autocomplete="address-level1" placeholder="Kigali City">
               </label>
               <label class="orders-field">
-                <span>District *</span>
+                <span class="orders-field-label">Akarere / District <strong>*</strong></span>
                 <input type="text" name="district" autocomplete="address-level1" placeholder="Gasabo">
               </label>
               <label class="orders-field">
-                <span>Sector *</span>
+                <span class="orders-field-label">Umurenge / Sector <strong>*</strong></span>
                 <input type="text" name="sector" autocomplete="address-level3" placeholder="Kimironko">
               </label>
-              <label class="orders-field orders-field--full">
-                <span>Street *</span>
-                <input type="text" name="street" autocomplete="street-address" placeholder="Street or landmark">
+              <label class="orders-field">
+                <span class="orders-field-label">Akagari / Cell <strong>*</strong></span>
+                <input type="text" name="cell" autocomplete="off" placeholder="Bibare">
+              </label>
+              <label class="orders-field">
+                <span class="orders-field-label">Umudugudu / Village <strong>*</strong></span>
+                <input type="text" name="village" autocomplete="off" placeholder="Village name">
               </label>
               <label class="orders-field orders-field--full">
-                <span>Optional Note</span>
+                <span class="orders-field-label">Umuhanda cyangwa Ikimenyetso / Street or Landmark <strong>*</strong></span>
+                <input type="text" name="street" autocomplete="street-address" placeholder="Street, building, or landmark">
+              </label>
+              <label class="orders-field orders-field--full">
+                <span class="orders-field-label">Ibisobanuro by’inyongera / Optional Note</span>
                 <textarea name="note" rows="4" placeholder="Delivery note, nearby landmark, or contact instruction"></textarea>
               </label>
             </div>
+
+            <section class="orders-location-card" aria-live="polite">
+              <div class="orders-location-copy">
+                <span class="orders-sidebar-label">GPS location</span>
+                <h3>Capture device location</h3>
+                <p id="locationStatus">We will ask for permission and store a Google Maps link with the order.</p>
+                <div class="orders-location-meta" id="locationMeta"></div>
+                <a class="orders-map-link" id="locationMapLink" href="#" target="_blank" rel="noreferrer noopener" hidden>Open Google Maps</a>
+              </div>
+              <div class="orders-location-actions">
+                <button type="button" class="orders-link-button" id="detectLocationBtn">Use Current Location</button>
+                <button type="button" class="orders-back-button" id="refreshLocationBtn">Refresh GPS</button>
+              </div>
+            </section>
 
             <div class="orders-step-actions">
               <a class="orders-back-button" href="../cart.html">Back</a>

@@ -30,15 +30,33 @@
 	}
 
 	function renderAddress(address) {
-		const lines = [
-			[address?.firstName, address?.lastName].filter(Boolean).join(" "),
-			address?.phone,
-			[address?.city, address?.district, address?.sector, address?.cell, address?.village, address?.street].filter(Boolean).join(", ")
-		].filter(Boolean);
+		const rows = [
+			["Customer", address?.fullName || [address?.firstName, address?.lastName].filter(Boolean).join(" ")],
+			["Phone", address?.phone],
+			["Province / City", address?.provinceCity || address?.city],
+			["District", address?.district],
+			["Sector", address?.sector],
+			["Cell", address?.cell],
+			["Village", address?.village],
+			["Street / Landmark", address?.street],
+			["Optional note", address?.note],
+			["GPS coordinates", address?.latitude && address?.longitude ? `${address.latitude}, ${address.longitude}` : ""],
+			["Location accuracy", address?.locationAccuracy ? `${address.locationAccuracy} m` : ""],
+			["Captured at", address?.locationCapturedAt ? new Date(address.locationCapturedAt).toLocaleString() : ""]
+		].filter(([, value]) => Boolean(value));
 
-		return lines.length
-			? lines.map((line) => `<p>${service.escapeHtml(line)}</p>`).join("")
-			: '<p class="orders-empty-state">No delivery address recorded.</p>';
+		if (!rows.length && !address?.mapLink) {
+			return '<p class="orders-empty-state">No delivery address recorded.</p>';
+		}
+
+		return `
+			<div class="orders-review-grid">
+				${rows.map(([label, value]) => `
+					<div><span>${service.escapeHtml(label)}</span><strong>${service.escapeHtml(value)}</strong></div>
+				`).join("")}
+			</div>
+			${address?.mapLink ? `<p><a class="orders-secondary-link" href="${service.escapeHtml(address.mapLink)}" target="_blank" rel="noreferrer noopener">Open Google Maps location</a></p>` : ""}
+		`;
 	}
 
 	function renderProducts(order) {

@@ -16,11 +16,23 @@ function renderProducts(products) {
 }
 
 function renderAddress(address) {
-  return [
-    [address?.firstName, address?.lastName].filter(Boolean).join(' '),
-    address?.phone,
-    [address?.city, address?.district, address?.sector, address?.cell, address?.village, address?.street].filter(Boolean).join(', ')
-  ].filter(Boolean).map((line) => `<p>${escapeHtml(line)}</p>`).join('');
+  const rows = [
+    ['Recipient', [address?.firstName, address?.lastName].filter(Boolean).join(' ') || address?.fullName],
+    ['Phone', address?.phone],
+    ['Province / City', address?.provinceCity || address?.city],
+    ['District', address?.district],
+    ['Sector', address?.sector],
+    ['Cell', address?.cell],
+    ['Village', address?.village],
+    ['Street / Landmark', address?.street],
+    ['Note', address?.note],
+    ['GPS', address?.latitude && address?.longitude ? `${address.latitude}, ${address.longitude}` : ''],
+    ['Google Maps', address?.mapLink ? `<a class="orders-map-link" href="${escapeHtml(address.mapLink)}" target="_blank" rel="noreferrer noopener">Open live location</a>` : '']
+  ].filter(([, value]) => Boolean(value));
+
+  return rows.map(([label, value]) => `
+    <p><strong>${escapeHtml(label)}:</strong> ${label === 'Google Maps' ? value : escapeHtml(value)}</p>
+  `).join('');
 }
 
 function renderConfirmation(confirmation) {
