@@ -72,7 +72,7 @@ const DEFAULT_ADDRESS = {
 
 const DEFAULT_PAYMENT = {
   paymentType: 'pay_now',
-  method: 'mtn',
+  method: '',
   phone: '',
   payerPhone: '',
   transactionId: ''
@@ -162,11 +162,14 @@ function normalizePayment(value = {}) {
     ...(value || {})
   };
   const phone = String(merged.phone || merged.payerPhone || '').trim();
+  const method = String(merged.method || '').trim();
+  const paymentType = method === 'cod' ? 'cod' : 'pay_now';
 
   return {
     ...clone(DEFAULT_PAYMENT),
     ...merged,
-    method: String(merged.method || 'mtn').trim() || 'mtn',
+    paymentType,
+    method,
     phone,
     payerPhone: phone,
     transactionId: String(merged.transactionId || '').trim()
@@ -260,7 +263,12 @@ function persistDraft() {
 }
 
 function ensureValidPaymentType() {
-  if (!isCodAvailable() && state.payment.paymentType === 'cod') {
+  if (!isCodAvailable() && state.payment.method === 'cod') {
+    state.payment.method = '';
+    state.payment.paymentType = 'pay_now';
+  }
+
+  if (state.payment.method !== 'cod') {
     state.payment.paymentType = 'pay_now';
   }
 
@@ -355,7 +363,11 @@ function buildShippingValidation() {
 }
 
 function buildPaymentValidation() {
-  if (state.payment.paymentType === 'cod') {
+  if (!state.payment.method) {
+    return { valid: false, message: 'Choose a payment method before placing the order.' };
+  }
+
+  if (state.payment.method === 'cod') {
     if (!isCodAvailable()) {
       return { valid: false, message: 'Cash on delivery is only available for Kigali address deliveries.' };
     }
@@ -363,11 +375,7 @@ function buildPaymentValidation() {
     return { valid: true };
   }
 
-  if (!state.payment.method) {
-    return { valid: false, message: 'Choose the mobile money method the customer used to pay.' };
-  }
-
-  if (!isValidPhone(state.payment.phone || state.payment.payerPhone)) {
+  if (!isValidPhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone)) {
     return { valid: false, message: 'Enter the payer phone number used for the transaction.' };
   }
 
@@ -424,7 +432,7 @@ export function getDeliveryOptions() {
 }
 
 export function isCodAvailable() {
-  return state.delivery.id === 'delivery' && String(state.shippingAddress.provinceCity || state.shippingAddress.city || '').trim().toLowerCase() === 'kigali';
+  return String(state.shippingAddress.provinceCity || state.shippingAddress.city || '').trim().toLowerCase().includes('kigali');
 }
 
 export function setStep(stepIndex) {
@@ -601,15 +609,15 @@ export function buildOrderPayload() {
     total: state.totals.total,
     deliveryMethod: state.delivery.id,
     deliveryLabel: state.delivery.label,
-    paymentType: state.payment.paymentType,
-    paymentMethod: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
+    paymentType: state.payment.method === 'cod' ? 'cod' : 'pay_now',
+    paymentMethod: state.payment.method === 'cod' ? 'cod' : state.payment.method,
     payment: {
-      type: state.payment.paymentType,
-      method: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
+      type: state.payment.method === 'cod' ? 'cod' : 'pay_now',
+      method: state.payment.method === 'cod' ? 'cod' : state.payment.method,
       payerPhone,
       transactionId: String(state.payment.transactionId || '').trim()
     },
-    status: state.payment.paymentType === 'cod' ? 'Pending Delivery (COD)' : 'Pending Payment Verification'
+    status: state.payment.method === 'cod' ? 'Pending Delivery (COD)' : 'Pending Payment Verification'
   };
 
   return { valid: true, order, customerName };
@@ -662,6 +670,10 @@ export async function submitOrder() {
           ? 'MTN Mobile Money'
           : order.paymentMethod === 'airtel'
             ? 'Airtel Money'
+            : order.paymentMethod === 'bank'
+              ? 'Bank Transfer'
+              : order.paymentMethod === 'card'
+                ? 'Visa / Mastercard'
             : 'Payment pending',
       paymentType: order.paymentType,
       paymentMethod: order.paymentMethod
@@ -723,6 +735,10 @@ export function getConfirmationState(orderId) {
         ? 'MTN Mobile Money'
         : order.paymentMethod === 'airtel'
           ? 'Airtel Money'
+          : order.paymentMethod === 'bank'
+            ? 'Bank Transfer'
+            : order.paymentMethod === 'card'
+              ? 'Visa / Mastercard'
           : 'Payment pending',
     paymentType: order.paymentType || 'pay_now',
     paymentMethod: order.paymentMethod || ''

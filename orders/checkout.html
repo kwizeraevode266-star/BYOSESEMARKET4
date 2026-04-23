@@ -10,16 +10,16 @@
   <link rel="stylesheet" href="checkout.css">
 </head>
 <body>
-  <div class="orders-shell orders-shell--compact orders-shell--stage">
-    <main class="orders-layout">
+  <div class="orders-shell orders-shell--compact orders-shell--review">
+    <main class="orders-layout orders-layout--review">
       <section class="orders-main">
         <div class="orders-progress" id="checkoutProgress"></div>
 
-        <article class="orders-panel">
+        <article class="orders-panel orders-panel--review">
           <header class="orders-panel-head orders-panel-head--stage">
             <p>Step 2</p>
             <h2>Checkout review</h2>
-            <p>Review the shipping details and order items before moving to payment.</p>
+            <p>Confirm delivery details, update quantities, choose payment, and place the order from one clean checkout surface.</p>
           </header>
 
           <div class="orders-step-message" id="checkoutMessage" hidden></div>
@@ -27,8 +27,16 @@
         </article>
       </section>
 
-      <aside class="orders-sidebar" id="checkoutSidebar"></aside>
+      <aside class="orders-sidebar orders-sidebar--review" id="checkoutSidebar"></aside>
     </main>
+  </div>
+
+  <div class="orders-loading" id="checkoutLoading" hidden>
+    <div class="orders-loading-card">
+      <div class="orders-spinner"></div>
+      <strong>Placing order...</strong>
+      <p>The order is being saved to the admin order queue.</p>
+    </div>
   </div>
 
   <script src="../services/authservice.js"></script>
