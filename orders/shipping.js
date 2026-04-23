@@ -10,6 +10,14 @@ import {
   validateShippingStage
 } from './state.js';
 
+const steps = [
+  { id: 'shipping', label: 'Shipping' },
+  { id: 'checkout', label: 'Checkout' },
+  { id: 'payment', label: 'Payment' }
+];
+
+const fields = ['fullName', 'phone', 'provinceCity', 'district', 'sector', 'cell', 'village', 'note'];
+
 const ui = {
   progress: document.getElementById('checkoutProgress'),
   sidebar: document.getElementById('checkoutSidebar'),
@@ -17,20 +25,12 @@ const ui = {
   message: document.getElementById('shippingMessage'),
   locationStatus: document.getElementById('locationStatus'),
   locationMeta: document.getElementById('locationMeta'),
-  locationMapLink: document.getElementById('locationMapLink'),
-  detectLocationButton: document.getElementById('detectLocationBtn'),
-  refreshLocationButton: document.getElementById('refreshLocationBtn')
+  locationMapLink: document.getElementById('locationMapLink')
 };
 
-const steps = [
-  { id: 'shipping', label: 'Shipping' },
-  { id: 'checkout', label: 'Checkout' },
-  { id: 'payment', label: 'Payment' }
-];
-
 function renderProgress(activeStage) {
+  const activeIndex = steps.findIndex((step) => step.id === activeStage);
   ui.progress.innerHTML = steps.map((step, index) => {
-    const activeIndex = steps.findIndex((item) => item.id === activeStage);
     const tone = index < activeIndex ? 'is-complete' : index === activeIndex ? 'is-active' : '';
     return `
       <button type="button" class="orders-progress-step ${tone}" disabled>
@@ -41,27 +41,34 @@ function renderProgress(activeStage) {
   }).join('');
 }
 
+function renderProducts(products) {
+  return products.map((item) => `
+    <article class="orders-summary-product">
+      <img src="${escapeHtml(item.image || item.img || '')}" alt="${escapeHtml(item.name || 'Product')}">
+      <div>
+        <strong>${escapeHtml(item.name || 'Product')}</strong>
+        <p>${escapeHtml(item.attributeSummary || 'Standard option')}</p>
+        <span>Qty ${Number(item.qty || 0)} x ${formatCurrency(item.price || 0)}</span>
+      </div>
+      <strong>${formatCurrency(item.total || ((Number(item.qty || 0) || 0) * (Number(item.price || 0) || 0)))}</strong>
+    </article>
+  `).join('');
+}
+
 function renderSidebar(state) {
   const itemCount = state.products.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   ui.sidebar.innerHTML = `
-    <section class="orders-sidebar-card">
-      <span class="orders-sidebar-label">Order source</span>
-      <h3>${state.source === 'direct' ? 'Buy Now checkout' : 'Cart checkout'}</h3>
-      <p>${escapeHtml(getResolvedCustomerName())}</p>
-      <p>${escapeHtml(state.shippingAddress.phone ? normalizePhone(state.shippingAddress.phone) : state.customer.phone || '')}</p>
-      <p>${escapeHtml([
-        state.shippingAddress.provinceCity || state.shippingAddress.city,
-        state.shippingAddress.district,
-        state.shippingAddress.sector
-      ].filter(Boolean).join(', '))}</p>
-    </section>
-    <section class="orders-sidebar-card">
+    <section class="orders-sidebar-card orders-sidebar-card--sticky">
+      <span class="orders-sidebar-label">Order summary</span>
       <div class="orders-sidebar-heading">
-        <h3>Order totals</h3>
-        <span>${itemCount} item${itemCount === 1 ? '' : 's'}</span>
+        <h3>${itemCount} item${itemCount === 1 ? '' : 's'}</h3>
+        <span>${escapeHtml(getResolvedCustomerName())}</span>
+      </div>
+      <div class="orders-summary-product-list orders-summary-product-list--compact">
+        ${renderProducts(state.products)}
       </div>
       <div class="orders-total-row"><span>Subtotal</span><strong>${formatCurrency(state.totals.subtotal)}</strong></div>
-      <div class="orders-total-row"><span>Delivery fee</span><strong>${formatCurrency(state.totals.shippingFee)}</strong></div>
+      <div class="orders-total-row"><span>Shipping</span><strong>${formatCurrency(state.totals.shippingFee)}</strong></div>
       <div class="orders-total-row is-total"><span>Total</span><strong>${formatCurrency(state.totals.total)}</strong></div>
     </section>
   `;
@@ -75,38 +82,26 @@ function buildMapLink(latitude, longitude) {
   return `https://maps.google.com/?q=${encodeURIComponent(`${latitude},${longitude}`)}`;
 }
 
-function formatCoordinateLabel(shippingAddress) {
-  if (!shippingAddress.latitude || !shippingAddress.longitude) {
-    return '';
-  }
-
-  return `${shippingAddress.latitude}, ${shippingAddress.longitude}`;
-}
-
 function renderLocationState(state, statusText) {
   const shippingAddress = state.shippingAddress || {};
+  const badges = [];
+  const coordinateText = shippingAddress.latitude && shippingAddress.longitude
+    ? `${shippingAddress.latitude}, ${shippingAddress.longitude}`
+    : '';
   const mapLink = shippingAddress.mapLink || buildMapLink(shippingAddress.latitude, shippingAddress.longitude);
-  const meta = [];
 
-  if (formatCoordinateLabel(shippingAddress)) {
-    meta.push(`<span class="orders-location-badge">GPS: ${escapeHtml(formatCoordinateLabel(shippingAddress))}</span>`);
+  if (coordinateText) {
+    badges.push(`<span class="orders-location-badge">Coordinates: ${escapeHtml(coordinateText)}</span>`);
   }
 
   if (shippingAddress.locationAccuracy) {
-    meta.push(`<span class="orders-location-badge">Accuracy: ${escapeHtml(shippingAddress.locationAccuracy)} m</span>`);
+    badges.push(`<span class="orders-location-badge">Accuracy ${escapeHtml(shippingAddress.locationAccuracy)}m</span>`);
   }
 
-  if (shippingAddress.provinceCity || shippingAddress.district) {
-    meta.push(`<span class="orders-location-badge">Detected: ${escapeHtml([
-      shippingAddress.provinceCity || shippingAddress.city,
-      shippingAddress.district
-    ].filter(Boolean).join(' / '))}</span>`);
-  }
-
-  ui.locationStatus.textContent = statusText || (mapLink
-    ? 'Location captured and ready to save with this order.'
-    : 'We will ask for permission and store a Google Maps link with the order.');
-  ui.locationMeta.innerHTML = meta.join('');
+  ui.locationStatus.textContent = statusText || (coordinateText
+    ? 'Location captured'
+    : 'Requesting device location permission...');
+  ui.locationMeta.innerHTML = badges.join('');
 
   if (mapLink) {
     ui.locationMapLink.hidden = false;
@@ -117,18 +112,43 @@ function renderLocationState(state, statusText) {
   }
 }
 
+function setMessage(message) {
+  ui.message.hidden = !message;
+  ui.message.textContent = message || '';
+}
+
+function setFieldError(name, message) {
+  const field = ui.form.querySelector(`[name="${name}"]`);
+  const wrapper = field?.closest('.orders-field');
+  const errorNode = ui.form.querySelector(`[data-error-for="${name}"]`);
+
+  wrapper?.classList.toggle('has-error', Boolean(message));
+  if (errorNode) {
+    errorNode.textContent = message || '';
+  }
+}
+
+function clearAllErrors() {
+  fields.forEach((name) => setFieldError(name, ''));
+}
+
 function syncForm(state) {
-  ui.form.querySelectorAll('[name]').forEach((field) => {
-    const nextValue = state.shippingAddress[field.name] || '';
-    field.value = nextValue;
+  fields.forEach((name) => {
+    const field = ui.form.querySelector(`[name="${name}"]`);
+    if (field) {
+      field.value = state.shippingAddress[name] || '';
+    }
   });
 
   renderLocationState(state);
 }
 
-function setMessage(message) {
-  ui.message.hidden = !message;
-  ui.message.textContent = message || '';
+function applyValidation(validation) {
+  clearAllErrors();
+  Object.entries(validation.errors || {}).forEach(([name, message]) => {
+    setFieldError(name, message);
+  });
+  setMessage(validation.valid ? '' : (validation.message || 'Please complete the required shipping fields.'));
 }
 
 async function reverseGeocode(latitude, longitude) {
@@ -139,26 +159,22 @@ async function reverseGeocode(latitude, longitude) {
 
   const payload = await response.json();
   const address = payload?.address || {};
-  const provinceCity = address.city || address.town || address.municipality || address.state || address.region || '';
-  const district = address.county || address.state_district || address.city_district || '';
-  const sector = address.suburb || address.borough || address.neighbourhood || '';
-  const street = address.road || address.pedestrian || address.footway || '';
 
   return {
-    provinceCity: String(provinceCity || '').trim(),
-    city: String(provinceCity || '').trim(),
-    district: String(district || '').trim(),
-    sector: String(sector || '').trim(),
-    street: String(street || '').trim()
+    provinceCity: String(address.city || address.town || address.municipality || address.state || address.region || '').trim(),
+    district: String(address.county || address.state_district || address.city_district || '').trim(),
+    sector: String(address.suburb || address.borough || address.neighbourhood || '').trim(),
+    cell: String(address.quarter || address.city_block || address.residential || '').trim(),
+    village: String(address.hamlet || address.village || address.locality || '').trim(),
+    street: String(address.road || address.pedestrian || address.footway || '').trim()
   };
 }
 
 function applyAutoDetectedAddress(detectedAddress) {
-  const currentState = getState();
-  const currentAddress = currentState.shippingAddress || {};
+  const currentAddress = getState().shippingAddress || {};
   const patch = {};
 
-  ['provinceCity', 'city', 'district', 'sector', 'street'].forEach((field) => {
+  ['provinceCity', 'district', 'sector', 'cell', 'village', 'street'].forEach((field) => {
     if (!currentAddress[field] && detectedAddress[field]) {
       patch[field] = detectedAddress[field];
     }
@@ -170,25 +186,23 @@ function applyAutoDetectedAddress(detectedAddress) {
   }
 }
 
-function captureLocation(options = {}) {
+function captureLocation() {
   if (!navigator.geolocation) {
-    renderLocationState(getState(), 'This device does not support GPS location capture.');
+    renderLocationState(getState(), 'Location unavailable on this device');
     return;
   }
 
-  const { silent = false } = options;
-  renderLocationState(getState(), 'Waiting for location permission and GPS signal...');
+  renderLocationState(getState(), 'Waiting for permission and GPS signal...');
 
   navigator.geolocation.getCurrentPosition(async (position) => {
     const latitude = Number(position.coords.latitude).toFixed(6);
     const longitude = Number(position.coords.longitude).toFixed(6);
     const locationAccuracy = Math.round(Number(position.coords.accuracy || 0));
-    const mapLink = buildMapLink(latitude, longitude);
 
     updateShippingDetails({
       latitude,
       longitude,
-      mapLink,
+      mapLink: buildMapLink(latitude, longitude),
       locationAccuracy: locationAccuracy ? String(locationAccuracy) : '',
       locationCapturedAt: new Date().toISOString()
     });
@@ -197,24 +211,17 @@ function captureLocation(options = {}) {
       const detectedAddress = await reverseGeocode(latitude, longitude);
       applyAutoDetectedAddress(detectedAddress);
       renderSidebar(getState());
-      renderLocationState(getState(), detectedAddress.provinceCity || detectedAddress.district
-        ? 'Location captured and nearby address fields were auto-filled where possible.'
-        : 'Location captured and saved with the order.');
+      renderLocationState(getState(), 'Location captured');
     } catch (error) {
       console.error(error);
       renderSidebar(getState());
-      renderLocationState(getState(), 'Location captured and saved with the order. Address auto-fill was not available.');
-    }
-
-    if (!silent) {
-      setMessage('');
+      renderLocationState(getState(), 'Location captured');
     }
   }, (error) => {
     console.error(error);
-    const denied = error?.code === 1;
-    renderLocationState(getState(), denied
-      ? 'Location permission was denied. You can continue with the manual address or try again.'
-      : 'Unable to capture location right now. Check GPS/network access and try again.');
+    renderLocationState(getState(), error?.code === 1
+      ? 'Location permission denied'
+      : 'Unable to capture location right now');
   }, {
     enableHighAccuracy: true,
     timeout: 12000,
@@ -223,28 +230,46 @@ function captureLocation(options = {}) {
 }
 
 function bindForm() {
-  ui.form.querySelectorAll('[name]').forEach((field) => {
-    field.addEventListener('input', (event) => {
-      updateShippingDetails({ [event.currentTarget.name]: event.currentTarget.value });
-      renderSidebar(getState());
+  fields.forEach((name) => {
+    const field = ui.form.querySelector(`[name="${name}"]`);
+    field?.addEventListener('input', (event) => {
+      const value = event.currentTarget.value;
+      updateShippingDetails({ [name]: value });
+
+      if (name === 'phone') {
+        const validation = validateShippingStage();
+        setFieldError('phone', validation.errors?.phone || '');
+      } else if (String(value || '').trim()) {
+        setFieldError(name, '');
+      }
+
       setMessage('');
+      renderSidebar(getState());
+    });
+
+    field?.addEventListener('blur', (event) => {
+      updateShippingDetails({ [name]: event.currentTarget.value });
+      const validation = validateShippingStage();
+      setFieldError(name, validation.errors?.[name] || '');
     });
   });
-
-  ui.detectLocationButton?.addEventListener('click', () => captureLocation());
-  ui.refreshLocationButton?.addEventListener('click', () => captureLocation());
 
   ui.form.addEventListener('submit', (event) => {
     event.preventDefault();
 
     const formData = new FormData(ui.form);
     updateShippingDetails(Object.fromEntries(formData.entries()));
+
     const validation = validateShippingStage();
+    applyValidation(validation);
     if (!validation.valid) {
-      setMessage(validation.message);
       return;
     }
 
+    const state = getState();
+    updateShippingDetails({
+      phone: normalizePhone(state.shippingAddress.phone) || state.shippingAddress.phone
+    });
     setStage('checkout');
     window.location.assign(getStageUrl('checkout'));
   });
@@ -263,5 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSidebar(state);
   syncForm(state);
   bindForm();
-  captureLocation({ silent: true });
+  setMessage('');
+  captureLocation();
 });

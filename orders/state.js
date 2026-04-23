@@ -23,18 +23,34 @@ import {
   writeStorage
 } from './utils.js';
 
-export const CHECKOUT_STAGE_URLS = {
-  shipping: 'shipping.html',
-  checkout: 'checkout.html',
-  payment: 'payment.html',
-  confirmation: 'confirmation.html'
+const DELIVERY_OPTIONS = [
+  {
+    id: 'delivery',
+    label: 'Delivery to address',
+    description: 'Ship the full order to the address confirmed in the shipping stage.',
+    fee: 5000
+  },
+  {
+    id: 'pickup',
+    label: 'Store pickup',
+    description: 'Pick up the order directly from the store with no delivery fee.',
+    fee: 0
+  }
+];
+
+const STAGES = ['shipping', 'checkout', 'payment'];
+const FIELD_LABELS = {
+  fullName: 'Amazina / Full Name',
+  phone: 'Telefoni / Phone Number',
+  provinceCity: 'Intara cyangwa Umujyi / Province or City',
+  district: 'Akarere / District',
+  sector: 'Umurenge / Sector',
+  cell: 'Akagari / Cell',
+  village: 'Umudugudu / Village'
 };
+const REQUIRED_SHIPPING_FIELDS = ['fullName', 'phone', 'provinceCity', 'district', 'sector', 'cell', 'village'];
 
-const DELIVERY_FEE = 5000;
-const SUBMISSION_DELAY_MS = 700;
-const listeners = new Set();
-
-const DEFAULT_SHIPPING_ADDRESS = {
+const DEFAULT_ADDRESS = {
   fullName: '',
   firstName: '',
   lastName: '',
@@ -55,15 +71,22 @@ const DEFAULT_SHIPPING_ADDRESS = {
 };
 
 const DEFAULT_PAYMENT = {
-  paymentType: 'mobile_money',
+  paymentType: 'pay_now',
   method: 'mtn',
-  phone: ''
+  phone: '',
+  payerPhone: '',
+  transactionId: ''
 };
+
+const COD_FEE = 2000;
+const SUBMISSION_DELAY_MS = 900;
+const listeners = new Set();
 
 const state = {
   initialized: false,
   isSubmitting: false,
-  stage: 'shipping',
+  currentStep: 0,
+  currentStage: 'shipping',
   source: 'cart',
   products: [],
   customer: {
@@ -73,26 +96,21 @@ const state = {
     phone: '',
     avatar: ''
   },
-  shippingAddress: clone(DEFAULT_SHIPPING_ADDRESS),
+  shippingAddress: clone(DEFAULT_ADDRESS),
+  delivery: clone(DELIVERY_OPTIONS[0]),
   payment: clone(DEFAULT_PAYMENT),
   confirmation: null,
   totals: {
     subtotal: 0,
-    shippingFee: 0,
+    shippingFee: DELIVERY_OPTIONS[0].fee,
     codFee: 0,
-    total: 0
+    total: DELIVERY_OPTIONS[0].fee
   }
 };
 
-function emit(reason) {
-  const snapshot = getState();
-  listeners.forEach((listener) => {
-    try {
-      listener(snapshot, reason);
-    } catch (error) {
-      console.error('Checkout listener failed:', error);
-    }
-  });
+function getStageIndex(stage) {
+  const index = STAGES.indexOf(stage);
+  return index === -1 ? 0 : index;
 }
 
 function splitFullName(fullName) {
@@ -103,19 +121,55 @@ function splitFullName(fullName) {
   };
 }
 
-function joinFullName(firstName, lastName) {
-  return [firstName, lastName].filter(Boolean).join(' ').trim();
+function normalizeShippingAddress(value = {}) {
+  const merged = {
+    ...clone(DEFAULT_ADDRESS),
+    ...(value || {})
+  };
+  const fallbackFullName = [merged.firstName, merged.lastName].filter(Boolean).join(' ').trim();
+  const fullName = String(merged.fullName || fallbackFullName).trim();
+  const nameParts = splitFullName(fullName);
+  const provinceCity = String(merged.provinceCity || merged.city || '').trim();
+  const street = String(merged.street || '').trim();
+  const note = String(merged.note || '').trim();
+
+  return {
+    ...clone(DEFAULT_ADDRESS),
+    ...merged,
+    fullName,
+    firstName: String(merged.firstName || nameParts.firstName).trim(),
+    lastName: String(merged.lastName || nameParts.lastName).trim(),
+    phone: String(merged.phone || '').trim(),
+    provinceCity,
+    city: provinceCity,
+    district: String(merged.district || '').trim(),
+    sector: String(merged.sector || '').trim(),
+    cell: String(merged.cell || '').trim(),
+    village: String(merged.village || '').trim(),
+    street,
+    note,
+    latitude: String(merged.latitude || '').trim(),
+    longitude: String(merged.longitude || '').trim(),
+    mapLink: String(merged.mapLink || '').trim(),
+    locationAccuracy: String(merged.locationAccuracy || '').trim(),
+    locationCapturedAt: String(merged.locationCapturedAt || '').trim()
+  };
 }
 
-function calculateTotals() {
-  const subtotal = state.products.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
-  const shippingFee = state.products.length ? DELIVERY_FEE : 0;
+function normalizePayment(value = {}) {
+  const merged = {
+    ...clone(DEFAULT_PAYMENT),
+    ...(value || {})
+  };
+  const phone = String(merged.phone || merged.payerPhone || '').trim();
 
-  state.totals = {
-    subtotal,
-    shippingFee,
-    codFee: 0,
-    total: subtotal + shippingFee
+  return {
+    ...clone(DEFAULT_PAYMENT),
+    ...merged,
+    method: String(merged.method || 'mtn').trim() || 'mtn',
+    phone,
+    payerPhone: phone,
+    transactionId: String(merged.transactionId || '').trim()
   };
 }
 
@@ -129,60 +183,28 @@ function buildCustomerState(user) {
   };
 }
 
-function buildShippingState(userAddress, draftAddress, customer) {
-  const merged = {
-    ...clone(DEFAULT_SHIPPING_ADDRESS),
-    ...(userAddress || {}),
-    ...(draftAddress || {})
-  };
-  const inferredName = joinFullName(merged.firstName, merged.lastName) || customer.name || '';
-  const inferredParts = splitFullName(merged.fullName || inferredName);
-
-  return {
-    ...merged,
-    fullName: String(merged.fullName || inferredName).trim(),
-    firstName: String(merged.firstName || inferredParts.firstName).trim(),
-    lastName: String(merged.lastName || inferredParts.lastName).trim(),
-    phone: String(merged.phone || customer.phone || '').trim(),
-    provinceCity: String(merged.provinceCity || merged.city || '').trim(),
-    city: String(merged.city || merged.provinceCity || '').trim(),
-    district: String(merged.district || '').trim(),
-    sector: String(merged.sector || '').trim(),
-    cell: String(merged.cell || '').trim(),
-    village: String(merged.village || '').trim(),
-    street: String(merged.street || merged.streetLandmark || merged.line1 || '').trim(),
-    note: String(merged.note || '').trim(),
-    latitude: String(merged.latitude || '').trim(),
-    longitude: String(merged.longitude || '').trim(),
-    mapLink: String(merged.mapLink || '').trim(),
-    locationAccuracy: String(merged.locationAccuracy || '').trim(),
-    locationCapturedAt: String(merged.locationCapturedAt || '').trim()
-  };
-}
-
-function syncProductsToSource() {
-  if (state.source === 'direct') {
-    const [item] = state.products;
-    writeDirectCheckout(item || null);
-    return;
-  }
-
-  writeCartItems(state.products);
-}
-
-function persistDraft() {
-  if (!state.products.length) {
-    removeStorage(STORAGE_KEYS.draft);
-    return;
-  }
-
-  writeStorage(STORAGE_KEYS.draft, {
-    stage: state.stage,
-    source: state.source,
-    shippingAddress: state.shippingAddress,
-    payment: state.payment,
-    products: state.source === 'direct' ? state.products : []
+function emit(reason) {
+  const snapshot = getState();
+  listeners.forEach((listener) => {
+    try {
+      listener(snapshot, reason);
+    } catch (error) {
+      console.error('Checkout listener failed:', error);
+    }
   });
+}
+
+function calculateTotals() {
+  const subtotal = state.products.reduce((sum, item) => sum + ((Number(item.price) || 0) * (Number(item.qty) || 0)), 0);
+  const shippingFee = state.products.length ? Number(state.delivery.fee || 0) : 0;
+  const codFee = state.payment.paymentType === 'cod' ? COD_FEE : 0;
+
+  state.totals = {
+    subtotal,
+    shippingFee,
+    codFee,
+    total: subtotal + shippingFee + codFee
+  };
 }
 
 function initializeProducts(draft) {
@@ -210,96 +232,154 @@ function initializeProducts(draft) {
   state.products = [];
 }
 
-function normalizeShippingPatch(values) {
-  const next = {
-    ...state.shippingAddress,
-    ...(values || {})
-  };
-  const fullName = values && Object.prototype.hasOwnProperty.call(values, 'fullName')
-    ? values.fullName
-    : next.fullName || joinFullName(next.firstName, next.lastName);
-  const parts = splitFullName(fullName);
-
-  next.fullName = String(fullName || '').trim();
-  next.firstName = String(next.firstName || parts.firstName).trim();
-  next.lastName = String(next.lastName || parts.lastName).trim();
-  next.phone = String(next.phone || '').trim();
-  next.provinceCity = String(next.provinceCity || next.city || '').trim();
-  next.city = String(next.city || next.provinceCity || '').trim();
-  next.district = String(next.district || '').trim();
-  next.sector = String(next.sector || '').trim();
-  next.cell = String(next.cell || '').trim();
-  next.village = String(next.village || '').trim();
-  next.street = String(next.street || next.streetLandmark || '').trim();
-  next.note = String(next.note || '').trim();
-  next.latitude = String(next.latitude || '').trim();
-  next.longitude = String(next.longitude || '').trim();
-  next.mapLink = String(next.mapLink || '').trim();
-  next.locationAccuracy = String(next.locationAccuracy || '').trim();
-  next.locationCapturedAt = String(next.locationCapturedAt || '').trim();
-
-  return next;
-}
-
-function buildStoredAddress() {
-  return {
-    ...clone(state.shippingAddress),
-    fullName: getResolvedCustomerName(),
-    firstName: state.shippingAddress.firstName,
-    lastName: state.shippingAddress.lastName,
-    phone: normalizePhone(state.shippingAddress.phone),
-    provinceCity: state.shippingAddress.provinceCity || state.shippingAddress.city,
-    city: state.shippingAddress.city || state.shippingAddress.provinceCity,
-    street: state.shippingAddress.street,
-    streetLandmark: state.shippingAddress.street
-  };
-}
-
-function getPaymentLabel(method) {
-  if (method === 'airtel') {
-    return 'Airtel Money';
+function syncProductsToSource() {
+  if (state.source === 'direct') {
+    const [item] = state.products;
+    writeDirectCheckout(item || null);
+    return;
   }
 
-  if (method === 'mtn') {
-    return 'MTN Mobile Money';
-  }
-
-  return 'Mobile Money';
+  writeCartItems(state.products);
 }
 
-function clearCheckoutSource() {
-  if (state.source === 'cart') {
-    writeCartItems([]);
-  } else {
-    removeStorage(STORAGE_KEYS.directCheckout);
+function persistDraft() {
+  if (!state.products.length) {
+    removeStorage(STORAGE_KEYS.draft);
+    return;
   }
+
+  writeStorage(STORAGE_KEYS.draft, {
+    stage: state.currentStage,
+    currentStep: state.currentStep,
+    source: state.source,
+    shippingAddress: state.shippingAddress,
+    delivery: { id: state.delivery.id },
+    payment: state.payment,
+    products: state.source === 'direct' ? state.products : []
+  });
 }
 
-export function initializeOrderFlow(requestedStage = 'shipping') {
+function ensureValidPaymentType() {
+  if (!isCodAvailable() && state.payment.paymentType === 'cod') {
+    state.payment.paymentType = 'pay_now';
+  }
+
+  calculateTotals();
+}
+
+function initializeBaseState(preferredStage = 'shipping') {
   const user = readCurrentUser();
   const draft = readStorage(STORAGE_KEYS.draft, null);
 
   initializeProducts(draft);
   state.customer = buildCustomerState(user);
-  state.shippingAddress = buildShippingState(getUserAddress(user), draft?.shippingAddress, state.customer);
-  state.payment = {
-    ...clone(DEFAULT_PAYMENT),
-    ...(draft?.payment || {})
-  };
-  if (!state.payment.phone) {
-    state.payment.phone = state.customer.phone || state.shippingAddress.phone || '';
+
+  const userAddress = getUserAddress(user);
+  state.shippingAddress = normalizeShippingAddress({
+    ...userAddress,
+    fullName: [userAddress.firstName, userAddress.lastName].filter(Boolean).join(' ').trim(),
+    provinceCity: userAddress.provinceCity || userAddress.city || ''
+  });
+  state.shippingAddress = normalizeShippingAddress({
+    ...state.shippingAddress,
+    ...(draft?.shippingAddress || {})
+  });
+
+  if (!state.shippingAddress.phone && state.customer.phone) {
+    state.shippingAddress.phone = state.customer.phone;
   }
 
-  state.stage = Object.prototype.hasOwnProperty.call(CHECKOUT_STAGE_URLS, draft?.stage)
+  const requestedDeliveryId = draft?.delivery?.id;
+  state.delivery = clone(DELIVERY_OPTIONS.find((option) => option.id === requestedDeliveryId) || DELIVERY_OPTIONS[0]);
+
+  state.payment = normalizePayment({
+    payerPhone: state.customer.phone,
+    ...(draft?.payment || {})
+  });
+
+  const requestedStage = STAGES.includes(draft?.stage)
     ? draft.stage
-    : requestedStage;
+    : STAGES[getStageIndex(STAGES[Number(draft?.currentStep)] || preferredStage)];
+
+  state.currentStage = STAGES.includes(preferredStage) ? preferredStage : (requestedStage || 'shipping');
+  state.currentStep = getStageIndex(state.currentStage);
   state.confirmation = null;
   state.isSubmitting = false;
   state.initialized = true;
 
-  calculateTotals();
+  ensureValidPaymentType();
   persistDraft();
   emit('initialized');
+}
+
+function getMissingShippingField() {
+  return REQUIRED_SHIPPING_FIELDS.find((field) => !String(state.shippingAddress[field] || '').trim()) || '';
+}
+
+function buildShippingValidation() {
+  const errors = {};
+
+  REQUIRED_SHIPPING_FIELDS.forEach((field) => {
+    if (!String(state.shippingAddress[field] || '').trim()) {
+      errors[field] = 'This field is required';
+    }
+  });
+
+  if (state.shippingAddress.phone && !isValidPhone(state.shippingAddress.phone)) {
+    errors.phone = 'Enter a valid Rwanda phone number';
+  }
+
+  const missingField = getMissingShippingField();
+  if (missingField) {
+    return {
+      valid: false,
+      message: `${FIELD_LABELS[missingField] || 'Shipping field'} is required.`,
+      errors
+    };
+  }
+
+  if (errors.phone) {
+    return {
+      valid: false,
+      message: 'Enter a valid Rwanda phone number for delivery updates.',
+      errors
+    };
+  }
+
+  persistUserAddress({
+    ...state.shippingAddress,
+    phone: normalizePhone(state.shippingAddress.phone)
+  });
+
+  return { valid: true, errors: {} };
+}
+
+function buildPaymentValidation() {
+  if (state.payment.paymentType === 'cod') {
+    if (!isCodAvailable()) {
+      return { valid: false, message: 'Cash on delivery is only available for Kigali address deliveries.' };
+    }
+
+    return { valid: true };
+  }
+
+  if (!state.payment.method) {
+    return { valid: false, message: 'Choose the mobile money method the customer used to pay.' };
+  }
+
+  if (!isValidPhone(state.payment.phone || state.payment.payerPhone)) {
+    return { valid: false, message: 'Enter the payer phone number used for the transaction.' };
+  }
+
+  return { valid: true };
+}
+
+export function initializeCheckoutState() {
+  initializeBaseState('shipping');
+}
+
+export function initializeOrderFlow(preferredStage) {
+  initializeBaseState(preferredStage);
 }
 
 export function subscribe(listener) {
@@ -312,21 +392,52 @@ export function getState() {
 }
 
 export function getStageUrl(stage) {
-  return CHECKOUT_STAGE_URLS[stage] || CHECKOUT_STAGE_URLS.shipping;
+  return `${stage}.html`;
 }
 
 export function setStage(stage) {
-  if (!Object.prototype.hasOwnProperty.call(CHECKOUT_STAGE_URLS, stage)) {
-    return;
-  }
-
-  state.stage = stage;
+  state.currentStage = STAGES.includes(stage) ? stage : 'shipping';
+  state.currentStep = getStageIndex(state.currentStage);
   persistDraft();
   emit('stage-changed');
 }
 
-export function hasProducts() {
-  return state.products.length > 0;
+export function resolveStageAccess(stage) {
+  if (!state.products.length) {
+    return { valid: false, redirectUrl: '../cart.html' };
+  }
+
+  if (stage === 'shipping') {
+    return { valid: true };
+  }
+
+  const shippingValidation = buildShippingValidation();
+  if (!shippingValidation.valid) {
+    return { valid: false, redirectUrl: getStageUrl('shipping') };
+  }
+
+  return { valid: true };
+}
+
+export function getDeliveryOptions() {
+  return clone(DELIVERY_OPTIONS);
+}
+
+export function isCodAvailable() {
+  return state.delivery.id === 'delivery' && String(state.shippingAddress.provinceCity || state.shippingAddress.city || '').trim().toLowerCase() === 'kigali';
+}
+
+export function setStep(stepIndex) {
+  const nextStage = STAGES[Math.max(0, Math.min(Number(stepIndex) || 0, STAGES.length - 1))] || 'shipping';
+  setStage(nextStage);
+}
+
+export function nextStep() {
+  setStage(STAGES[Math.min(getStageIndex(state.currentStage) + 1, STAGES.length - 1)]);
+}
+
+export function previousStep() {
+  setStage(STAGES[Math.max(getStageIndex(state.currentStage) - 1, 0)]);
 }
 
 export function updateProductQuantity(productId, variantKey, quantity) {
@@ -364,111 +475,101 @@ export function removeProduct(productId, variantKey) {
   emit('products-changed');
 }
 
-export function updateShippingDetails(values) {
-  state.shippingAddress = normalizeShippingPatch(values);
+export function updateShippingDetails(patch = {}) {
+  state.shippingAddress = normalizeShippingAddress({
+    ...state.shippingAddress,
+    ...(patch || {})
+  });
+
   if (!state.payment.phone && state.shippingAddress.phone) {
-    state.payment.phone = state.shippingAddress.phone;
+    state.payment = normalizePayment({
+      ...state.payment,
+      phone: state.shippingAddress.phone
+    });
   }
+
+  ensureValidPaymentType();
   persistDraft();
   emit('shipping-changed');
 }
 
-export function updatePaymentDetails(values) {
-  state.payment = {
-    ...state.payment,
-    ...(values || {})
-  };
-  state.payment.method = String(state.payment.method || 'mtn').trim() || 'mtn';
-  state.payment.phone = String(state.payment.phone || '').trim();
+export function updateShippingField(field, value) {
+  updateShippingDetails({ [field]: value });
+}
 
+export function selectDeliveryOption(optionId) {
+  state.delivery = clone(DELIVERY_OPTIONS.find((option) => option.id === optionId) || DELIVERY_OPTIONS[0]);
+  ensureValidPaymentType();
+  persistDraft();
+  emit('delivery-changed');
+}
+
+export function updatePaymentDetails(patch = {}) {
+  state.payment = normalizePayment({
+    ...state.payment,
+    ...(patch || {})
+  });
+
+  ensureValidPaymentType();
   persistDraft();
   emit('payment-changed');
 }
 
-export function validateShippingStage() {
-  if (!hasProducts()) {
-    return { valid: false, message: 'Add at least one product before starting checkout.' };
-  }
+export function updatePaymentField(field, value) {
+  updatePaymentDetails({ [field]: value });
+}
 
-  const shipping = normalizeShippingPatch();
-  const requiredFields = ['fullName', 'phone', 'provinceCity', 'district', 'sector', 'cell', 'village', 'street'];
-  const missingField = requiredFields.find((field) => !String(shipping[field] || '').trim());
-  if (missingField) {
-    return { valid: false, message: 'Complete the shipping form before continuing to checkout.' };
-  }
-
-  if (!isValidPhone(shipping.phone)) {
-    return { valid: false, message: 'Enter a valid Rwanda phone number for delivery updates.' };
+export function validateCartStep() {
+  if (!state.products.length) {
+    return { valid: false, message: 'Your cart is empty. Add products before checking out.' };
   }
 
   return { valid: true };
 }
 
-export function validateCheckoutStage() {
-  if (!hasProducts()) {
-    return { valid: false, message: 'Your order has no products to review.' };
+export function validateShippingStage() {
+  return buildShippingValidation();
+}
+
+export function validateShippingStep() {
+  return buildShippingValidation();
+}
+
+export function validateDeliveryStep() {
+  if (!DELIVERY_OPTIONS.some((option) => option.id === state.delivery.id)) {
+    return { valid: false, message: 'Select a delivery option before continuing.' };
   }
 
-  return validateShippingStage();
+  return { valid: true };
 }
 
 export function validatePaymentStage() {
-  const checkoutValidation = validateCheckoutStage();
-  if (!checkoutValidation.valid) {
-    return checkoutValidation;
-  }
+  return buildPaymentValidation();
+}
 
-  if (!String(state.payment.method || '').trim()) {
-    return { valid: false, message: 'Choose a payment method before placing the order.' };
-  }
-
-  if (!isValidPhone(state.payment.phone)) {
-    return { valid: false, message: 'Enter the mobile money phone number that will pay for this order.' };
-  }
-
-  return { valid: true };
+export function validatePaymentStep() {
+  return buildPaymentValidation();
 }
 
 export function getResolvedCustomerName() {
-  return joinFullName(state.shippingAddress.firstName, state.shippingAddress.lastName)
-    || state.shippingAddress.fullName
-    || state.customer.name
-    || 'Guest Customer';
-}
-
-export function resolveStageAccess(stage) {
-  if (!hasProducts()) {
-    return {
-      valid: false,
-      redirectUrl: '../shop.html',
-      message: 'No products are available for checkout.'
-    };
-  }
-
-  if (stage === 'shipping') {
-    return { valid: true };
-  }
-
-  const shippingValidation = validateShippingStage();
-  if (!shippingValidation.valid) {
-    return {
-      valid: false,
-      redirectUrl: getStageUrl('shipping'),
-      message: shippingValidation.message
-    };
-  }
-
-  return { valid: true };
+  return state.shippingAddress.fullName || state.customer.name || 'Guest Customer';
 }
 
 export function buildOrderPayload() {
-  const paymentValidation = validatePaymentStage();
+  const shippingValidation = buildShippingValidation();
+  if (!shippingValidation.valid) {
+    return shippingValidation;
+  }
+
+  const paymentValidation = buildPaymentValidation();
   if (!paymentValidation.valid) {
     return paymentValidation;
   }
 
   const customerName = getResolvedCustomerName();
-  const shippingAddress = buildStoredAddress();
+  const normalizedPhone = normalizePhone(state.shippingAddress.phone || state.customer.phone);
+  const payerPhone = normalizePhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone || state.customer.phone);
+
   const order = {
     id: createOrderId(),
     date: new Date().toISOString(),
@@ -477,30 +578,38 @@ export function buildOrderPayload() {
     customerId: state.customer.id,
     customerName,
     customerEmail: state.customer.email,
-    customerPhone: normalizePhone(shippingAddress.phone || state.customer.phone),
+    customerPhone: normalizedPhone,
     customerImage: state.customer.avatar,
     customer: {
       id: state.customer.id,
       name: customerName,
       email: state.customer.email,
-      phone: normalizePhone(shippingAddress.phone || state.customer.phone),
+      phone: normalizedPhone,
       avatar: state.customer.avatar
     },
-    shippingAddress,
+    shippingAddress: {
+      ...clone(state.shippingAddress),
+      phone: normalizedPhone,
+      city: state.shippingAddress.provinceCity || state.shippingAddress.city,
+      line1: state.shippingAddress.street || '',
+      firstName: state.shippingAddress.firstName,
+      lastName: state.shippingAddress.lastName
+    },
     subtotal: state.totals.subtotal,
     shippingFee: state.totals.shippingFee,
-    codFee: 0,
+    codFee: state.totals.codFee,
     total: state.totals.total,
-    deliveryMethod: 'delivery',
-    deliveryLabel: 'Standard delivery',
-    paymentType: 'Mobile Money',
-    paymentMethod: state.payment.method,
+    deliveryMethod: state.delivery.id,
+    deliveryLabel: state.delivery.label,
+    paymentType: state.payment.paymentType,
+    paymentMethod: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
     payment: {
-      type: 'mobile_money',
-      method: state.payment.method,
-      payerPhone: normalizePhone(state.payment.phone)
+      type: state.payment.paymentType,
+      method: state.payment.paymentType === 'cod' ? 'cod' : state.payment.method,
+      payerPhone,
+      transactionId: String(state.payment.transactionId || '').trim()
     },
-    status: 'Pending'
+    status: state.payment.paymentType === 'cod' ? 'Pending Delivery (COD)' : 'Pending Payment Verification'
   };
 
   return { valid: true, order, customerName };
@@ -524,7 +633,13 @@ export async function submitOrder() {
 
     saveOrder(order);
     persistUserAddress(order.shippingAddress);
-    clearCheckoutSource();
+
+    if (state.source === 'cart') {
+      writeCartItems([]);
+    } else {
+      removeStorage(STORAGE_KEYS.directCheckout);
+    }
+
     removeStorage(STORAGE_KEYS.draft);
     emitCartUpdated();
 
@@ -535,13 +650,19 @@ export async function submitOrder() {
       total: order.total,
       subtotal: order.subtotal,
       shippingFee: order.shippingFee,
-      codFee: 0,
+      codFee: order.codFee,
       placedAt: order.date,
       status: order.status,
       products: clone(order.products),
       shippingAddress: clone(order.shippingAddress),
       deliveryLabel: order.deliveryLabel,
-      paymentLabel: getPaymentLabel(order.paymentMethod),
+      paymentLabel: order.paymentType === 'cod'
+        ? 'Cash on delivery'
+        : order.paymentMethod === 'mtn'
+          ? 'MTN Mobile Money'
+          : order.paymentMethod === 'airtel'
+            ? 'Airtel Money'
+            : 'Payment pending',
       paymentType: order.paymentType,
       paymentMethod: order.paymentMethod
     };
@@ -555,7 +676,7 @@ export async function submitOrder() {
       valid: true,
       order,
       confirmation,
-      redirectUrl: `${getStageUrl('confirmation')}?orderId=${encodeURIComponent(order.id)}`,
+      redirectUrl: `confirmation.html?orderId=${encodeURIComponent(order.id)}`,
       message: `${customerName} order placed for ${formatCurrency(order.total)}.`
     };
   } catch (error) {
@@ -595,9 +716,15 @@ export function getConfirmationState(orderId) {
     status: order.status || 'Pending',
     products: clone(order.products || []),
     shippingAddress: clone(order.shippingAddress || {}),
-    deliveryLabel: order.deliveryLabel || order.deliveryMethod || 'Standard delivery',
-    paymentLabel: getPaymentLabel(order.paymentMethod),
-    paymentType: order.paymentType || 'Mobile Money',
-    paymentMethod: order.paymentMethod || 'mtn'
+    deliveryLabel: order.deliveryLabel || order.deliveryMethod || 'Delivery',
+    paymentLabel: order.paymentType === 'cod'
+      ? 'Cash on delivery'
+      : order.paymentMethod === 'mtn'
+        ? 'MTN Mobile Money'
+        : order.paymentMethod === 'airtel'
+          ? 'Airtel Money'
+          : 'Payment pending',
+    paymentType: order.paymentType || 'pay_now',
+    paymentMethod: order.paymentMethod || ''
   };
 }

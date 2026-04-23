@@ -202,19 +202,12 @@ export function getUserAddress(user) {
     firstName: String(address.firstName || firstName || '').trim(),
     lastName: String(address.lastName || rest.join(' ') || '').trim(),
     phone: String(address.phone || user?.phone || '').trim(),
-    provinceCity: String(address.provinceCity || address.city || '').trim(),
-    city: String(address.city || address.provinceCity || '').trim(),
+    city: String(address.city || '').trim(),
     district: String(address.district || '').trim(),
     sector: String(address.sector || '').trim(),
     cell: String(address.cell || '').trim(),
     village: String(address.village || '').trim(),
-    street: String(address.street || address.streetLandmark || address.line1 || '').trim(),
-    note: String(address.note || '').trim(),
-    latitude: String(address.latitude || '').trim(),
-    longitude: String(address.longitude || '').trim(),
-    mapLink: String(address.mapLink || '').trim(),
-    locationAccuracy: String(address.locationAccuracy || '').trim(),
-    locationCapturedAt: String(address.locationCapturedAt || '').trim()
+    street: String(address.street || address.line1 || '').trim()
   };
 }
 
@@ -231,8 +224,6 @@ export function persistUserAddress(address) {
       ...(currentUser.address || {}),
       ...clone(address),
       phone: normalizePhone(address.phone) || currentUser.phone || '',
-      provinceCity: address.provinceCity || address.city || currentUser.address?.provinceCity || currentUser.address?.city || '',
-      city: address.city || address.provinceCity || currentUser.address?.city || currentUser.address?.provinceCity || '',
       line1: address.street || currentUser.address?.line1 || ''
     }
   };

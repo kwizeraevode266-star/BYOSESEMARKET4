@@ -1,7 +1,6 @@
 import { escapeHtml, formatCurrency } from './utils.js';
 import {
   getResolvedCustomerName,
-  getStageUrl,
   getState,
   initializeOrderFlow,
   resolveStageAccess,
@@ -12,6 +11,12 @@ import {
   validatePaymentStage
 } from './state.js';
 
+const steps = [
+  { id: 'shipping', label: 'Shipping' },
+  { id: 'checkout', label: 'Checkout' },
+  { id: 'payment', label: 'Payment' }
+];
+
 const ui = {
   progress: document.getElementById('checkoutProgress'),
   sidebar: document.getElementById('checkoutSidebar'),
@@ -20,20 +25,9 @@ const ui = {
   loading: document.getElementById('checkoutLoading')
 };
 
-const steps = [
-  { id: 'shipping', label: 'Shipping' },
-  { id: 'checkout', label: 'Checkout' },
-  { id: 'payment', label: 'Payment' }
-];
-
-function setMessage(message) {
-  ui.message.hidden = !message;
-  ui.message.textContent = message || '';
-}
-
 function renderProgress(activeStage) {
+  const activeIndex = steps.findIndex((step) => step.id === activeStage);
   ui.progress.innerHTML = steps.map((step, index) => {
-    const activeIndex = steps.findIndex((item) => item.id === activeStage);
     const tone = index < activeIndex ? 'is-complete' : index === activeIndex ? 'is-active' : '';
     return `
       <button type="button" class="orders-progress-step ${tone}" disabled>
@@ -44,25 +38,42 @@ function renderProgress(activeStage) {
   }).join('');
 }
 
+function renderProducts(products) {
+  return products.map((item) => `
+    <article class="orders-summary-product">
+      <img src="${escapeHtml(item.image || item.img || '')}" alt="${escapeHtml(item.name || 'Product')}">
+      <div>
+        <strong>${escapeHtml(item.name || 'Product')}</strong>
+        <p>${escapeHtml(item.attributeSummary || 'Standard option')}</p>
+        <span>Qty ${Number(item.qty || 0)} x ${formatCurrency(item.price || 0)}</span>
+      </div>
+      <strong>${formatCurrency(item.total || ((Number(item.qty || 0) || 0) * (Number(item.price || 0) || 0)))}</strong>
+    </article>
+  `).join('');
+}
+
 function renderSidebar(state) {
   const itemCount = state.products.reduce((sum, item) => sum + Number(item.qty || 0), 0);
   ui.sidebar.innerHTML = `
-    <section class="orders-sidebar-card">
-      <span class="orders-sidebar-label">Customer</span>
-      <h3>${escapeHtml(getResolvedCustomerName())}</h3>
-      <p>${escapeHtml(state.payment.phone || state.shippingAddress.phone || '')}</p>
-      <p>${escapeHtml(state.payment.method === 'airtel' ? 'Airtel Money' : 'MTN Mobile Money')}</p>
-    </section>
-    <section class="orders-sidebar-card">
+    <section class="orders-sidebar-card orders-sidebar-card--sticky">
+      <span class="orders-sidebar-label">Ready to place</span>
       <div class="orders-sidebar-heading">
-        <h3>Final total</h3>
+        <h3>${escapeHtml(getResolvedCustomerName())}</h3>
         <span>${itemCount} item${itemCount === 1 ? '' : 's'}</span>
       </div>
+      <div class="orders-summary-product-list orders-summary-product-list--compact">
+        ${renderProducts(state.products)}
+      </div>
       <div class="orders-total-row"><span>Subtotal</span><strong>${formatCurrency(state.totals.subtotal)}</strong></div>
-      <div class="orders-total-row"><span>Delivery fee</span><strong>${formatCurrency(state.totals.shippingFee)}</strong></div>
+      <div class="orders-total-row"><span>Shipping</span><strong>${formatCurrency(state.totals.shippingFee)}</strong></div>
       <div class="orders-total-row is-total"><span>Total</span><strong>${formatCurrency(state.totals.total)}</strong></div>
     </section>
   `;
+}
+
+function setMessage(message) {
+  ui.message.hidden = !message;
+  ui.message.textContent = message || '';
 }
 
 function syncForm(state) {
@@ -73,7 +84,7 @@ function syncForm(state) {
 
   const phoneInput = ui.form.querySelector('input[name="phone"]');
   if (phoneInput) {
-    phoneInput.value = state.payment.phone || '';
+    phoneInput.value = state.payment.phone || state.shippingAddress.phone || '';
   }
 }
 
@@ -96,16 +107,13 @@ function bindForm() {
   ui.form.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const phoneInput = ui.form.querySelector('input[name="phone"]');
-    const methodInput = ui.form.querySelector('input[name="method"]:checked');
-    updatePaymentDetails({
-      phone: phoneInput?.value || '',
-      method: methodInput?.value || 'mtn'
-    });
+    const phone = ui.form.querySelector('input[name="phone"]')?.value || '';
+    const method = ui.form.querySelector('input[name="method"]:checked')?.value || 'mtn';
+    updatePaymentDetails({ phone, method });
 
     const validation = validatePaymentStage();
     if (!validation.valid) {
-      setMessage(validation.message);
+      setMessage(validation.message || 'Complete payment details before placing the order.');
       return;
     }
 
@@ -138,4 +146,5 @@ document.addEventListener('DOMContentLoaded', () => {
   renderSidebar(state);
   syncForm(state);
   bindForm();
+  setMessage('');
 });
