@@ -23,27 +23,32 @@ const paymentOptions = [
   {
     id: 'mtn',
     title: 'MTN Mobile Money',
-    detail: 'Pay using MTN MoMo with the customer shipping phone.'
+    detail: 'Pay with MTN MoMo',
+    icon: '../img/MTN.jpeg'
   },
   {
     id: 'airtel',
     title: 'Airtel Money',
-    detail: 'Use Airtel Money for quick mobile payment confirmation.'
+    detail: 'Use Airtel Money',
+    icon: '../img/airtel.jpeg'
   },
   {
     id: 'bank',
     title: 'Bank Transfer',
-    detail: 'Record the transfer and verify it from the admin payment queue.'
+    detail: 'Pay by Bank Transfer',
+    icon: '../img/BANK TRANSFER.jpeg'
   },
   {
     id: 'card',
     title: 'Visa / Mastercard',
-    detail: 'Card payment selected for online authorization and verification.'
+    detail: 'Pay with Visa or Mastercard',
+    icon: '../img/VASA  MASTERCARD.jpeg'
   },
   {
     id: 'cod',
     title: 'Pay on Delivery',
-    detail: 'Available only for addresses whose Province / City contains Kigali.'
+    detail: 'Pay when order arrives',
+    icon: '../img/PAY ON DELIVERY.jpeg'
   }
 ];
 
@@ -96,21 +101,15 @@ function renderShippingSummary(state) {
   return `
     <section class="orders-review-card orders-review-card--summary">
       <div class="orders-section-head">
-        <div>
+        <div class="orders-shipping-summary-copy">
           <span class="orders-sidebar-label">Shipping summary</span>
-          <h3>${escapeHtml(getResolvedCustomerName())}</h3>
+          <div class="orders-shipping-summary-inline">
+            <h3>${escapeHtml(getResolvedCustomerName())}</h3>
+            <span>${escapeHtml(address.phone || '')}</span>
+          </div>
+          <p class="orders-shipping-summary-address">${escapeHtml(addressText || 'Address not available')}</p>
         </div>
         <a class="orders-text-link" href="shipping.html">Change</a>
-      </div>
-      <div class="orders-review-list">
-        <div class="orders-review-row">
-          <span>Phone</span>
-          <strong>${escapeHtml(address.phone || '')}</strong>
-        </div>
-        <div class="orders-review-row">
-          <span>Address</span>
-          <strong>${escapeHtml(addressText || 'Address not available')}</strong>
-        </div>
       </div>
     </section>
   `;
@@ -131,11 +130,11 @@ function renderProductList(state) {
             <img src="${escapeHtml(item.image || item.img || '')}" alt="${escapeHtml(item.name || 'Product')}">
             <div class="orders-review-product-copy">
               <div class="orders-review-product-top">
-                <div>
+                <div class="orders-review-product-meta">
                   <h4>${escapeHtml(item.name || 'Product')}</h4>
-                  <p>${escapeHtml(item.attributeSummary || 'Standard option')}</p>
+                  <p>${escapeHtml(item.color || item.size ? [item.color, item.size].filter(Boolean).join(' • ') : (item.attributeSummary || 'Standard option'))}</p>
+                  <strong class="orders-review-unit-price">${formatCurrency(item.price || 0)}</strong>
                 </div>
-                <strong>${formatCurrency(item.price || 0)}</strong>
               </div>
               <div class="orders-review-product-bottom">
                 <div class="orders-qty-control">
@@ -191,11 +190,13 @@ function renderPaymentMethods(state) {
           <h3>Select one payment method</h3>
         </div>
       </div>
-      <div class="orders-payment-grid">
+      <div class="orders-payment-list" role="radiogroup" aria-label="Payment methods">
         ${visibleOptions.map((option) => `
-          <label class="orders-choice-card ${state.payment.method === option.id ? 'is-selected' : ''}">
+          <label class="orders-payment-option ${state.payment.method === option.id ? 'is-selected' : ''}">
             <input type="radio" name="checkoutPaymentMethod" value="${option.id}" ${state.payment.method === option.id ? 'checked' : ''}>
-            <div class="orders-payment-card-copy">
+            <span class="orders-payment-radio" aria-hidden="true"></span>
+            <img class="orders-payment-icon" src="${escapeHtml(option.icon)}" alt="${escapeHtml(option.title)} icon">
+            <div class="orders-payment-option-copy">
               <strong>${escapeHtml(option.title)}</strong>
               <p>${escapeHtml(option.detail)}</p>
             </div>

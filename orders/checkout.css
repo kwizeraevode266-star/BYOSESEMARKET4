@@ -1225,6 +1225,44 @@ body {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(240, 251, 247, 0.92));
 }
 
+.orders-review-card--summary .orders-section-head {
+  align-items: center;
+  margin-bottom: 0;
+}
+
+.orders-shipping-summary-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.orders-shipping-summary-inline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.orders-shipping-summary-inline h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.orders-shipping-summary-inline span {
+  color: var(--orders-muted);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.orders-shipping-summary-address {
+  margin: 0;
+  color: var(--orders-muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
 .orders-section-head {
   display: flex;
   align-items: flex-start;
@@ -1258,18 +1296,18 @@ body {
 
 .orders-review-product {
   display: grid;
-  grid-template-columns: 92px minmax(0, 1fr);
-  gap: 16px;
-  padding: 16px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 12px;
+  padding: 12px;
   border-radius: 18px;
   border: 1px solid rgba(148, 163, 184, 0.18);
   background: rgba(248, 250, 252, 0.82);
 }
 
 .orders-review-product img {
-  width: 92px;
-  height: 92px;
-  border-radius: 18px;
+  width: 76px;
+  height: 76px;
+  border-radius: 14px;
   object-fit: cover;
 }
 
@@ -1285,28 +1323,69 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
 }
 
 .orders-review-product-copy {
-  gap: 14px;
+  gap: 10px;
+}
+
+.orders-review-product-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .orders-review-product-top p,
 .orders-payment-card-copy p,
 .orders-payment-note {
-  margin: 6px 0 0;
+  margin: 0;
   color: var(--orders-muted);
+}
+
+.orders-review-product-top h4 {
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.orders-review-product-meta p {
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.orders-review-unit-price {
+  color: var(--orders-accent-dark);
+  font-size: 0.92rem;
 }
 
 .orders-review-price-stack {
   align-items: flex-end;
-  gap: 6px;
+  gap: 4px;
 }
 
 .orders-review-price-stack span {
   color: var(--orders-muted);
-  font-size: 0.88rem;
+  font-size: 0.8rem;
+}
+
+.orders-review-price-stack strong {
+  font-size: 0.92rem;
+}
+
+.orders-qty-control {
+  padding: 3px;
+}
+
+.orders-qty-control button {
+  width: 30px;
+  height: 30px;
+  font-size: 1rem;
+}
+
+.orders-qty-control input {
+  width: 40px;
+  font-size: 0.92rem;
 }
 
 .orders-payment-grid {
@@ -1324,6 +1403,81 @@ body {
 .orders-payment-grid .orders-choice-card.is-selected {
   border-color: rgba(0, 184, 148, 0.42);
   box-shadow: inset 0 0 0 1px rgba(0, 184, 148, 0.18), 0 14px 28px rgba(0, 184, 148, 0.12);
+}
+
+.orders-payment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.orders-payment-option {
+  position: relative;
+  display: grid;
+  grid-template-columns: 18px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.78);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.orders-payment-option input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.orders-payment-radio {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(108, 123, 119, 0.6);
+  background: #ffffff;
+  box-shadow: inset 0 0 0 4px #ffffff;
+}
+
+.orders-payment-option.is-selected {
+  border-color: rgba(0, 184, 148, 0.4);
+  background: rgba(0, 184, 148, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(0, 184, 148, 0.14);
+}
+
+.orders-payment-option.is-selected .orders-payment-radio {
+  border-color: var(--orders-accent);
+  background: var(--orders-accent);
+}
+
+.orders-payment-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.orders-payment-option-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.orders-payment-option-copy strong {
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.orders-payment-option-copy p {
+  margin: 0;
+  color: var(--orders-muted);
+  font-size: 0.8rem;
+  line-height: 1.25;
 }
 
 .orders-order-summary-card {
@@ -1357,31 +1511,116 @@ body {
 
 @media (max-width: 720px) {
   .orders-panel--review {
-    padding: 20px;
+    padding: 18px;
   }
 
-  .orders-section-head,
-  .orders-review-product-top,
-  .orders-review-product-bottom {
-    flex-direction: column;
-    align-items: flex-start;
+  .orders-review-card {
+    padding: 14px;
+  }
+
+  .orders-review-card--summary .orders-section-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: end;
   }
 
   .orders-payment-grid {
     grid-template-columns: 1fr;
   }
 
+  .orders-payment-list {
+    gap: 8px;
+  }
+
+  .orders-payment-option {
+    grid-template-columns: 18px 24px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 56px;
+    padding: 9px 10px;
+    border-radius: 14px;
+  }
+
+  .orders-payment-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+  }
+
+  .orders-payment-option-copy strong {
+    font-size: 0.86rem;
+  }
+
+  .orders-payment-option-copy p {
+    font-size: 0.76rem;
+  }
+
   .orders-review-product {
-    grid-template-columns: 1fr;
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px;
   }
 
   .orders-review-product img {
-    width: 84px;
-    height: 84px;
+    width: 68px;
+    height: 68px;
+  }
+
+  .orders-review-product-top {
+    align-items: flex-start;
+  }
+
+  .orders-review-product-bottom {
+    align-items: center;
+    gap: 10px;
+  }
+
+  .orders-shipping-summary-inline {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .orders-shipping-summary-inline h3 {
+    font-size: 0.95rem;
+  }
+
+  .orders-shipping-summary-inline span,
+  .orders-shipping-summary-address {
+    font-size: 0.82rem;
+  }
+
+  .orders-text-link {
+    min-height: 34px;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+  }
+
+  .orders-review-product-top h4 {
+    font-size: 0.92rem;
+  }
+
+  .orders-review-product-meta p,
+  .orders-review-unit-price,
+  .orders-review-price-stack strong {
+    font-size: 0.84rem;
   }
 
   .orders-review-price-stack {
     align-items: flex-start;
+  }
+
+  .orders-review-price-stack span {
+    font-size: 0.76rem;
+  }
+
+  .orders-qty-control button {
+    width: 28px;
+    height: 28px;
+  }
+
+  .orders-qty-control input {
+    width: 34px;
+    font-size: 0.86rem;
   }
 
   .orders-shell--review .orders-sidebar--review {
