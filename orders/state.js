@@ -369,7 +369,7 @@ function buildPaymentValidation() {
 
   if (state.payment.method === 'cod') {
     if (!isCodAvailable()) {
-      return { valid: false, message: 'Cash on delivery is only available for Kigali address deliveries.' };
+      return { valid: false, message: 'Pay When You Receive Your Order is only available for Kigali addresses.' };
     }
 
     return { valid: true };
@@ -665,7 +665,7 @@ export async function submitOrder() {
       shippingAddress: clone(order.shippingAddress),
       deliveryLabel: order.deliveryLabel,
       paymentLabel: order.paymentType === 'cod'
-        ? 'Cash on delivery'
+        ? 'Pay When You Receive Your Order'
         : order.paymentMethod === 'mtn'
           ? 'MTN Mobile Money'
           : order.paymentMethod === 'airtel'
@@ -730,7 +730,7 @@ export function getConfirmationState(orderId) {
     shippingAddress: clone(order.shippingAddress || {}),
     deliveryLabel: order.deliveryLabel || order.deliveryMethod || 'Delivery',
     paymentLabel: order.paymentType === 'cod'
-      ? 'Cash on delivery'
+      ? 'Pay When You Receive Your Order'
       : order.paymentMethod === 'mtn'
         ? 'MTN Mobile Money'
         : order.paymentMethod === 'airtel'

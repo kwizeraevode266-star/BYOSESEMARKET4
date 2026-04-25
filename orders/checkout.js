@@ -47,7 +47,10 @@ const paymentOptions = [
   {
     id: 'cod',
     title: 'Pay on Delivery',
-    detail: 'Pay when order arrives',
+    detail: 'Pay after receiving your order.',
+    detailSecondary: 'Available in Kigali only.',
+    detailRw: 'Wishyura nyuma yo kwakira igicuruzwa, ukishyura umaze kugenzura ko gihuye n’icyo waguze.',
+    unavailable: 'Iyi serivisi iboneka gusa mu Mujyi wa Kigali.',
     icon: '../img/PAY ON DELIVERY.jpeg'
   }
 ];
@@ -80,11 +83,6 @@ function setMessage(message) {
 
 function getPaymentLabel(method) {
   return paymentOptions.find((option) => option.id === method)?.title || 'Not selected';
-}
-
-function getEstimatedDeliveryLabel(state) {
-  const city = String(state.shippingAddress?.provinceCity || state.shippingAddress?.city || '').toLowerCase();
-  return city.includes('kigali') ? 'Estimated delivery: 1 to 2 business days' : 'Estimated delivery: 2 to 4 business days';
 }
 
 function renderShippingSummary(state) {
@@ -155,32 +153,8 @@ function renderProductList(state) {
   `;
 }
 
-function renderDeliveryInfo(state) {
-  return `
-    <section class="orders-review-card">
-      <div class="orders-section-head">
-        <div>
-          <span class="orders-sidebar-label">Delivery information</span>
-          <h3>Shipping details</h3>
-        </div>
-      </div>
-      <div class="orders-review-list">
-        <div class="orders-review-row">
-          <span>Delivery fee</span>
-          <strong>${formatCurrency(state.totals.shippingFee)}</strong>
-        </div>
-        <div class="orders-review-row">
-          <span>Timing</span>
-          <strong>${escapeHtml(getEstimatedDeliveryLabel(state))}</strong>
-        </div>
-      </div>
-    </section>
-  `;
-}
-
 function renderPaymentMethods(state) {
   const codVisible = isCodAvailable();
-  const visibleOptions = paymentOptions.filter((option) => option.id !== 'cod' || codVisible);
 
   return `
     <section class="orders-review-card">
@@ -191,21 +165,50 @@ function renderPaymentMethods(state) {
         </div>
       </div>
       <div class="orders-payment-list" role="radiogroup" aria-label="Payment methods">
-        ${visibleOptions.map((option) => `
-          <label class="orders-payment-option ${state.payment.method === option.id ? 'is-selected' : ''}">
-            <input type="radio" name="checkoutPaymentMethod" value="${option.id}" ${state.payment.method === option.id ? 'checked' : ''}>
+        ${paymentOptions.map((option) => {
+          const isDisabled = option.id === 'cod' && !codVisible;
+          return `
+          <label class="orders-payment-option ${state.payment.method === option.id ? 'is-selected' : ''} ${isDisabled ? 'is-disabled' : ''}">
+            <input type="radio" name="checkoutPaymentMethod" value="${option.id}" ${state.payment.method === option.id ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
             <span class="orders-payment-radio" aria-hidden="true"></span>
             <img class="orders-payment-icon" src="${escapeHtml(option.icon)}" alt="${escapeHtml(option.title)} icon">
             <div class="orders-payment-option-copy">
               <strong>${escapeHtml(option.title)}</strong>
               <p>${escapeHtml(option.detail)}</p>
+              ${option.detailSecondary ? `<p>${escapeHtml(option.detailSecondary)}</p>` : ''}
+              ${option.detailRw ? `<p>${escapeHtml(option.detailRw)}</p>` : ''}
+              ${isDisabled ? `<small class="orders-payment-warning">${escapeHtml(option.unavailable || 'Not available in your area.')}</small>` : ''}
             </div>
           </label>
-        `).join('')}
+        `;
+        }).join('')}
       </div>
-      ${codVisible ? '' : '<p class="orders-payment-note">Pay on Delivery is hidden because the Province / City from Step 1 does not contain Kigali.</p>'}
     </section>
   `;
+}
+
+async function handlePlaceOrder() {
+  const shippingValidation = validateShippingStage();
+  if (!shippingValidation.valid) {
+    setMessage(shippingValidation.message || 'Shipping data is incomplete.');
+    window.location.assign('shipping.html');
+    return;
+  }
+
+  const paymentValidation = validatePaymentStage();
+  if (!paymentValidation.valid) {
+    setMessage(paymentValidation.message || 'Select a payment method before placing the order.');
+    return;
+  }
+
+  setMessage('');
+  const result = await submitOrder();
+  if (!result.valid) {
+    setMessage(result.message || 'Unable to place the order right now.');
+    return;
+  }
+
+  window.location.assign(result.redirectUrl);
 }
 
 function renderSidebar(state) {
@@ -237,30 +240,19 @@ function renderSidebar(state) {
         ${state.isSubmitting ? 'Placing Order...' : 'Place Order'}
       </button>
     </section>
+    <section class="orders-mobile-checkout-bar" aria-label="Mobile checkout actions">
+      <div class="orders-mobile-checkout-total">
+        <span>Total</span>
+        <strong>${formatCurrency(state.totals.total)}</strong>
+      </div>
+      <button type="button" class="orders-mobile-checkout-button" id="mobilePlaceOrderButton" ${isDisabled ? 'disabled' : ''}>
+        ${state.isSubmitting ? 'Placing Order...' : 'Place Order'}
+      </button>
+    </section>
   `;
 
-  ui.sidebar.querySelector('#placeOrderButton')?.addEventListener('click', async () => {
-    const shippingValidation = validateShippingStage();
-    if (!shippingValidation.valid) {
-      setMessage(shippingValidation.message || 'Shipping data is incomplete.');
-      window.location.assign('shipping.html');
-      return;
-    }
-
-    const paymentValidation = validatePaymentStage();
-    if (!paymentValidation.valid) {
-      setMessage(paymentValidation.message || 'Select a payment method before placing the order.');
-      return;
-    }
-
-    setMessage('');
-    const result = await submitOrder();
-    if (!result.valid) {
-      setMessage(result.message || 'Unable to place the order right now.');
-      return;
-    }
-
-    window.location.assign(result.redirectUrl);
+  ui.sidebar.querySelectorAll('#placeOrderButton, #mobilePlaceOrderButton').forEach((button) => {
+    button.addEventListener('click', handlePlaceOrder);
   });
 }
 
@@ -269,7 +261,6 @@ function renderContent(state) {
     <div class="orders-step-stack orders-step-stack--review">
       ${renderShippingSummary(state)}
       ${renderProductList(state)}
-      ${renderDeliveryInfo(state)}
       ${renderPaymentMethods(state)}
     </div>
   `;
