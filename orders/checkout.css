@@ -1597,6 +1597,334 @@ body {
   }
 }
 
+  .orders-shell--success {
+    padding-top: 24px;
+    padding-bottom: 48px;
+  }
+
+  .orders-layout--success {
+    grid-template-columns: 1fr;
+    margin-top: 0;
+  }
+
+  .orders-panel--success {
+    padding: 20px;
+    overflow: hidden;
+  }
+
+  .orders-success-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .orders-success-hero,
+  .orders-success-section {
+    border: 1px solid rgba(0, 184, 148, 0.12);
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 250, 246, 0.88));
+    box-shadow: 0 24px 70px rgba(14, 30, 24, 0.08);
+  }
+
+  .orders-success-hero {
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+    align-items: center;
+    animation: orders-success-hero-enter 0.55s ease both;
+  }
+
+  .orders-success-check {
+    width: 84px;
+    height: 84px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 28px;
+    background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.95), rgba(0, 184, 148, 0.18));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 18px 34px rgba(0, 184, 148, 0.18);
+  }
+
+  .orders-success-check svg {
+    width: 56px;
+    height: 56px;
+  }
+
+  .orders-success-check circle,
+  .orders-success-check path {
+    stroke: #00b894;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .orders-success-check circle {
+    stroke-dasharray: 226;
+    stroke-dashoffset: 226;
+    animation: orders-success-circle 0.7s ease forwards;
+  }
+
+  .orders-success-check path {
+    stroke-dasharray: 60;
+    stroke-dashoffset: 60;
+    animation: orders-success-check 0.45s ease 0.35s forwards;
+  }
+
+  .orders-success-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .orders-success-copy h1,
+  .orders-success-copy p,
+  .orders-success-section h2 {
+    margin: 0;
+  }
+
+  .orders-success-copy h1 {
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    line-height: 0.98;
+  }
+
+  .orders-success-copy p {
+    color: var(--orders-muted);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 44rem;
+  }
+
+  .orders-success-section {
+    padding: 20px;
+  }
+
+  .orders-success-section-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .orders-success-section-head h2 {
+    font-size: clamp(1.15rem, 3vw, 1.5rem);
+  }
+
+  .orders-success-metrics,
+  .orders-success-grid,
+  .orders-success-support-actions,
+  .orders-success-actions {
+    display: grid;
+    gap: 14px;
+  }
+
+  .orders-success-metrics {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .orders-success-metric-card,
+  .orders-success-info-row,
+  .orders-success-payment-note,
+  .orders-success-track-button,
+  .orders-success-product-card {
+    border-radius: 22px;
+    background: rgba(248, 250, 252, 0.92);
+    border: 1px solid rgba(22, 48, 43, 0.08);
+  }
+
+  .orders-success-metric-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 18px;
+  }
+
+  .orders-success-metric-card span,
+  .orders-success-info-row span,
+  .orders-success-product-meta span {
+    color: var(--orders-muted);
+    font-size: 0.84rem;
+  }
+
+  .orders-success-metric-card strong,
+  .orders-success-info-row strong {
+    font-size: 1rem;
+    line-height: 1.4;
+  }
+
+  .orders-success-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+
+  .orders-success-info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orders-success-info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 16px;
+  }
+
+  .orders-success-payment-note {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+  }
+
+  .orders-success-payment-note p {
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+
+  .orders-success-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .orders-success-product-card {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .orders-success-product-card img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 18px;
+    background: #f2f7f6;
+  }
+
+  .orders-success-product-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .orders-success-product-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .orders-success-product-head h3,
+  .orders-success-product-copy p {
+    margin: 0;
+  }
+
+  .orders-success-product-head h3 {
+    font-size: 1rem;
+  }
+
+  .orders-success-product-copy p {
+    color: var(--orders-muted);
+    line-height: 1.45;
+  }
+
+  .orders-success-product-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .orders-success-support-actions,
+  .orders-success-actions {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+
+  .orders-success-support-button,
+  .orders-success-track-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 54px;
+    padding: 14px 20px;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .orders-success-support-button.is-whatsapp {
+    background: linear-gradient(135deg, #00b894 0%, #009e7f 100%);
+    color: #ffffff;
+    box-shadow: 0 16px 28px rgba(0, 184, 148, 0.22);
+  }
+
+  .orders-success-support-button.is-call {
+    background: rgba(0, 184, 148, 0.1);
+    color: var(--orders-accent-dark);
+    border: 1px solid rgba(0, 184, 148, 0.2);
+  }
+
+  .orders-success-track-button {
+    border: 1px solid rgba(22, 48, 43, 0.1);
+    color: var(--orders-text);
+    cursor: not-allowed;
+  }
+
+  .orders-success-track-button span {
+    margin-left: 8px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: rgba(0, 184, 148, 0.12);
+    color: #00856a;
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .orders-success-page--empty .orders-success-section {
+    text-align: center;
+  }
+
+  @keyframes orders-success-hero-enter {
+    from {
+      opacity: 0;
+      transform: scale(0.97) translateY(14px);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes orders-success-circle {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes orders-success-check {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .orders-success-hero {
+      grid-template-columns: auto minmax(0, 1fr);
+      gap: 22px;
+      padding: 28px;
+    }
+
+    .orders-panel--success {
+      padding: 26px;
+    }
+  }
+
 @media (min-width: 1025px) {
   .orders-mobile-checkout-bar {
     display: none !important;
@@ -1604,6 +1932,69 @@ body {
 }
 
 @media (max-width: 720px) {
+    .orders-panel--success {
+      padding: 14px;
+    }
+
+    .orders-success-hero,
+    .orders-success-section {
+      border-radius: 22px;
+    }
+
+    .orders-success-hero {
+      padding: 18px;
+    }
+
+    .orders-success-check {
+      width: 72px;
+      height: 72px;
+      border-radius: 24px;
+    }
+
+    .orders-success-check svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .orders-success-copy h1 {
+      font-size: 1.9rem;
+    }
+
+    .orders-success-section {
+      padding: 16px;
+    }
+
+    .orders-success-metric-card,
+    .orders-success-info-row,
+    .orders-success-payment-note {
+      padding: 14px;
+      border-radius: 18px;
+    }
+
+    .orders-success-product-card {
+      grid-template-columns: 60px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+      border-radius: 18px;
+    }
+
+    .orders-success-product-card img {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+    }
+
+    .orders-success-product-head {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .orders-success-support-button,
+    .orders-success-track-button,
+    .orders-link-button {
+      width: 100%;
+    }
+
   .orders-panel--review {
     padding: 18px;
   }

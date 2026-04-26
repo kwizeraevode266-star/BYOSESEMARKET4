@@ -213,8 +213,8 @@ async function handlePlaceOrder() {
 
 function renderSidebar(state) {
   const shippingValid = validateShippingStage().valid;
-  const paymentValid = validatePaymentStage().valid;
-  const isDisabled = state.isSubmitting || !state.products.length || !shippingValid || !paymentValid;
+  const hasSelectedPayment = Boolean(state.payment.method);
+  const isDisabled = state.isSubmitting || !state.products.length || !shippingValid || !hasSelectedPayment;
   const itemCount = state.products.reduce((sum, item) => sum + Number(item.qty || 0), 0);
 
   ui.sidebar.innerHTML = `

@@ -80,6 +80,7 @@ const DEFAULT_PAYMENT = {
 
 const COD_FEE = 2000;
 const SUBMISSION_DELAY_MS = 900;
+const INACTIVE_PAYMENT_MESSAGE = 'This payment method is not available yet. Ubu buryo bwo kwishyura ntiburakora.';
 const listeners = new Set();
 
 const state = {
@@ -163,7 +164,7 @@ function normalizePayment(value = {}) {
   };
   const phone = String(merged.phone || merged.payerPhone || '').trim();
   const method = String(merged.method || '').trim();
-  const paymentType = method === 'cod' ? 'cod' : 'pay_now';
+  const paymentType = isCodMethod(method) ? 'cod' : 'pay_now';
 
   return {
     ...clone(DEFAULT_PAYMENT),
@@ -174,6 +175,10 @@ function normalizePayment(value = {}) {
     payerPhone: phone,
     transactionId: String(merged.transactionId || '').trim()
   };
+}
+
+function isCodMethod(method) {
+  return String(method || '').trim().toLowerCase() === 'cod';
 }
 
 function buildCustomerState(user) {
@@ -263,12 +268,12 @@ function persistDraft() {
 }
 
 function ensureValidPaymentType() {
-  if (!isCodAvailable() && state.payment.method === 'cod') {
+  if (!isCodAvailable() && isCodMethod(state.payment.method)) {
     state.payment.method = '';
     state.payment.paymentType = 'pay_now';
   }
 
-  if (state.payment.method !== 'cod') {
+  if (!isCodMethod(state.payment.method)) {
     state.payment.paymentType = 'pay_now';
   }
 
@@ -367,7 +372,7 @@ function buildPaymentValidation() {
     return { valid: false, message: 'Choose a payment method before placing the order.' };
   }
 
-  if (state.payment.method === 'cod') {
+  if (isCodMethod(state.payment.method)) {
     if (!isCodAvailable()) {
       return { valid: false, message: 'Pay When You Receive Your Order is only available for Kigali addresses.' };
     }
@@ -375,11 +380,7 @@ function buildPaymentValidation() {
     return { valid: true };
   }
 
-  if (!isValidPhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone)) {
-    return { valid: false, message: 'Enter the payer phone number used for the transaction.' };
-  }
-
-  return { valid: true };
+  return { valid: false, message: INACTIVE_PAYMENT_MESSAGE };
 }
 
 export function initializeCheckoutState() {
@@ -577,6 +578,7 @@ export function buildOrderPayload() {
   const customerName = getResolvedCustomerName();
   const normalizedPhone = normalizePhone(state.shippingAddress.phone || state.customer.phone);
   const payerPhone = normalizePhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone || state.customer.phone);
+  const usesCod = isCodMethod(state.payment.method);
 
   const order = {
     id: createOrderId(),
@@ -609,15 +611,19 @@ export function buildOrderPayload() {
     total: state.totals.total,
     deliveryMethod: state.delivery.id,
     deliveryLabel: state.delivery.label,
-    paymentType: state.payment.method === 'cod' ? 'cod' : 'pay_now',
-    paymentMethod: state.payment.method === 'cod' ? 'cod' : state.payment.method,
+    paymentType: usesCod ? 'cod' : 'pay_now',
+    paymentMethod: usesCod ? 'COD' : state.payment.method,
+    paymentStatus: usesCod ? 'Pending' : 'Unavailable',
+    note: usesCod ? 'Pay on delivery' : '',
     payment: {
-      type: state.payment.method === 'cod' ? 'cod' : 'pay_now',
-      method: state.payment.method === 'cod' ? 'cod' : state.payment.method,
+      type: usesCod ? 'cod' : 'pay_now',
+      method: usesCod ? 'COD' : state.payment.method,
+      status: usesCod ? 'Pending' : 'Unavailable',
+      note: usesCod ? 'Pay on delivery' : '',
       payerPhone,
       transactionId: String(state.payment.transactionId || '').trim()
     },
-    status: state.payment.method === 'cod' ? 'Pending Delivery (COD)' : 'Pending Payment Verification'
+    status: usesCod ? 'Pending' : 'Pending Payment Verification'
   };
 
   return { valid: true, order, customerName };
@@ -664,7 +670,7 @@ export async function submitOrder() {
       products: clone(order.products),
       shippingAddress: clone(order.shippingAddress),
       deliveryLabel: order.deliveryLabel,
-      paymentLabel: order.paymentType === 'cod'
+      paymentLabel: order.paymentType === 'cod' || isCodMethod(order.paymentMethod)
         ? 'Pay When You Receive Your Order'
         : order.paymentMethod === 'mtn'
           ? 'MTN Mobile Money'
@@ -688,7 +694,7 @@ export async function submitOrder() {
       valid: true,
       order,
       confirmation,
-      redirectUrl: `confirmation.html?orderId=${encodeURIComponent(order.id)}`,
+      redirectUrl: `../order-success.html?orderId=${encodeURIComponent(order.id)}`,
       message: `${customerName} order placed for ${formatCurrency(order.total)}.`
     };
   } catch (error) {
@@ -729,7 +735,7 @@ export function getConfirmationState(orderId) {
     products: clone(order.products || []),
     shippingAddress: clone(order.shippingAddress || {}),
     deliveryLabel: order.deliveryLabel || order.deliveryMethod || 'Delivery',
-    paymentLabel: order.paymentType === 'cod'
+    paymentLabel: order.paymentType === 'cod' || isCodMethod(order.paymentMethod)
       ? 'Pay When You Receive Your Order'
       : order.paymentMethod === 'mtn'
         ? 'MTN Mobile Money'
