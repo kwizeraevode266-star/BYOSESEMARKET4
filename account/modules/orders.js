@@ -3,7 +3,8 @@
 // ===============================
 
 (function () {
-  const STATUS_KEYS = ["pending", "processing", "shipped", "delivered"];
+  const STATUS_KEYS = ["pending", "confirmed", "shipping", "delivered"];
+  const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" rx="20" fill="%23E9F8F3"/%3E%3Cpath d="M27 62h42v4H27z" fill="%2300B894" fill-opacity=".2"/%3E%3Crect x="29" y="26" width="38" height="28" rx="10" fill="%2300B894" fill-opacity=".18"/%3E%3Cpath d="M39 38h18v4H39zm0 8h12v4H39z" fill="%23008F72"/%3E%3C/svg%3E';
 
   // Public API (attach to window for integration)
   async function initOrders(options = {}) {
@@ -72,8 +73,8 @@
           <div class="oms-tabs" role="tablist">
             <button class="oms-tab active" data-status="all">All</button>
             <button class="oms-tab" data-status="pending">Pending</button>
-            <button class="oms-tab" data-status="processing">Processing</button>
-            <button class="oms-tab" data-status="shipped">Shipped</button>
+            <button class="oms-tab" data-status="confirmed">Confirmed</button>
+            <button class="oms-tab" data-status="shipping">Shipping</button>
             <button class="oms-tab" data-status="delivered">Delivered</button>
           </div>
         </div>
@@ -107,10 +108,10 @@
       const productId = card.dataset.productId;
 
       // if click on details button or card itself -> open product-details
-      if (productId) {
-        window.location.href = `../product-details.html?product=${productId}&order=${orderId}`;
-      } else if (orderId) {
-        window.location.href = `../product-details.html?order=${orderId}`;
+      if (orderId) {
+        window.location.href = `../order-details.html?id=${orderId}`;
+      } else if (productId) {
+        window.location.href = `../product-details.html?product=${productId}`;
       }
     });
   }
@@ -147,8 +148,8 @@
     if (!status) return "pending";
     const s = status.toLowerCase();
     if (s.includes("pending")) return "pending";
-    if (s.includes("process") || s === "processing") return "processing";
-    if (s.includes("ship") || s === "shipped") return "shipped";
+    if (s.includes("confirm") || s.includes("process") || s === "confirmed") return "confirmed";
+    if (s.includes("ship") || s === "shipping") return "shipping";
     if (s.includes("deliver") || s === "delivered" || s === "completed") return "delivered";
     return "pending";
   }
@@ -161,7 +162,7 @@
 
     // internal rendering
     const statusKey = mapStatus(order.status);
-    const img = order.image || (order.items && order.items[0] && order.items[0].image) || "../img/placeholder.png";
+    const img = order.image || (order.items && order.items[0] && order.items[0].image) || FALLBACK_IMAGE;
     const name = order.title || (order.items && order.items[0] && order.items[0].name) || "Product";
     const qty = order.quantity || (order.items && order.items[0] && order.items[0].qty) || 1;
     const price = order.total || (order.items && order.items[0] && order.items[0].price) || order.price || 0;
@@ -193,15 +194,15 @@
     `;
   }
 
-  // Simple tracking timeline for processing / shipped
+  // Simple tracking timeline for confirmed / shipping
   function renderTrackingTimeline(order) {
     const key = mapStatus(order.status);
     if (key === 'pending' || key === 'delivered') return '';
 
     const stages = [
       { k: 'pending', t: 'Order received' },
-      { k: 'processing', t: 'Processing' },
-      { k: 'shipped', t: 'Shipped' },
+      { k: 'confirmed', t: 'Confirmed' },
+      { k: 'shipping', t: 'Shipping' },
       { k: 'delivered', t: 'Delivered' }
     ];
 

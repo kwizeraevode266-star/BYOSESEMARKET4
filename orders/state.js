@@ -359,6 +359,17 @@ function buildShippingValidation() {
     };
   }
 
+  if (!state.shippingAddress.latitude || !state.shippingAddress.longitude || !state.shippingAddress.mapLink) {
+    return {
+      valid: false,
+      message: 'Capture your GPS location before placing the order.',
+      errors: {
+        ...errors,
+        gpsLocation: 'GPS location is required'
+      }
+    };
+  }
+
   persistUserAddress({
     ...state.shippingAddress,
     phone: normalizePhone(state.shippingAddress.phone)
@@ -575,21 +586,66 @@ export function buildOrderPayload() {
     return paymentValidation;
   }
 
+  if (!state.customer.id) {
+    return {
+      valid: false,
+      message: 'You must be logged in to place an order.'
+    };
+  }
+
   const customerName = getResolvedCustomerName();
   const normalizedPhone = normalizePhone(state.shippingAddress.phone || state.customer.phone);
   const payerPhone = normalizePhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone || state.customer.phone);
   const usesCod = isCodMethod(state.payment.method);
+  const orderId = createOrderId();
+  const createdAtIso = new Date().toISOString();
+  const items = state.products.map((product) => ({
+    productId: String(product?.id || '').trim(),
+    productName: String(product?.name || 'Product').trim() || 'Product',
+    image: String(product?.image || product?.img || '').trim(),
+    size: String(product?.size || product?.attributes?.Size || '').trim(),
+    color: String(product?.color || product?.attributes?.Color || '').trim(),
+    quantity: Math.max(1, Number(product?.qty || 1) || 1),
+    price: Number(product?.price || 0) || 0
+  }));
+  const fullAddress = {
+    province: state.shippingAddress.provinceCity,
+    district: state.shippingAddress.district,
+    sector: state.shippingAddress.sector,
+    cell: state.shippingAddress.cell,
+    village: state.shippingAddress.village,
+    street: state.shippingAddress.street,
+    note: state.shippingAddress.note
+  };
+  const gpsLocation = {
+    latitude: state.shippingAddress.latitude,
+    longitude: state.shippingAddress.longitude,
+    googleMapsLink: state.shippingAddress.mapLink
+  };
+  const paymentStatus = usesCod ? 'pending' : 'pending';
+  const orderStatus = 'pending';
 
   const order = {
-    id: createOrderId(),
-    date: new Date().toISOString(),
-    createdAt: Date.now(),
+    id: orderId,
+    orderId,
+    userId: state.customer.id,
+    date: createdAtIso,
+    createdAt: createdAtIso,
+    createdAtMs: Date.now(),
+    timestamp: createdAtIso,
+    orderStatus,
+    status: 'Pending',
+    paymentStatus,
     products: clone(state.products),
+    items,
     customerId: state.customer.id,
     customerName,
+    phoneNumber: normalizedPhone,
     customerEmail: state.customer.email,
     customerPhone: normalizedPhone,
     customerImage: state.customer.avatar,
+    fullAddress,
+    gpsLocation,
     customer: {
       id: state.customer.id,
       name: customerName,
@@ -602,28 +658,39 @@ export function buildOrderPayload() {
       phone: normalizedPhone,
       city: state.shippingAddress.provinceCity || state.shippingAddress.city,
       line1: state.shippingAddress.street || '',
+      province: state.shippingAddress.provinceCity || state.shippingAddress.city,
       firstName: state.shippingAddress.firstName,
-      lastName: state.shippingAddress.lastName
+      lastName: state.shippingAddress.lastName,
+      mapLink: state.shippingAddress.mapLink,
+      googleMapsLink: state.shippingAddress.mapLink
     },
     subtotal: state.totals.subtotal,
+    deliveryFee: state.totals.shippingFee,
     shippingFee: state.totals.shippingFee,
     codFee: state.totals.codFee,
+    totalAmount: state.totals.total,
     total: state.totals.total,
     deliveryMethod: state.delivery.id,
     deliveryLabel: state.delivery.label,
     paymentType: usesCod ? 'cod' : 'pay_now',
     paymentMethod: usesCod ? 'COD' : state.payment.method,
-    paymentStatus: usesCod ? 'Pending' : 'Unavailable',
+    paymentStatusLabel: usesCod ? 'Pending' : 'Pending',
     note: usesCod ? 'Pay on delivery' : '',
     payment: {
       type: usesCod ? 'cod' : 'pay_now',
       method: usesCod ? 'COD' : state.payment.method,
-      status: usesCod ? 'Pending' : 'Unavailable',
+      status: paymentStatus,
       note: usesCod ? 'Pay on delivery' : '',
       payerPhone,
       transactionId: String(state.payment.transactionId || '').trim()
     },
-    status: usesCod ? 'Pending' : 'Pending Payment Verification'
+    statusHistory: [
+      {
+        status: orderStatus,
+        label: 'Order received',
+        timestamp: createdAtIso
+      }
+    ]
   };
 
   return { valid: true, order, customerName };

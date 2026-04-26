@@ -4,7 +4,7 @@
 	const ORDER_KEYS = ["byose_orders", "orders"];
 	const USER_KEYS = ["bm_users", "byose_market_users"];
 	const EVENT_NAME = "byose:admin-orders-changed";
-	const STATUS_OPTIONS = ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"];
+	const STATUS_OPTIONS = ["Pending", "Confirmed", "Shipping", "Delivered", "Cancelled", "Returned"];
 
 	function clone(value) {
 		return JSON.parse(JSON.stringify(value));
@@ -129,6 +129,9 @@
 
 	function normalizeStatus(status) {
 		const normalized = normalizeText(status);
+		if (normalized.includes("return")) {
+			return "Returned";
+		}
 		if (normalized.includes("cancel")) {
 			return "Cancelled";
 		}
@@ -136,26 +139,29 @@
 			return "Delivered";
 		}
 		if (normalized.includes("ship")) {
-			return "Shipped";
+			return "Shipping";
 		}
-		if (normalized.includes("process")) {
-			return "Processing";
+		if (normalized.includes("confirm") || normalized.includes("process") || normalized.includes("approve") || normalized.includes("payment")) {
+			return "Confirmed";
 		}
 		return "Pending";
 	}
 
 	function getStatusTone(status) {
 		const normalized = normalizeStatus(status).toLowerCase();
+		if (normalized === "returned") {
+			return "cancelled";
+		}
 		if (normalized === "cancelled") {
 			return "cancelled";
 		}
 		if (normalized === "delivered") {
 			return "delivered";
 		}
-		if (normalized === "shipped") {
+		if (normalized === "shipping") {
 			return "shipped";
 		}
-		if (normalized === "processing") {
+		if (normalized === "confirmed") {
 			return "processing";
 		}
 		return "pending";
@@ -428,8 +434,17 @@
 	function updateOrderStatus(orderId, status) {
 		return updateStoredOrder(orderId, (order) => ({
 			...order,
+			orderStatus: normalizeStatus(status).toLowerCase(),
 			status: normalizeStatus(status),
-			updatedAt: new Date().toISOString()
+			updatedAt: new Date().toISOString(),
+			statusHistory: [
+				...(Array.isArray(order?.statusHistory) ? order.statusHistory : []),
+				{
+					status: normalizeStatus(status).toLowerCase(),
+					label: normalizeStatus(status),
+					timestamp: new Date().toISOString()
+				}
+			]
 		}));
 	}
 
@@ -449,7 +464,7 @@
 		const orders = getOrders();
 		return {
 			totalOrders: orders.length,
-			pendingOrders: orders.filter((order) => order.status === "Pending").length,
+			pendingOrders: orders.filter((order) => order.status === "Pending" || order.status === "Confirmed").length,
 			deliveredOrders: orders.filter((order) => order.status === "Delivered").length,
 			totalRevenue: orders.reduce((sum, order) => sum + Number(order.total || 0), 0)
 		};

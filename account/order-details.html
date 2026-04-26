@@ -4,28 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Order Details | Byose Market</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f6f8fb; color: #132033; }
-    main { max-width: 720px; margin: 0 auto; padding: 32px 20px; }
-    .card { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 12px 32px rgba(19, 32, 51, 0.08); }
-    a { color: #1f5eff; text-decoration: none; }
-  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="orders/orders-ui.css">
 </head>
-<body>
-  <main>
-    <div class="card">
-      <h1>Order Details</h1>
-      <p id="orderId">Order reference: pending</p>
-      <p>This route is available for notifications and deep links on GitHub Pages.</p>
-      <p><a href="account.html">Back to account</a></p>
-    </div>
-  </main>
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get('id');
-    if (orderId) {
-      document.getElementById('orderId').textContent = 'Order reference: #' + orderId;
-    }
-  </script>
+<body class="account-order-details-page">
+  <main id="orderDetailsApp" class="orders-shell"></main>
+  <script src="services/orderservice.js"></script>
+  <script src="orders/order-details.js"></script>
 </body>
 </html>

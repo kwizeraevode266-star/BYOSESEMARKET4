@@ -1,89 +1,332 @@
-// ===============================
-// 🔥 ORDER SERVICE
-// ===============================
+(function (global) {
+  'use strict';
 
-// ===============================
-// 📦 BASE API URL
-// ===============================
-const ORDER_API = window.__BYOSE_ORDER_API__ || "";
+  const ORDER_API = global.__BYOSE_ORDER_API__ || '';
+  const ORDER_KEYS = ['byose_orders', 'orders'];
+  const USER_KEYS = ['bm_current_user', 'bm_user', 'byose_market_user', 'user'];
+  const CHANGE_EVENTS = ['storage', 'byose:orders-changed', 'byose:admin-orders-changed'];
 
-// ===============================
-// 📥 GET ALL ORDERS
-// ===============================
-async function getOrders(userId) {
-  if (!ORDER_API) {
-    return [];
+  function safeParse(value, fallbackValue) {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return fallbackValue;
+    }
   }
 
-  try {
-    const res = await fetch(`${ORDER_API}/${userId}`);
-    const data = await res.json();
+  function readArrayFromKeys(keys) {
+    const unique = new Map();
 
-    return data.orders || [];
+    keys.forEach((key) => {
+      const raw = global.localStorage.getItem(key);
+      if (!raw) {
+        return;
+      }
 
-  } catch (error) {
-    console.error("Fetch Orders Error:", error);
-    return [];
+      const parsed = safeParse(raw, []);
+      if (!Array.isArray(parsed)) {
+        return;
+      }
+
+      parsed.forEach((entry) => {
+        const identifier = String(entry?.orderId || entry?.id || '').trim();
+        if (!identifier || unique.has(identifier)) {
+          return;
+        }
+
+        unique.set(identifier, entry);
+      });
+    });
+
+    return Array.from(unique.values());
   }
-}
 
-// ===============================
-// 📊 GROUP ORDERS
-// ===============================
-function groupOrders(orders) {
-  return {
-    toPay: orders.filter(o => o.status === "pending"),
-    toShip: orders.filter(o => o.status === "shipping"),
-    toReceive: orders.filter(o => o.status === "delivering"),
-    delivered: orders.filter(o => o.status === "completed")
-  };
-}
+  function normalizePhone(value) {
+    return String(value || '').replace(/\s+/g, '').trim();
+  }
 
-// ===============================
-// 📜 ORDER HISTORY
-// ===============================
-async function getOrderHistory(userId) {
-  const orders = await getOrders(userId);
+  function formatCurrency(value) {
+    return `RWF ${Number(value || 0).toLocaleString('en-US')}`;
+  }
 
-  return orders.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
+  function readCurrentUser() {
+    if (global.authService && typeof global.authService.getCurrentUser === 'function') {
+      try {
+        const authUser = global.authService.getCurrentUser();
+        if (authUser && typeof authUser === 'object') {
+          return authUser;
+        }
+      } catch (error) {
+        console.error('Unable to resolve current user from auth service:', error);
+      }
+    }
 
-// ===============================
-// 🔍 GET SINGLE ORDER
-// ===============================
-async function getOrderById(orderId) {
-  if (!ORDER_API) {
+    for (const key of USER_KEYS) {
+      const localValue = safeParse(global.localStorage.getItem(key), null);
+      if (localValue && typeof localValue === 'object') {
+        return localValue;
+      }
+    }
+
     return null;
   }
 
-  try {
-    const res = await fetch(`${ORDER_API}/single/${orderId}`);
-    const data = await res.json();
-
-    return data.order;
-
-  } catch (error) {
-    console.error("Order Error:", error);
+  function normalizeStatus(status) {
+    const normalized = String(status || '').toLowerCase().trim();
+    if (normalized.includes('return')) {
+      return 'returned';
+    }
+    if (normalized.includes('cancel')) {
+      return 'cancelled';
+    }
+    if (normalized.includes('deliver') || normalized.includes('complete')) {
+      return 'delivered';
+    }
+    if (normalized.includes('ship')) {
+      return 'shipping';
+    }
+    if (normalized.includes('confirm') || normalized.includes('process') || normalized.includes('approve') || normalized.includes('payment')) {
+      return 'confirmed';
+    }
+    return 'pending';
   }
-}
 
-// ===============================
-// ❌ CANCEL ORDER
-// ===============================
-async function cancelOrder(orderId) {
-  if (!ORDER_API) {
-    return { success: false, message: 'Static hosting mode: order API unavailable.' };
+  function getStatusMeta(status) {
+    const key = normalizeStatus(status);
+    if (key === 'shipping') {
+      return { key, label: 'Shipping', tone: 'shipping', icon: 'fa-solid fa-truck-fast', message: 'On the way to you' };
+    }
+    if (key === 'delivered') {
+      return { key, label: 'Delivered', tone: 'delivered', icon: 'fa-solid fa-circle-check', message: 'Completed purchases' };
+    }
+    if (key === 'returned') {
+      return { key, label: 'Returned', tone: 'returned', icon: 'fa-solid fa-rotate-left', message: 'Returned or refunded orders' };
+    }
+    if (key === 'cancelled') {
+      return { key, label: 'Cancelled', tone: 'cancelled', icon: 'fa-solid fa-ban', message: 'Order cancelled' };
+    }
+    if (key === 'confirmed') {
+      return { key, label: 'Confirmed', tone: 'pending', icon: 'fa-solid fa-receipt', message: 'Awaiting confirmation' };
+    }
+    return { key: 'pending', label: 'Pending', tone: 'pending', icon: 'fa-solid fa-hourglass-half', message: 'Awaiting confirmation' };
   }
 
-  try {
-    const res = await fetch(`${ORDER_API}/cancel/${orderId}`, {
-      method: "POST"
+  function mapGroup(status) {
+    const key = normalizeStatus(status);
+    if (key === 'shipping') {
+      return 'shipping';
+    }
+    if (key === 'delivered') {
+      return 'delivered';
+    }
+    if (key === 'returned') {
+      return 'returns';
+    }
+    return 'pending';
+  }
+
+  function normalizeItem(item) {
+    const attributes = item?.attributes && typeof item.attributes === 'object' ? item.attributes : {};
+    return {
+      productId: String(item?.productId || item?.id || '').trim(),
+      productName: String(item?.productName || item?.name || 'Product').trim() || 'Product',
+      image: String(item?.image || item?.img || '').trim(),
+      size: String(item?.size || attributes.Size || '').trim(),
+      color: String(item?.color || attributes.Color || '').trim(),
+      quantity: Math.max(1, Number(item?.quantity || item?.qty || 1) || 1),
+      price: Number(item?.price || 0) || 0
+    };
+  }
+
+  function normalizeOrder(order) {
+    const statusMeta = getStatusMeta(order?.orderStatus || order?.status);
+    const items = (Array.isArray(order?.items) ? order.items : Array.isArray(order?.products) ? order.products : []).map(normalizeItem);
+    const shippingAddress = order?.shippingAddress && typeof order.shippingAddress === 'object' ? order.shippingAddress : {};
+    const fullAddress = order?.fullAddress && typeof order.fullAddress === 'object'
+      ? order.fullAddress
+      : {
+          province: order?.fullAddress?.province || shippingAddress.province || shippingAddress.provinceCity || shippingAddress.city || '',
+          district: shippingAddress.district || '',
+          sector: shippingAddress.sector || '',
+          cell: shippingAddress.cell || '',
+          village: shippingAddress.village || '',
+          street: shippingAddress.street || shippingAddress.line1 || '',
+          note: shippingAddress.note || ''
+        };
+    const gpsLocation = order?.gpsLocation && typeof order.gpsLocation === 'object'
+      ? order.gpsLocation
+      : {
+          latitude: shippingAddress.latitude || '',
+          longitude: shippingAddress.longitude || '',
+          googleMapsLink: shippingAddress.googleMapsLink || shippingAddress.mapLink || ''
+        };
+
+    return {
+      id: String(order?.orderId || order?.id || '').trim(),
+      orderId: String(order?.orderId || order?.id || '').trim(),
+      userId: String(order?.userId || order?.customerId || order?.customer?.id || '').trim(),
+      customerName: String(order?.customerName || order?.customer?.name || '').trim(),
+      customerEmail: String(order?.customerEmail || order?.customer?.email || '').trim().toLowerCase(),
+      phoneNumber: String(order?.phoneNumber || order?.customerPhone || order?.customer?.phone || '').trim(),
+      fullAddress,
+      gpsLocation,
+      items,
+      itemCount: items.reduce((sum, item) => sum + Number(item.quantity || 0), 0),
+      subtotal: Number(order?.subtotal || 0) || 0,
+      deliveryFee: Number(order?.deliveryFee ?? order?.shippingFee ?? 0) || 0,
+      totalAmount: Number(order?.totalAmount ?? order?.total ?? 0) || 0,
+      paymentMethod: String(order?.paymentMethod || order?.payment?.method || '').trim(),
+      paymentStatus: String(order?.paymentStatus || order?.payment?.status || '').trim().toLowerCase(),
+      orderStatus: statusMeta.key,
+      statusLabel: statusMeta.label,
+      statusTone: statusMeta.tone,
+      trackingMessage: statusMeta.message,
+      statusIcon: statusMeta.icon,
+      groupKey: mapGroup(statusMeta.key),
+      createdAt: String(order?.createdAt || order?.date || order?.timestamp || '').trim(),
+      updatedAt: String(order?.updatedAt || order?.createdAt || order?.date || '').trim(),
+      date: String(order?.date || order?.createdAt || order?.timestamp || '').trim(),
+      raw: order
+    };
+  }
+
+  function orderBelongsToUser(order, userId, currentUser) {
+    const resolvedUserId = String(userId || currentUser?.id || currentUser?.userId || '').trim();
+    if (resolvedUserId && String(order.userId || '').trim() === resolvedUserId) {
+      return true;
+    }
+
+    const currentEmail = String(currentUser?.email || '').trim().toLowerCase();
+    if (currentEmail && currentEmail === String(order.customerEmail || '').trim().toLowerCase()) {
+      return true;
+    }
+
+    const currentPhone = normalizePhone(currentUser?.phone || currentUser?.phoneNumber || '');
+    if (currentPhone && currentPhone === normalizePhone(order.phoneNumber || '')) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async function fetchApiOrders(userId) {
+    if (!ORDER_API || !userId) {
+      return [];
+    }
+
+    try {
+      const response = await fetch(`${ORDER_API}/${encodeURIComponent(userId)}`);
+      const data = await response.json();
+      return Array.isArray(data?.orders) ? data.orders : [];
+    } catch (error) {
+      console.error('Fetch Orders Error:', error);
+      return [];
+    }
+  }
+
+  async function getOrders(userId) {
+    const currentUser = readCurrentUser();
+    const resolvedUserId = String(userId || currentUser?.id || currentUser?.userId || '').trim();
+    if (!resolvedUserId && !currentUser) {
+      return [];
+    }
+
+    const apiOrders = await fetchApiOrders(resolvedUserId);
+    const localOrders = readArrayFromKeys(ORDER_KEYS);
+    const combined = [...apiOrders, ...localOrders]
+      .map(normalizeOrder)
+      .filter((order, index, list) => list.findIndex((entry) => entry.orderId === order.orderId) === index)
+      .filter((order) => orderBelongsToUser(order, resolvedUserId, currentUser))
+      .sort((left, right) => new Date(right.createdAt || right.date || 0) - new Date(left.createdAt || left.date || 0));
+
+    return combined;
+  }
+
+  function groupOrders(orders) {
+    return {
+      pending: orders.filter((order) => order.groupKey === 'pending'),
+      shipping: orders.filter((order) => order.groupKey === 'shipping'),
+      delivered: orders.filter((order) => order.groupKey === 'delivered'),
+      returns: orders.filter((order) => order.groupKey === 'returns')
+    };
+  }
+
+  async function getOrderHistory(userId) {
+    return getOrders(userId);
+  }
+
+  async function getOrderById(orderId, userId) {
+    const orders = await getOrders(userId);
+    return orders.find((order) => String(order.orderId) === String(orderId || '')) || null;
+  }
+
+  function writeOrders(orders) {
+    const serialized = JSON.stringify(Array.isArray(orders) ? orders : []);
+    ORDER_KEYS.forEach((key) => {
+      global.localStorage.setItem(key, serialized);
+    });
+  }
+
+  async function cancelOrder(orderId, userId) {
+    const orders = readArrayFromKeys(ORDER_KEYS);
+    const currentUser = readCurrentUser();
+    const index = orders.findIndex((order) => {
+      const normalizedOrder = normalizeOrder(order);
+      return normalizedOrder.orderId === String(orderId || '') && orderBelongsToUser(normalizedOrder, userId, currentUser);
     });
 
-    const data = await res.json();
-    return data;
+    if (index === -1) {
+      return { success: false, message: 'Order not found.' };
+    }
 
-  } catch (error) {
-    console.error("Cancel Error:", error);
+    orders[index] = {
+      ...orders[index],
+      orderStatus: 'cancelled',
+      status: 'Cancelled',
+      updatedAt: new Date().toISOString()
+    };
+    writeOrders(orders);
+    global.dispatchEvent(new CustomEvent('byose:orders-changed', { detail: { action: 'cancel', orderId } }));
+
+    return { success: true, message: 'Order cancelled successfully.' };
   }
-}
+
+  function subscribe(listener) {
+    const callback = typeof listener === 'function' ? listener : function () {};
+    const handlers = CHANGE_EVENTS.map((eventName) => {
+      const handler = function (event) {
+        if (eventName === 'storage' && event && event.key && !ORDER_KEYS.includes(event.key)) {
+          return;
+        }
+        callback(event);
+      };
+      global.addEventListener(eventName, handler);
+      return { eventName, handler };
+    });
+
+    return function unsubscribe() {
+      handlers.forEach(({ eventName, handler }) => {
+        global.removeEventListener(eventName, handler);
+      });
+    };
+  }
+
+  const service = {
+    cancelOrder,
+    formatCurrency,
+    getCurrentUser: readCurrentUser,
+    getOrderById,
+    getOrderHistory,
+    getOrders,
+    getStatusMeta,
+    groupOrders,
+    normalizeStatus,
+    subscribe
+  };
+
+  global.orderService = service;
+  global.getOrders = getOrders;
+  global.getOrderHistory = getOrderHistory;
+  global.getOrderById = getOrderById;
+  global.cancelOrder = cancelOrder;
+})(window);

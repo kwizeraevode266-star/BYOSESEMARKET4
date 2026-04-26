@@ -254,8 +254,28 @@ export function persistUserAddress(address) {
 }
 
 export function readOrders() {
-  const orders = readStorage(STORAGE_KEYS.orders, []);
-  return Array.isArray(orders) ? orders : [];
+  const sources = [
+    readStorage(STORAGE_KEYS.orders, []),
+    readStorage('orders', [])
+  ];
+  const unique = new Map();
+
+  sources.forEach((source) => {
+    if (!Array.isArray(source)) {
+      return;
+    }
+
+    source.forEach((order) => {
+      const key = getOrderIdentifier(order);
+      if (!key || unique.has(key)) {
+        return;
+      }
+
+      unique.set(key, clone(order));
+    });
+  });
+
+  return Array.from(unique.values());
 }
 
 export function readOrderById(orderId) {
@@ -263,7 +283,14 @@ export function readOrderById(orderId) {
 }
 
 export function saveOrder(order) {
+  validateOrder(order);
+
   const orders = readOrders();
+  const orderKey = getOrderIdentifier(order);
+  if (orders.some((existingOrder) => getOrderIdentifier(existingOrder) === orderKey)) {
+    throw new Error('This order has already been saved.');
+  }
+
   const nextOrders = orders.concat([clone(order)]);
 
   writeStorage(STORAGE_KEYS.orders, nextOrders);
@@ -285,5 +312,66 @@ export function emitCartUpdated() {
 }
 
 export function createOrderId() {
-  return `ORD-${Date.now()}-${Math.floor(Math.random() * 900 + 100)}`;
+  const nextSequence = readOrders().reduce((highest, order, index) => {
+    const identifier = String(order?.orderId || order?.id || '').trim();
+    const match = identifier.match(/^BM(\d+)$/i);
+    if (match) {
+      return Math.max(highest, Number(match[1]) || 0);
+    }
+
+    return Math.max(highest, index + 1);
+  }, 0) + 1;
+
+  return `BM${String(nextSequence).padStart(13, '0')}`;
+}
+
+function getOrderIdentifier(order) {
+  return String(order?.orderId || order?.id || '').trim();
+}
+
+function validateOrder(order) {
+  const requiredFields = [
+    ['orderId', order?.orderId || order?.id],
+    ['userId', order?.userId || order?.customerId],
+    ['customerName', order?.customerName],
+    ['phoneNumber', order?.phoneNumber || order?.customerPhone],
+    ['province', order?.fullAddress?.province || order?.shippingAddress?.provinceCity],
+    ['district', order?.fullAddress?.district || order?.shippingAddress?.district],
+    ['sector', order?.fullAddress?.sector || order?.shippingAddress?.sector],
+    ['cell', order?.fullAddress?.cell || order?.shippingAddress?.cell],
+    ['village', order?.fullAddress?.village || order?.shippingAddress?.village],
+    ['latitude', order?.gpsLocation?.latitude || order?.shippingAddress?.latitude],
+    ['longitude', order?.gpsLocation?.longitude || order?.shippingAddress?.longitude],
+    ['googleMapsLink', order?.gpsLocation?.googleMapsLink || order?.shippingAddress?.mapLink],
+    ['paymentMethod', order?.paymentMethod],
+    ['paymentStatus', order?.paymentStatus],
+    ['orderStatus', order?.orderStatus || order?.status],
+    ['createdAt', order?.createdAt || order?.date]
+  ];
+
+  const missingField = requiredFields.find(([, value]) => !String(value || '').trim());
+  if (missingField) {
+    throw new Error(`Order is missing required field: ${missingField[0]}`);
+  }
+
+  const items = Array.isArray(order?.items) ? order.items : [];
+  if (!items.length) {
+    throw new Error('Order is missing required field: items');
+  }
+
+  const hasInvalidItem = items.some((item) => {
+    const requiredItemFields = [
+      item?.productId,
+      item?.productName,
+      item?.image,
+      item?.quantity,
+      item?.price
+    ];
+
+    return requiredItemFields.some((value) => value === undefined || value === null || String(value).trim() === '');
+  });
+
+  if (hasInvalidItem) {
+    throw new Error('Order items are incomplete.');
+  }
 }

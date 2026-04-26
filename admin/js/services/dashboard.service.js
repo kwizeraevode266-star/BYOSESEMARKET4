@@ -155,14 +155,20 @@
 
 	function mapOrderStatus(status) {
 		const normalized = String(status || '').toLowerCase();
+		if (normalized.includes('return')) {
+			return { label: 'Returned', tone: 'cancelled' };
+		}
+		if (normalized.includes('cancel')) {
+			return { label: 'Cancelled', tone: 'cancelled' };
+		}
 		if (normalized.includes('deliver') || normalized.includes('complete')) {
-			return { label: 'Completed', tone: 'completed' };
+			return { label: 'Delivered', tone: 'completed' };
 		}
 		if (normalized.includes('ship')) {
-			return { label: 'Shipped', tone: 'shipped' };
+			return { label: 'Shipping', tone: 'shipped' };
 		}
-		if (normalized.includes('process') || normalized.includes('payment')) {
-			return { label: 'Processing', tone: 'processing' };
+		if (normalized.includes('confirm') || normalized.includes('process') || normalized.includes('payment')) {
+			return { label: 'Confirmed', tone: 'processing' };
 		}
 		return { label: 'Pending', tone: 'review' };
 	}
