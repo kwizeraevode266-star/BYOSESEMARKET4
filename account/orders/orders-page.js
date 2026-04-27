@@ -191,9 +191,10 @@
   function createOrderCard(order) {
     const firstItem = order.items[0] || {};
     const moreItems = Math.max(0, order.itemCount - Number(firstItem.quantity || 0));
+    const imageSource = firstItem.image || firstItem.imageUrl || FALLBACK_IMAGE;
     return `
       <article class="orders-card">
-        <img class="orders-card-image" src="${escapeHtml(firstItem.image || FALLBACK_IMAGE)}" alt="${escapeHtml(firstItem.productName || 'Product')} product image">
+        <img class="orders-card-image" src="${escapeHtml(imageSource)}" alt="${escapeHtml(firstItem.productName || 'Product')} product image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}';this.classList.add('is-fallback-image');">
         <div class="orders-card-main">
           <div class="orders-card-header">
             <div>

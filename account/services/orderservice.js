@@ -45,6 +45,38 @@
     return String(value || '').replace(/\s+/g, '').trim();
   }
 
+  function getSiteRootHref() {
+    const pathname = String(global.location?.pathname || '/').replace(/\\/g, '/');
+    const marker = pathname.toLowerCase().indexOf('/account/');
+    const rootPath = marker >= 0 ? pathname.slice(0, marker + 1) : '/';
+    return new URL(rootPath, global.location?.origin || global.location?.href || '/').href;
+  }
+
+  function resolveImageSource(value) {
+    const source = String(value || '').trim();
+    if (!source) {
+      return '';
+    }
+
+    if (/^(data:|blob:|https?:)/i.test(source)) {
+      return source;
+    }
+
+    try {
+      if (source.startsWith('/')) {
+        return new URL(source, global.location.origin).href;
+      }
+
+      if (source.startsWith('./') || source.startsWith('../')) {
+        return new URL(source, global.location.href).href;
+      }
+
+      return new URL(source.replace(/^\/+/, ''), getSiteRootHref()).href;
+    } catch (error) {
+      return source;
+    }
+  }
+
   function formatCurrency(value) {
     return `RWF ${Number(value || 0).toLocaleString('en-US')}`;
   }
@@ -127,10 +159,21 @@
 
   function normalizeItem(item) {
     const attributes = item?.attributes && typeof item.attributes === 'object' ? item.attributes : {};
+    const imageSource = (
+      item?.image
+      || item?.imageUrl
+      || item?.productImage
+      || item?.mainImage
+      || item?.thumbnail
+      || item?.img
+      || ''
+    );
+
     return {
       productId: String(item?.productId || item?.id || '').trim(),
       productName: String(item?.productName || item?.name || 'Product').trim() || 'Product',
-      image: String(item?.image || item?.img || '').trim(),
+      image: resolveImageSource(imageSource),
+      imageUrl: resolveImageSource(imageSource),
       size: String(item?.size || attributes.Size || '').trim(),
       color: String(item?.color || attributes.Color || '').trim(),
       quantity: Math.max(1, Number(item?.quantity || item?.qty || 1) || 1),

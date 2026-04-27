@@ -167,9 +167,16 @@ img {
 .orders-card-image {
   width: 88px;
   height: 88px;
+  min-width: 88px;
   border-radius: 18px;
+  overflow: hidden;
   object-fit: cover;
   background: linear-gradient(135deg, rgba(0, 184, 148, 0.14), rgba(0, 184, 148, 0.04));
+}
+
+.orders-card-image.is-fallback-image {
+  object-fit: contain;
+  padding: 10px;
 }
 
 .orders-card-main {
@@ -422,6 +429,7 @@ img {
   .orders-item-card img {
     width: 72px;
     height: 72px;
+    min-width: 72px;
   }
 
   .orders-address-grid,
