@@ -145,8 +145,50 @@
 		}
 	];
 
+	let initialized = false;
+
 	function normalize(path) {
 		return String(path || '').replace(/\\/g, '/').replace(/^\/+/, '').toLowerCase();
+	}
+
+	function getAdminBasePath() {
+		const path = String(window.location.pathname || '').replace(/\\/g, '/');
+		const marker = '/admin/';
+		const markerIndex = path.toLowerCase().indexOf(marker);
+
+		if (markerIndex !== -1) {
+			return path.slice(0, markerIndex + marker.length);
+		}
+
+		const segments = path.split('/');
+		segments.pop();
+
+		while (segments.length && segments[segments.length - 1].toLowerCase() !== 'admin') {
+			segments.pop();
+		}
+
+		if (segments.length && segments[segments.length - 1].toLowerCase() === 'admin') {
+			return `${segments.join('/')}/`;
+		}
+
+		return 'admin/';
+	}
+
+	function resolveAdminHref(href) {
+		const value = String(href || '').trim();
+		if (!value) {
+			return '#';
+		}
+
+		if (/^(?:[a-z]+:|#|\?)/i.test(value)) {
+			return value;
+		}
+
+		if (value.startsWith('/')) {
+			return value;
+		}
+
+		return `${getAdminBasePath()}${value.replace(/^\.\//, '')}`;
 	}
 
 	function getCurrentPath() {
@@ -161,7 +203,7 @@
 
 	function createChildLink(item, currentPath) {
 		const active = normalize(item.href) === currentPath;
-		return `<a class="admin-sidebar-child-link${active ? ' is-active' : ''}" href="${item.href}"${active ? ' aria-current="page"' : ''}><span class="admin-sidebar-child-dot" aria-hidden="true"></span><span>${item.label}</span></a>`;
+		return `<a class="admin-sidebar-child-link${active ? ' is-active' : ''}" href="${resolveAdminHref(item.href)}"${active ? ' aria-current="page"' : ''}><span class="admin-sidebar-child-dot" aria-hidden="true"></span><span>${item.label}</span></a>`;
 	}
 
 	function createNavItem(item, currentPath, index) {
@@ -171,7 +213,7 @@
 
 		if (!Array.isArray(item.children) || !item.children.length) {
 			return `
-				<a class="admin-sidebar-link${itemActive ? ' is-active' : ''}" href="${item.href}"${itemActive ? ' aria-current="page"' : ''}>
+				<a class="admin-sidebar-link${itemActive ? ' is-active' : ''}" href="${resolveAdminHref(item.href)}"${itemActive ? ' aria-current="page"' : ''}>
 					<span class="admin-sidebar-icon">${item.icon || ''}</span>
 					<span class="admin-sidebar-link-text">
 						<span>${item.label}</span>
@@ -185,14 +227,18 @@
 
 		return `
 			<div class="admin-sidebar-branch">
-				<button class="admin-sidebar-parent${itemActive ? ' is-active' : ''}" type="button" aria-expanded="false" aria-controls="${sectionId}">
-					<span class="admin-sidebar-icon">${item.icon || ''}</span>
-					<span class="admin-sidebar-link-text">
-						<span>${item.label}</span>
-						<small>${item.description || ''}</small>
-					</span>
-					<span class="admin-sidebar-caret">&#8250;</span>
-				</button>
+				<div class="admin-sidebar-branch-header">
+					<a class="admin-sidebar-link admin-sidebar-link--branch${itemActive ? ' is-active' : ''}" href="${resolveAdminHref(item.href)}"${directActive ? ' aria-current="page"' : ''}>
+						<span class="admin-sidebar-icon">${item.icon || ''}</span>
+						<span class="admin-sidebar-link-text">
+							<span>${item.label}</span>
+							<small>${item.description || ''}</small>
+						</span>
+					</a>
+					<button class="admin-sidebar-expander${itemActive ? ' is-active' : ''}" type="button" aria-label="Toggle ${item.label} links" aria-expanded="false" aria-controls="${sectionId}">
+						<span class="admin-sidebar-caret">&#8250;</span>
+					</button>
+				</div>
 				<div class="admin-sidebar-children-wrap" id="${sectionId}" data-sidebar-panel>
 					<div class="admin-sidebar-children">
 						${item.children.map((child) => createChildLink(child, currentPath)).join('')}
@@ -233,7 +279,7 @@
 	}
 
 	function bindSidebarInteractions(root) {
-		const buttons = Array.from(root.querySelectorAll('.admin-sidebar-parent'));
+		const buttons = Array.from(root.querySelectorAll('.admin-sidebar-expander'));
 
 		function closeAllSections(exceptButton) {
 			buttons.forEach((button) => {
@@ -370,17 +416,35 @@
 
 	function initAdminSidebar() {
 		const root = document.querySelector('[data-sidebar-root]');
-		if (!root) {
+		if (!root || root.dataset.sidebarMounted === 'true') {
 			return;
 		}
 
 		renderSidebar(root);
 		bindSidebarInteractions(root);
 		setupResponsiveSidebar(root);
+		root.dataset.sidebarMounted = 'true';
+		initialized = true;
+	}
+
+	function scheduleSidebarInit() {
+		if (initialized) {
+			return;
+		}
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initAdminSidebar, { once: true });
+			return;
+		}
+
+		initAdminSidebar();
 	}
 
 	window.AdminSidebar = {
 		init: initAdminSidebar,
-		navigation
+		navigation,
+		resolveAdminHref
 	};
+
+	scheduleSidebarInit();
 })();

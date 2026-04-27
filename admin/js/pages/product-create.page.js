@@ -42,6 +42,19 @@
 	const shortDescriptionInput = document.getElementById('shortDescriptionInput');
 	const longDescriptionInput = document.getElementById('longDescriptionInput');
 
+	function populateCategoryOptions() {
+		if (!categorySelect || typeof service.getCategoryOptions !== 'function') {
+			return;
+		}
+
+		const options = service.getCategoryOptions();
+		const currentValue = categorySelect.value;
+		categorySelect.innerHTML = options.map((option) => `<option value="${service.escapeHtml(option.value)}">${service.escapeHtml(option.label)}</option>`).join('');
+		categorySelect.value = options.some((option) => option.value === currentValue) ? currentValue : (options[0]?.value || 'general');
+	}
+
+	populateCategoryOptions();
+
 	const state = {
 		productId: null,
 		mainImage: '',

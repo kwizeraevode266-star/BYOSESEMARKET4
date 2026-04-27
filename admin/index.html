@@ -3,12 +3,17 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Admin Index | Byose Market</title>
+	<title>Redirecting | Byose Market Admin</title>
+	<meta http-equiv="refresh" content="0; url=dashboard.html">
+	<script>
+		(function () {
+			var target = 'dashboard.html';
+			var suffix = window.location.search || window.location.hash || '';
+			window.location.replace(target + suffix);
+		})();
+	</script>
 </head>
 <body>
-	<main>
-		<h1>Admin Index</h1>
-		<p>Admin structure placeholder.</p>
-	</main>
+	<p>Redirecting to the admin dashboard...</p>
 </body>
 </html>

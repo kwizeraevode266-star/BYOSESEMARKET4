@@ -49,15 +49,6 @@ const Tracker = (function(){
       referrer: document.referrer || null,
     };
 
-    // Attempt to get geolocation (best-effort)
-    const geo = await fetchGeo();
-    if(geo){
-      visitor.ip = geo.ip || null;
-      visitor.city = geo.city || null;
-      visitor.country = geo.country_name || null;
-      visitor.org = geo.org || null;
-    }
-
     // If a logged-in user exists, attach id
     try{
       const currentUser = JSON.parse(localStorage.getItem('byose_market_current_user') || 'null');
@@ -67,6 +58,22 @@ const Tracker = (function(){
     const store = getStore();
     store.push(visitor);
     saveStore(store);
+
+    // Attempt to enrich the stored visit with geolocation without blocking the write.
+    fetchGeo().then((geo) => {
+      if(!geo) return;
+      try{
+        const all = getStore();
+        const idx = all.findIndex(v=>v.id===visitor.id);
+        if(idx>-1){
+          all[idx].ip = geo.ip || null;
+          all[idx].city = geo.city || null;
+          all[idx].country = geo.country_name || null;
+          all[idx].org = geo.org || null;
+          saveStore(all);
+        }
+      }catch(e){}
+    }).catch(() => null);
 
     // on unload update duration for last visitor id
     window.addEventListener('beforeunload', () => {

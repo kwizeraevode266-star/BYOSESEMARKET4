@@ -1,12 +1,24 @@
 (function (global) {
 	"use strict";
 
-	const CATEGORY_OPTIONS = [
+	const DEFAULT_CATEGORY_OPTIONS = [
 		{ value: "fashion", label: "Fashion" },
 		{ value: "shoes", label: "Shoes" },
 		{ value: "electronics", label: "Electronics" },
 		{ value: "general", label: "General" }
 	];
+
+	function getCategoryOptions() {
+		const categoriesService = global.AdminCategoriesService;
+		if (categoriesService && typeof categoriesService.getCategoryOptions === "function") {
+			const options = categoriesService.getCategoryOptions();
+			if (Array.isArray(options) && options.length) {
+				return options;
+			}
+		}
+
+		return DEFAULT_CATEGORY_OPTIONS.slice();
+	}
 
 	function getCatalogService() {
 		return global.ByoseProductCatalog || null;
@@ -365,7 +377,7 @@
 	}
 
 	global.AdminProductsService = {
-		CATEGORY_OPTIONS,
+		CATEGORY_OPTIONS: DEFAULT_CATEGORY_OPTIONS,
 		createAttributeTemplate,
 		createProduct,
 		deleteProduct,
@@ -373,6 +385,7 @@
 		filterProducts,
 		formatCurrency,
 		formatDate,
+		getCategoryOptions,
 		getProductById,
 		getProductIdFromLocation,
 		getProducts,

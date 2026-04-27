@@ -37,6 +37,19 @@
 	const shortDescriptionInput = document.getElementById('shortDescriptionInput');
 	const longDescriptionInput = document.getElementById('longDescriptionInput');
 
+	function populateCategoryOptions() {
+		if (!categorySelect || typeof service.getCategoryOptions !== 'function') {
+			return;
+		}
+
+		const options = service.getCategoryOptions();
+		const currentValue = String(product?.category || categorySelect.value || 'general');
+		categorySelect.innerHTML = options.map((option) => `<option value="${service.escapeHtml(option.value)}">${service.escapeHtml(option.label)}</option>`).join('');
+		categorySelect.value = options.some((option) => option.value === currentValue) ? currentValue : (options[0]?.value || 'general');
+	}
+
+	populateCategoryOptions();
+
 	if (!product) {
 		status.textContent = 'The selected product could not be found in the shared catalog.';
 		status.dataset.state = 'error';

@@ -1,8 +1,5 @@
 (function(){
-  // Bridge loader that ensures the account shared storage helpers are available across the site.
-  // It loads the account-scoped storage implementation if present.
-  try{
-    if (window.handleAccountClick && window.isLoggedIn) return;
+  try {
     function getSitePrefix() {
       var path = (window.location && window.location.pathname) || '';
       if (path.indexOf('/account/settings/') !== -1) return '../../';
@@ -16,9 +13,37 @@
       ) return '../';
       return '';
     }
-    var s = document.createElement('script');
-    s.src = getSitePrefix() + 'account/shared/storage.js';
-    s.async = false;
-    document.head.appendChild(s);
-  }catch(e){console.error('Failed to load auth bridge',e)}
+
+    function appendScript(path, onload) {
+      var script = document.createElement('script');
+      script.src = getSitePrefix() + path;
+      script.async = false;
+      if (typeof onload === 'function') {
+        script.onload = onload;
+      }
+      document.head.appendChild(script);
+    }
+
+    if (!(window.handleAccountClick && window.isLoggedIn)) {
+      appendScript('account/shared/storage.js');
+    }
+
+    if (!window.__byoseStorefrontConfigLoaded) {
+      window.__byoseStorefrontConfigLoaded = true;
+      appendScript('js/storefront-config.js');
+    }
+
+    if (!window.__byoseTrackerRequested) {
+      window.__byoseTrackerRequested = true;
+      appendScript('js/tracker.js', function () {
+        if (window.__byoseTrackerStarted || !window.Tracker || typeof window.Tracker.startVisit !== 'function') {
+          return;
+        }
+        window.__byoseTrackerStarted = true;
+        window.Tracker.startVisit();
+      });
+    }
+  } catch (e) {
+    console.error('Failed to load shared site bridges', e);
+  }
 })();

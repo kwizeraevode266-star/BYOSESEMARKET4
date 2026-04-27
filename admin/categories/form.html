@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Category Form | Byose Market Admin</title>
+  <title>Redirecting | Category Form</title>
+  <meta http-equiv="refresh" content="0; url=index.html?view=form">
+  <script>
+    (function () {
+      var target = 'index.html?view=form';
+      var suffix = window.location.hash || '';
+      window.location.replace(target + suffix);
+    })();
+  </script>
 </head>
-<body>
-  <main>
-    <h1>Category Form</h1>
-    <p>Admin structure placeholder.</p>
-  </main>
-</body>
+<body><p>Redirecting to category editor...</p></body>
 </html>
