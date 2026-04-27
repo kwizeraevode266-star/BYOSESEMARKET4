@@ -52,7 +52,6 @@ img {
 .orders-shell {
   width: min(100%, 1120px);
   margin: 0 auto;
-  padding: 24px 16px 40px;
 }
 
 .orders-topbar {
@@ -60,11 +59,9 @@ img {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 14px;
 }
 
-.orders-back-link,
-.orders-refresh-button,
 .orders-detail-back {
   display: inline-flex;
   align-items: center;
@@ -81,7 +78,6 @@ img {
   cursor: pointer;
 }
 
-.orders-hero,
 .orders-detail-hero,
 .orders-panel,
 .orders-card,
@@ -93,18 +89,16 @@ img {
   box-shadow: var(--orders-shadow);
 }
 
-.orders-hero,
 .orders-detail-hero {
   position: relative;
   overflow: hidden;
-  padding: 28px;
-  margin-bottom: 18px;
+  padding: 22px;
+  margin-bottom: 14px;
   background:
     linear-gradient(135deg, rgba(0, 184, 148, 0.96), rgba(0, 143, 114, 0.94));
   color: #ffffff;
 }
 
-.orders-hero::after,
 .orders-detail-hero::after {
   content: '';
   position: absolute;
@@ -117,21 +111,19 @@ img {
 }
 
 .orders-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
-.orders-hero h1,
 .orders-detail-hero h1 {
   margin: 0;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
   line-height: 1.08;
 }
 
-.orders-hero p,
 .orders-detail-hero p {
   position: relative;
   z-index: 1;
@@ -141,8 +133,6 @@ img {
   line-height: 1.6;
 }
 
-.orders-status-nav,
-.orders-summary-grid,
 .orders-list,
 .orders-detail-grid,
 .orders-item-list {
@@ -150,33 +140,6 @@ img {
   gap: 14px;
 }
 
-.orders-status-nav {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 18px;
-}
-
-.orders-status-link,
-.orders-summary-card {
-  border-radius: var(--orders-radius-lg);
-  border: 1px solid var(--orders-border);
-  background: rgba(255, 255, 255, 0.84);
-}
-
-.orders-status-link {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-  padding: 18px;
-  box-shadow: 0 12px 24px rgba(10, 39, 32, 0.06);
-}
-
-.orders-status-link.is-active {
-  border-color: rgba(0, 184, 148, 0.24);
-  background: linear-gradient(180deg, rgba(0, 184, 148, 0.14), rgba(255, 255, 255, 0.94));
-}
-
-.orders-status-link strong,
-.orders-summary-card strong,
 .orders-card-header strong,
 .orders-item-meta strong,
 .orders-detail-summary strong,
@@ -184,9 +147,6 @@ img {
   color: var(--orders-text);
 }
 
-.orders-status-link span,
-.orders-status-link small,
-.orders-summary-card span,
 .orders-card-subline,
 .orders-card-meta,
 .orders-item-meta span,
@@ -195,21 +155,6 @@ img {
 .orders-detail-section p,
 .orders-detail-note {
   color: var(--orders-muted);
-}
-
-.orders-summary-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin-bottom: 18px;
-}
-
-.orders-summary-card {
-  padding: 18px;
-}
-
-.orders-summary-card strong {
-  display: block;
-  margin-top: 10px;
-  font-size: 1.4rem;
 }
 
 .orders-card {
@@ -461,15 +406,6 @@ img {
 }
 
 @media (min-width: 768px) {
-  .orders-shell {
-    padding: 28px 22px 48px;
-  }
-
-  .orders-status-nav,
-  .orders-summary-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
   .orders-detail-grid {
     grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
     align-items: start;

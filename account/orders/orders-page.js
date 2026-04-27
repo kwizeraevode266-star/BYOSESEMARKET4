@@ -7,6 +7,11 @@
   }
 
   const VIEW_CONFIG = {
+    all: {
+      label: 'View All',
+      subtitle: 'All orders',
+      icon: 'fa-solid fa-layer-group'
+    },
     pending: {
       label: 'Pending',
       subtitle: 'Awaiting confirmation',
@@ -30,8 +35,13 @@
   };
 
   const TRACKING_STEPS = ['pending', 'confirmed', 'shipping', 'delivered'];
-  const view = document.body.dataset.ordersView || 'pending';
+  const view = document.body.dataset.ordersView || 'all';
   const FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"%3E%3Crect width="96" height="96" rx="20" fill="%23E9F8F3"/%3E%3Cpath d="M27 62h42v4H27z" fill="%2300B894" fill-opacity=".2"/%3E%3Crect x="29" y="26" width="38" height="28" rx="10" fill="%2300B894" fill-opacity=".18"/%3E%3Cpath d="M39 38h18v4H39zm0 8h12v4H39z" fill="%23008F72"/%3E%3C/svg%3E';
+  const state = {
+    query: '',
+    sortBy: 'newest',
+    filterMenuOpen: false
+  };
 
   function formatDate(value) {
     if (!value) {
@@ -94,37 +104,87 @@
 
   function createStatusNav(groups) {
     return Object.entries(VIEW_CONFIG).map(([key, config]) => {
-      const count = groups[key]?.length || 0;
+      const count = key === 'all'
+        ? Object.values(groups).reduce((sum, list) => sum + list.length, 0)
+        : groups[key]?.length || 0;
       const activeClass = key === view ? 'is-active' : '';
       return `
-        <a class="orders-status-link ${activeClass}" href="${escapeHtml(key)}.html">
-          <span><i class="${escapeHtml(config.icon)}" aria-hidden="true"></i> ${escapeHtml(config.label)}</span>
-          <strong>${count}</strong>
-          <small>${escapeHtml(config.subtitle)}</small>
+        <a class="orders-tab ${activeClass}" href="${escapeHtml(key)}.html" aria-current="${key === view ? 'page' : 'false'}">
+          <span>${escapeHtml(config.label)}</span>
+          <small>${count}</small>
         </a>
       `;
     }).join('');
   }
 
-  function createSummary(groups, allOrders) {
-    const totalSpent = allOrders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
+  function getViewOrders(groups, allOrders) {
+    if (view === 'all') {
+      return allOrders.slice();
+    }
+
+    return groups[view] || [];
+  }
+
+  function matchesSearch(order, query) {
+    if (!query) {
+      return true;
+    }
+
+    const haystack = [
+      order.orderId,
+      order.customerName,
+      order.statusLabel,
+      order.trackingMessage,
+      ...order.items.map((item) => `${item.productName} ${item.size} ${item.color}`)
+    ].join(' ').toLowerCase();
+
+    return haystack.includes(query.toLowerCase());
+  }
+
+  function sortOrders(orders, sortBy) {
+    const list = orders.slice();
+    if (sortBy === 'oldest') {
+      return list.sort((left, right) => new Date(left.createdAt || left.date || 0) - new Date(right.createdAt || right.date || 0));
+    }
+    if (sortBy === 'amount') {
+      return list.sort((left, right) => Number(right.totalAmount || 0) - Number(left.totalAmount || 0));
+    }
+    return list.sort((left, right) => new Date(right.createdAt || right.date || 0) - new Date(left.createdAt || left.date || 0));
+  }
+
+  function createHeader(config) {
     return `
-      <div class="orders-summary-card">
-        <span>Total orders</span>
-        <strong>${allOrders.length}</strong>
-      </div>
-      <div class="orders-summary-card">
-        <span>Awaiting action</span>
-        <strong>${(groups.pending || []).length}</strong>
-      </div>
-      <div class="orders-summary-card">
-        <span>Delivered</span>
-        <strong>${(groups.delivered || []).length}</strong>
-      </div>
-      <div class="orders-summary-card">
-        <span>Total spent</span>
-        <strong>${escapeHtml(service.formatCurrency(totalSpent))}</strong>
-      </div>
+      <section class="orders-app-header" aria-label="Orders tools">
+        <a class="orders-app-icon orders-app-back" href="../account.html" aria-label="Back to account">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+        </a>
+        <label class="orders-search" for="ordersSearchInput">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input id="ordersSearchInput" type="search" placeholder="Search orders" value="${escapeHtml(state.query)}" autocomplete="off">
+        </label>
+        <button class="orders-app-icon ${state.filterMenuOpen ? 'is-active' : ''}" type="button" id="ordersFilterButton" aria-label="Open filters" aria-expanded="${state.filterMenuOpen ? 'true' : 'false'}" aria-haspopup="menu" aria-controls="ordersFilterMenu">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+        </button>
+        <a class="orders-app-icon" href="../settings/guide.html" aria-label="Get support">
+          <i class="fa-regular fa-circle-question" aria-hidden="true"></i>
+        </a>
+      </section>
+      <section class="orders-view-bar" aria-label="Current orders view">
+        <div>
+          <p class="orders-view-kicker">My Orders</p>
+          <h1>${escapeHtml(config.label)}</h1>
+        </div>
+      </section>
+    `;
+  }
+
+  function createFilterMenu() {
+    return `
+      <section class="orders-filter-menu ${state.filterMenuOpen ? 'is-open' : ''}" id="ordersFilterMenu" role="menu" aria-label="Sort orders" ${state.filterMenuOpen ? '' : 'hidden'}>
+        <button class="orders-filter-option ${state.sortBy === 'newest' ? 'is-active' : ''}" type="button" data-sort="newest" role="menuitemradio" aria-checked="${state.sortBy === 'newest' ? 'true' : 'false'}">Newest first</button>
+        <button class="orders-filter-option ${state.sortBy === 'oldest' ? 'is-active' : ''}" type="button" data-sort="oldest" role="menuitemradio" aria-checked="${state.sortBy === 'oldest' ? 'true' : 'false'}">Oldest first</button>
+        <button class="orders-filter-option ${state.sortBy === 'amount' ? 'is-active' : ''}" type="button" data-sort="amount" role="menuitemradio" aria-checked="${state.sortBy === 'amount' ? 'true' : 'false'}">Highest amount</button>
+      </section>
     `;
   }
 
@@ -187,25 +247,41 @@
     const currentUser = service.getCurrentUser();
     const allOrders = await service.getOrders(currentUser?.id || currentUser?.userId || '');
     const groups = service.groupOrders(allOrders);
-    const currentOrders = groups[view] || [];
+    const currentOrders = getViewOrders(groups, allOrders)
+      .filter((order) => matchesSearch(order, state.query));
+    const sortedOrders = sortOrders(currentOrders, state.sortBy);
     const config = VIEW_CONFIG[view] || VIEW_CONFIG.pending;
 
     root.innerHTML = `
-      <div class="orders-topbar">
-        <a class="orders-back-link" href="../account.html"><i class="fa-solid fa-arrow-left" aria-hidden="true"></i>Back to account</a>
-        <button class="orders-refresh-button" type="button" id="ordersRefreshButton"><i class="fa-solid fa-rotate" aria-hidden="true"></i>Refresh</button>
-      </div>
-      <section class="orders-hero">
-        <p class="orders-kicker">My Orders</p>
-        <h1>${escapeHtml(config.label)}</h1>
-        <p>${escapeHtml(config.subtitle)}. Orders are linked to your account and refresh when checkout or admin status updates change shared order storage.</p>
+      ${createHeader(config)}
+      <section class="orders-tabs-shell">
+        <div class="orders-tabs" role="tablist" aria-label="Order status tabs">${createStatusNav(groups)}</div>
+        ${createFilterMenu()}
       </section>
-      <section class="orders-status-nav">${createStatusNav(groups)}</section>
-      <section class="orders-summary-grid">${createSummary(groups, allOrders)}</section>
-      <section class="orders-list">${currentOrders.length ? currentOrders.map(createOrderCard).join('') : createEmptyState(currentUser)}</section>
+      <section class="orders-list">${sortedOrders.length ? sortedOrders.map(createOrderCard).join('') : createEmptyState(currentUser)}</section>
     `;
 
-    document.getElementById('ordersRefreshButton')?.addEventListener('click', render, { once: true });
+    document.getElementById('ordersSearchInput')?.addEventListener('input', handleSearchInput);
+    document.getElementById('ordersFilterButton')?.addEventListener('click', toggleFilterMenu);
+    document.querySelectorAll('[data-sort]').forEach((button) => {
+      button.addEventListener('click', handleSortChange);
+    });
+  }
+
+  function handleSearchInput(event) {
+    state.query = String(event.target.value || '');
+    render();
+  }
+
+  function toggleFilterMenu() {
+    state.filterMenuOpen = !state.filterMenuOpen;
+    render();
+  }
+
+  function handleSortChange(event) {
+    state.sortBy = String(event.currentTarget.dataset.sort || 'newest');
+    state.filterMenuOpen = false;
+    render();
   }
 
   let refreshFrame = 0;
@@ -221,6 +297,18 @@
 
   const unsubscribe = service.subscribe(queueRender);
   window.addEventListener('focus', queueRender);
+  document.addEventListener('click', (event) => {
+    if (!state.filterMenuOpen) {
+      return;
+    }
+
+    if (event.target.closest('#ordersFilterButton') || event.target.closest('#ordersFilterMenu')) {
+      return;
+    }
+
+    state.filterMenuOpen = false;
+    render();
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       queueRender();
