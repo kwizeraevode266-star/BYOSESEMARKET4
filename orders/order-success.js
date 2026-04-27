@@ -4,6 +4,50 @@ import { getConfirmationState } from './state.js';
 const SUPPORT_PHONE = '+250780430710';
 const SUPPORT_WHATSAPP = '250780430710';
 
+function getPaymentLabel(confirmation) {
+  if (confirmation?.paymentType === 'cod' || String(confirmation?.paymentMethod || '').toLowerCase() === 'cod') {
+    return 'Pay on Delivery';
+  }
+
+  if (confirmation?.paymentMethod === 'mtn') {
+    return 'MTN Mobile Money';
+  }
+
+  if (confirmation?.paymentMethod === 'airtel') {
+    return 'Airtel Money';
+  }
+
+  if (confirmation?.paymentMethod === 'bank') {
+    return 'Bank Transfer';
+  }
+
+  if (confirmation?.paymentMethod === 'card') {
+    return 'Visa / Mastercard';
+  }
+
+  return 'Payment pending';
+}
+
+function getPaymentNote(confirmation) {
+  if (confirmation?.paymentType === 'cod' || String(confirmation?.paymentMethod || '').toLowerCase() === 'cod') {
+    return {
+      title: 'Cash on delivery',
+      lines: [
+        'You will pay when your order is delivered.',
+        'Uzishyura ari uko igicuruzwa kikugezeho.'
+      ]
+    };
+  }
+
+  return {
+    title: getPaymentLabel(confirmation),
+    lines: [
+      'Your order is saved with the selected payment method and is awaiting processing.',
+      'Order details are already visible in the admin system.'
+    ]
+  };
+}
+
 function buildSupportMessage(confirmation) {
   return [
     `Muraho Byose Market, ndifuza ubufasha kuri order ${confirmation.orderId || ''}.`,
@@ -86,7 +130,7 @@ function renderSummary(confirmation) {
       </div>
       <div class="orders-success-metric-card">
         <span>Payment Method</span>
-        <strong>Pay on Delivery</strong>
+        <strong>${escapeHtml(getPaymentLabel(confirmation))}</strong>
       </div>
       <div class="orders-success-metric-card">
         <span>Total Amount</span>
@@ -102,6 +146,7 @@ function renderSummary(confirmation) {
 
 function renderSuccess(confirmation) {
   const supportMessage = encodeURIComponent(buildSupportMessage(confirmation));
+  const paymentNote = getPaymentNote(confirmation);
 
   return `
     <div class="orders-success-page">
@@ -144,12 +189,11 @@ function renderSuccess(confirmation) {
           <div class="orders-success-section-head">
             <div>
               <span class="orders-sidebar-label">Payment</span>
-              <h2>Cash on delivery</h2>
+              <h2>${escapeHtml(paymentNote.title)}</h2>
             </div>
           </div>
           <div class="orders-success-payment-note">
-            <p>You will pay when your order is delivered.</p>
-            <p>Uzishyura ari uko igicuruzwa kikugezeho.</p>
+            ${paymentNote.lines.map((line) => `<p>${escapeHtml(line)}</p>`).join('')}
           </div>
         </section>
       </div>

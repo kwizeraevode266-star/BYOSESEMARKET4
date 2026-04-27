@@ -3,6 +3,7 @@ import {
   getResolvedCustomerName,
   getState,
   initializeOrderFlow,
+  isCodAvailable,
   resolveStageAccess,
   setStage,
   submitOrder,
@@ -78,8 +79,17 @@ function setMessage(message) {
 
 function syncForm(state) {
   ui.form.querySelectorAll('input[name="method"]').forEach((input) => {
+    const isCodInput = input.value === 'cod';
+    const isDisabled = isCodInput && !isCodAvailable();
+
+    input.disabled = isDisabled;
+    if (isDisabled && input.checked) {
+      input.checked = false;
+    }
+
     input.checked = input.value === state.payment.method;
     input.closest('.orders-choice-card')?.classList.toggle('is-selected', input.checked);
+    input.closest('.orders-choice-card')?.classList.toggle('is-disabled', isDisabled);
   });
 
   const phoneInput = ui.form.querySelector('input[name="phone"]');

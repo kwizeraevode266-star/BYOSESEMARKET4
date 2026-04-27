@@ -5,6 +5,7 @@
 	const USER_KEYS = ["bm_users", "byose_market_users"];
 	const EVENT_NAME = "byose:admin-orders-changed";
 	const STATUS_OPTIONS = ["Pending", "Confirmed", "Shipping", "Delivered", "Cancelled", "Returned"];
+	const FALLBACK_PRODUCT_IMAGE = "../img/logo.png";
 
 	function clone(value) {
 		return JSON.parse(JSON.stringify(value));
@@ -112,6 +113,38 @@
 
 	function normalizePhone(value) {
 		return String(value || "").replace(/\s+/g, "").trim();
+	}
+
+	function getSiteRootHref() {
+		const pathname = String(global.location?.pathname || "/").replace(/\\/g, "/");
+		const marker = pathname.toLowerCase().indexOf("/admin/");
+		const rootPath = marker >= 0 ? pathname.slice(0, marker + 1) : "/";
+		return new URL(rootPath, global.location?.origin || global.location?.href || "/").href;
+	}
+
+	function resolveStorefrontImagePath(path) {
+		const value = String(path || "").trim();
+		if (!value) {
+			return new URL(FALLBACK_PRODUCT_IMAGE, global.location?.href || getSiteRootHref()).href;
+		}
+
+		if (/^(?:data:|blob:|https?:)/i.test(value)) {
+			return value;
+		}
+
+		try {
+			if (value.startsWith("/")) {
+				return new URL(value, global.location.origin).href;
+			}
+
+			if (value.startsWith("./") || value.startsWith("../")) {
+				return new URL(value, global.location.href).href;
+			}
+
+			return new URL(value.replace(/^\/+/, ""), getSiteRootHref()).href;
+		} catch (error) {
+			return value || FALLBACK_PRODUCT_IMAGE;
+		}
 	}
 
 	function toIsoDate(value) {
@@ -259,13 +292,15 @@
 		const attributes = item?.attributes && typeof item.attributes === "object" && !Array.isArray(item.attributes)
 			? clone(item.attributes)
 			: {};
-		const image = String(
+		const image = resolveStorefrontImagePath(String(
 			item?.image
 			|| item?.img
+			|| item?.imageUrl
+			|| item?.productImage
 			|| catalogProduct?.mainImage
 			|| catalogProduct?.image
 			|| ""
-		).trim();
+		).trim());
 		const attributeSummary = Object.keys(attributes).length
 			? Object.entries(attributes).map(([key, value]) => `${key}: ${value}`).join(" | ")
 			: String(item?.attributeSummary || "Standard option").trim() || "Standard option";
@@ -305,8 +340,14 @@
 			|| "Guest Customer"
 		).trim() || "Guest Customer";
 
-		const products = Array.isArray(order?.products)
-			? order.products.map((item) => normalizeProduct(item, findCatalogProduct(item, catalog)))
+		const productSeed = Array.isArray(order?.products) && order.products.length
+			? order.products
+			: Array.isArray(order?.items)
+				? order.items
+				: [];
+
+		const products = productSeed.length
+			? productSeed.map((item) => normalizeProduct(item, findCatalogProduct(item, catalog)))
 			: [];
 
 		const payment = order?.payment && typeof order.payment === "object" ? order.payment : {};
@@ -319,9 +360,9 @@
 			updatedAt: toIsoDate(order?.updatedAt || order?.date || order?.createdAt || Date.now()),
 			status,
 			statusTone: getStatusTone(status),
-			total: Number(order?.total ?? order?.totalPrice ?? order?.subtotal ?? 0) || 0,
+			total: Number(order?.total ?? order?.totalAmount ?? order?.totalPrice ?? order?.subtotal ?? 0) || 0,
 			subtotal: Number(order?.subtotal || 0) || 0,
-			shippingFee: Number(order?.shippingFee || 0) || 0,
+			shippingFee: Number(order?.shippingFee ?? order?.deliveryFee ?? 0) || 0,
 			codFee: Number(order?.codFee || 0) || 0,
 			customerId: String(order?.customerId || matchedCustomer?.id || customerSeed?.id || "").trim(),
 			customerName,

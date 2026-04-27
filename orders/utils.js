@@ -133,10 +133,24 @@ export function describeAttributes(item) {
   return entries.map(([key, value]) => `${key}: ${value}`).join(' | ');
 }
 
+export function resolveOrderItemImage(item) {
+  const galleryImage = Array.isArray(item?.gallery) ? item.gallery.find((entry) => String(entry || '').trim()) : '';
+  return String(
+    item?.image
+    || item?.img
+    || item?.imageUrl
+    || item?.productImage
+    || item?.mainImage
+    || item?.thumbnail
+    || galleryImage
+    || 'img/logo.png'
+  ).trim();
+}
+
 export function normalizeCartItem(item) {
   const attributes = normalizeAttributes(item);
   const variantKey = item?.variantKey || buildVariantKey(attributes);
-  const image = String(item?.image || item?.img || '').trim();
+  const image = resolveOrderItemImage(item);
   const qty = Math.max(1, Number(item?.qty || 1) || 1);
   const price = Number(item?.price || 0) || 0;
 
@@ -147,6 +161,10 @@ export function normalizeCartItem(item) {
     qty,
     image,
     img: image,
+    imageUrl: image,
+    productImage: image,
+    mainImage: image,
+    thumbnail: image,
     attributes,
     attributeSummary: item?.attributeSummary || describeAttributes({ attributes }),
     variantKey,
@@ -332,7 +350,6 @@ function getOrderIdentifier(order) {
 function validateOrder(order) {
   const requiredFields = [
     ['orderId', order?.orderId || order?.id],
-    ['userId', order?.userId || order?.customerId],
     ['customerName', order?.customerName],
     ['phoneNumber', order?.phoneNumber || order?.customerPhone],
     ['province', order?.fullAddress?.province || order?.shippingAddress?.provinceCity],
@@ -340,9 +357,6 @@ function validateOrder(order) {
     ['sector', order?.fullAddress?.sector || order?.shippingAddress?.sector],
     ['cell', order?.fullAddress?.cell || order?.shippingAddress?.cell],
     ['village', order?.fullAddress?.village || order?.shippingAddress?.village],
-    ['latitude', order?.gpsLocation?.latitude || order?.shippingAddress?.latitude],
-    ['longitude', order?.gpsLocation?.longitude || order?.shippingAddress?.longitude],
-    ['googleMapsLink', order?.gpsLocation?.googleMapsLink || order?.shippingAddress?.mapLink],
     ['paymentMethod', order?.paymentMethod],
     ['paymentStatus', order?.paymentStatus],
     ['orderStatus', order?.orderStatus || order?.status],
@@ -354,16 +368,22 @@ function validateOrder(order) {
     throw new Error(`Order is missing required field: ${missingField[0]}`);
   }
 
+  const hasLinkedUser = Boolean(String(order?.userId || order?.customerId || '').trim());
+  if (!hasLinkedUser && order?.isGuest !== true) {
+    throw new Error('Order must be linked to a user or explicitly marked as a guest order.');
+  }
+
   const items = Array.isArray(order?.items) ? order.items : [];
   if (!items.length) {
     throw new Error('Order is missing required field: items');
   }
 
   const hasInvalidItem = items.some((item) => {
+    const image = resolveOrderItemImage(item);
     const requiredItemFields = [
       item?.productId,
       item?.productName,
-      item?.image,
+      image,
       item?.quantity,
       item?.price
     ];

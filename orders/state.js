@@ -16,6 +16,7 @@ import {
   readDirectCheckout,
   readStorage,
   removeStorage,
+  resolveOrderItemImage,
   saveCheckoutConfirmation,
   saveOrder,
   writeCartItems,
@@ -78,6 +79,7 @@ const DEFAULT_PAYMENT = {
   transactionId: ''
 };
 
+const SUPPORTED_PAY_NOW_METHODS = ['mtn', 'airtel', 'bank', 'card'];
 const COD_FEE = 2000;
 const SUBMISSION_DELAY_MS = 900;
 const INACTIVE_PAYMENT_MESSAGE = 'This payment method is not available yet. Ubu buryo bwo kwishyura ntiburakora.';
@@ -359,17 +361,6 @@ function buildShippingValidation() {
     };
   }
 
-  if (!state.shippingAddress.latitude || !state.shippingAddress.longitude || !state.shippingAddress.mapLink) {
-    return {
-      valid: false,
-      message: 'Capture your GPS location before placing the order.',
-      errors: {
-        ...errors,
-        gpsLocation: 'GPS location is required'
-      }
-    };
-  }
-
   persistUserAddress({
     ...state.shippingAddress,
     phone: normalizePhone(state.shippingAddress.phone)
@@ -391,7 +382,19 @@ function buildPaymentValidation() {
     return { valid: true };
   }
 
-  return { valid: false, message: INACTIVE_PAYMENT_MESSAGE };
+  if (!SUPPORTED_PAY_NOW_METHODS.includes(String(state.payment.method || '').trim().toLowerCase())) {
+    return { valid: false, message: INACTIVE_PAYMENT_MESSAGE };
+  }
+
+  const payerPhone = normalizePhone(
+    state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone || state.customer.phone
+  );
+
+  if (!payerPhone || !isValidPhone(payerPhone)) {
+    return { valid: false, message: 'Enter a valid Rwanda phone number for payment updates.' };
+  }
+
+  return { valid: true };
 }
 
 export function initializeCheckoutState() {
@@ -586,23 +589,31 @@ export function buildOrderPayload() {
     return paymentValidation;
   }
 
-  if (!state.customer.id) {
-    return {
-      valid: false,
-      message: 'You must be logged in to place an order.'
-    };
-  }
-
   const customerName = getResolvedCustomerName();
   const normalizedPhone = normalizePhone(state.shippingAddress.phone || state.customer.phone);
   const payerPhone = normalizePhone(state.payment.phone || state.payment.payerPhone || state.shippingAddress.phone || state.customer.phone);
   const usesCod = isCodMethod(state.payment.method);
+  const hasAccount = Boolean(String(state.customer.id || '').trim());
   const orderId = createOrderId();
   const createdAtIso = new Date().toISOString();
-  const items = state.products.map((product) => ({
+  const products = state.products.map((product) => {
+    const image = resolveOrderItemImage(product);
+    return {
+      ...clone(product),
+      image,
+      img: image,
+      imageUrl: image,
+      productImage: image,
+      mainImage: image,
+      thumbnail: image,
+      qty: Math.max(1, Number(product?.qty || 1) || 1),
+      total: (Number(product?.price || 0) || 0) * Math.max(1, Number(product?.qty || 1) || 1)
+    };
+  });
+  const items = products.map((product) => ({
     productId: String(product?.id || '').trim(),
     productName: String(product?.name || 'Product').trim() || 'Product',
-    image: String(product?.image || product?.img || '').trim(),
+    image: resolveOrderItemImage(product),
     size: String(product?.size || product?.attributes?.Size || '').trim(),
     color: String(product?.color || product?.attributes?.Color || '').trim(),
     quantity: Math.max(1, Number(product?.qty || 1) || 1),
@@ -628,7 +639,10 @@ export function buildOrderPayload() {
   const order = {
     id: orderId,
     orderId,
-    userId: state.customer.id,
+    userId: hasAccount ? state.customer.id : '',
+    accountId: hasAccount ? state.customer.id : '',
+    isGuest: !hasAccount,
+    userEmail: state.customer.email,
     date: createdAtIso,
     createdAt: createdAtIso,
     createdAtMs: Date.now(),
@@ -636,9 +650,9 @@ export function buildOrderPayload() {
     orderStatus,
     status: 'Pending',
     paymentStatus,
-    products: clone(state.products),
+    products,
     items,
-    customerId: state.customer.id,
+    customerId: hasAccount ? state.customer.id : '',
     customerName,
     phoneNumber: normalizedPhone,
     customerEmail: state.customer.email,
@@ -647,11 +661,12 @@ export function buildOrderPayload() {
     fullAddress,
     gpsLocation,
     customer: {
-      id: state.customer.id,
+      id: hasAccount ? state.customer.id : '',
       name: customerName,
       email: state.customer.email,
       phone: normalizedPhone,
-      avatar: state.customer.avatar
+      avatar: state.customer.avatar,
+      isGuest: !hasAccount
     },
     shippingAddress: {
       ...clone(state.shippingAddress),

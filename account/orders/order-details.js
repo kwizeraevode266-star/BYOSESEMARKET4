@@ -91,7 +91,7 @@
   function renderItems(order) {
     return order.items.map((item) => `
       <article class="orders-item-card">
-        <img src="${escapeHtml(item.image || FALLBACK_IMAGE)}" alt="${escapeHtml(item.productName)} product image">
+        <img src="${escapeHtml(item.image || FALLBACK_IMAGE)}" alt="${escapeHtml(item.productName)} product image" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}';this.classList.add('is-fallback-image');">
         <div>
           <div class="orders-item-heading">
             <h3>${escapeHtml(item.productName)}</h3>
@@ -106,6 +106,16 @@
         </div>
       </article>
     `).join('');
+  }
+
+  function getPaymentLabel(order) {
+    const method = String(order?.paymentMethod || '').trim().toLowerCase();
+    if (method === 'cod') return 'Pay on Delivery';
+    if (method === 'mtn') return 'MTN Mobile Money';
+    if (method === 'airtel') return 'Airtel Money';
+    if (method === 'bank') return 'Bank Transfer';
+    if (method === 'card') return 'Visa / Mastercard';
+    return 'Not set';
   }
 
   async function render() {
@@ -171,7 +181,7 @@
               <div><span>Subtotal</span><strong>${escapeHtml(service.formatCurrency(order.subtotal || 0))}</strong></div>
               <div><span>Delivery fee</span><strong>${escapeHtml(service.formatCurrency(order.deliveryFee || 0))}</strong></div>
               <div><span>Total</span><strong>${escapeHtml(service.formatCurrency(order.totalAmount || 0))}</strong></div>
-              <div><span>Payment</span><strong>${escapeHtml(order.paymentMethod || 'COD')}</strong></div>
+              <div><span>Payment</span><strong>${escapeHtml(getPaymentLabel(order))}</strong></div>
             </div>
             <p class="orders-detail-note">Payment status: ${escapeHtml(order.paymentStatus || 'pending')}.</p>
           </article>

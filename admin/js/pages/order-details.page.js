@@ -24,6 +24,7 @@
 		summaryPanel: document.getElementById("orderSummaryPanel"),
 		productsList: document.getElementById("orderProductsList")
 	};
+	const FALLBACK_PRODUCT_IMAGE = "../img/logo.png";
 
 	function getStatusMarkup(order) {
 		return `<span class="order-status-pill order-status-pill--${service.getStatusTone(order.status)}">${service.escapeHtml(order.status)}</span>`;
@@ -67,7 +68,7 @@
 
 		elements.productsList.innerHTML = order.products.map((product) => `
 			<article class="order-product-card">
-				<img src="${service.escapeHtml(product.image)}" alt="${service.escapeHtml(product.name)}">
+				<img src="${service.escapeHtml(product.image || FALLBACK_PRODUCT_IMAGE)}" alt="${service.escapeHtml(product.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.src='${FALLBACK_PRODUCT_IMAGE}';">
 				<div class="order-product-copy">
 					<div class="order-product-heading">
 						<div>
