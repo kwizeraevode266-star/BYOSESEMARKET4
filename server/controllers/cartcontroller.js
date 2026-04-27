@@ -1,6 +1,6 @@
-const Cart = require('../models/Cart');
-const Product = require('../models/Product');
-const User = require('../models/User');
+const Cart = require('../models/cart');
+const Product = require('../models/product');
+const User = require('../models/user');
 
 async function resolveUser(req) {
     // token contains custom id in payload (id)

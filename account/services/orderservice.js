@@ -45,6 +45,10 @@
     return String(value || '').replace(/\s+/g, '').trim();
   }
 
+  function normalizeEmail(value) {
+    return String(value || '').trim().toLowerCase();
+  }
+
   function getSiteRootHref() {
     const pathname = String(global.location?.pathname || '/').replace(/\\/g, '/');
     const marker = pathname.toLowerCase().indexOf('/account/');
@@ -68,7 +72,8 @@
       }
 
       if (source.startsWith('./') || source.startsWith('../')) {
-        return new URL(source, global.location.href).href;
+        const normalizedSource = source.replace(/^\.\//, '').replace(/^(\.\.\/)+/, '');
+        return new URL(normalizedSource, getSiteRootHref()).href;
       }
 
       return new URL(source.replace(/^\/+/, ''), getSiteRootHref()).href;
@@ -247,11 +252,31 @@
 
   function orderBelongsToUser(order, userId, currentUser) {
     const resolvedUserId = String(userId || currentUser?.id || currentUser?.userId || '').trim();
-    if (!resolvedUserId) {
-      return false;
+    const resolvedEmail = normalizeEmail(currentUser?.email);
+    const resolvedPhone = normalizePhone(currentUser?.phone);
+
+    if (resolvedUserId) {
+      const orderUserId = String(order?.userId || order?.accountId || '').trim();
+      if (orderUserId && orderUserId === resolvedUserId) {
+        return true;
+      }
     }
 
-    return Boolean(order?.userId) && String(order.userId).trim() === resolvedUserId;
+    if (resolvedEmail) {
+      const orderEmail = normalizeEmail(order?.userEmail || order?.customerEmail);
+      if (orderEmail && orderEmail === resolvedEmail) {
+        return true;
+      }
+    }
+
+    if (resolvedPhone) {
+      const orderPhone = normalizePhone(order?.phoneNumber || order?.customerPhone || order?.customer?.phone);
+      if (orderPhone && orderPhone === resolvedPhone) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
   async function fetchApiOrders(userId) {
@@ -272,16 +297,21 @@
   async function getOrders(userId) {
     const currentUser = readCurrentUser();
     const resolvedUserId = String(userId || currentUser?.id || currentUser?.userId || '').trim();
-    if (!resolvedUserId) {
+    const hasResolvedIdentity = Boolean(
+      resolvedUserId
+      || normalizeEmail(currentUser?.email)
+      || normalizePhone(currentUser?.phone)
+    );
+
+    if (!hasResolvedIdentity) {
       return [];
     }
 
-    const apiOrders = await fetchApiOrders(resolvedUserId);
+    const apiOrders = resolvedUserId ? await fetchApiOrders(resolvedUserId) : [];
     const localOrders = readArrayFromKeys(ORDER_KEYS);
     const combined = [...apiOrders, ...localOrders]
       .map(normalizeOrder)
       .filter((order, index, list) => list.findIndex((entry) => entry.orderId === order.orderId) === index)
-      .filter((order) => Boolean(order.userId))
       .filter((order) => orderBelongsToUser(order, resolvedUserId, currentUser))
       .sort((left, right) => new Date(right.createdAt || right.date || 0) - new Date(left.createdAt || left.date || 0));
 

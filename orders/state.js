@@ -111,6 +111,45 @@ const state = {
   }
 };
 
+function getOrdersApiUrl() {
+  const configuredBase = String(window.__BYOSE_API_BASE__ || '').trim().replace(/\/$/, '');
+  if (configuredBase) {
+    return configuredBase.endsWith('/api') ? `${configuredBase}/orders` : `${configuredBase}/api/orders`;
+  }
+
+  if (/^https?:$/i.test(String(window.location.protocol || ''))) {
+    return `${window.location.origin}/api/orders`;
+  }
+
+  return '';
+}
+
+async function persistOrderToServer(order) {
+  const endpoint = getOrdersApiUrl();
+  if (!endpoint) {
+    return { skipped: true };
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order)
+    });
+
+    if (!response.ok) {
+      throw new Error(`Order API request failed with status ${response.status}`);
+    }
+
+    return await response.json().catch(() => ({ success: true }));
+  } catch (error) {
+    console.warn('Unable to persist order to the API. Falling back to local checkout storage.', error);
+    return { success: false, error };
+  }
+}
+
 function getStageIndex(stage) {
   const index = STAGES.indexOf(stage);
   return index === -1 ? 0 : index;
@@ -769,6 +808,8 @@ export async function submitOrder() {
 
     saveCheckoutConfirmation(confirmation);
     state.confirmation = confirmation;
+
+    await persistOrderToServer(order);
 
     await delay(SUBMISSION_DELAY_MS);
 

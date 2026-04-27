@@ -16,6 +16,9 @@
 
 	function readStorageArray(keys) {
 		const list = Array.isArray(keys) ? keys : [keys];
+		const merged = [];
+		const seen = new Set();
+
 		for (const key of list) {
 			const raw = window.localStorage.getItem(key);
 			if (!raw) {
@@ -23,12 +26,30 @@
 			}
 
 			const parsed = safeParse(raw, []);
-			if (Array.isArray(parsed)) {
-				return parsed;
+			if (!Array.isArray(parsed)) {
+				continue;
 			}
+
+			parsed.forEach((entry, index) => {
+				const identifier = String(
+					entry?.orderId
+					|| entry?.id
+					|| entry?.email
+					|| entry?.phone
+					|| entry?.timestamp
+					|| `${key}-${index}`
+				).trim().toLowerCase();
+
+				if (seen.has(identifier)) {
+					return;
+				}
+
+				seen.add(identifier);
+				merged.push(entry);
+			});
 		}
 
-		return [];
+		return merged;
 	}
 
 	function readProducts() {

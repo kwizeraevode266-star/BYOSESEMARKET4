@@ -6,7 +6,7 @@ const { hashPassword, comparePasswords } = require('../utils/hash');
 const { generateToken } = require('../utils/token');
 const { generateOTP, saveOTP, verifyOTP } = require('../utils/otp');
 const { sendSMS } = require('../utils/sms');
-const User = require('../models/User');
+const User = require('../models/user');
 
 function sanitizeUserForClient(u) {
     if (!u) return null;

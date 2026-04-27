@@ -1,117 +1,19 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Product Details</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="shop.css">
-  <link rel="stylesheet" href="css/header.css">
-  <link rel="stylesheet" href="css/search.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting | Byose Market</title>
+  <meta http-equiv="refresh" content="0; url=details/product-details1.html">
+  <script>
+    (function () {
+      var target = 'details/product-details1.html';
+      var suffix = window.location.search || window.location.hash || '';
+      window.location.replace(target + suffix);
+    })();
+  </script>
 </head>
 <body>
-  <header class="main-header">
-    <div class="header-wrap">
-      <div class="logo"><a href="index.html"><img src="img/logo.jpeg" alt="Byose Market"></a></div>
-      <nav class="nav" id="mainNav">
-        <a href="index.html">Home</a>
-        <a href="shop.html">Shop</a>
-      </nav>
-      <div class="header-icons">
-        <div id="cart-slot"></div>
-      </div>
-    </div>
-  </header>
-
-  <!-- MOBILE SEARCH ENTRY -->
-  <div class="mobile-search-entry">
-    <a href="search.html" class="mobile-search-entry-trigger" aria-label="Search">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <span>Search products…</span>
-    </a>
-  </div>
-
-  <main class="container product-details-page">
-    <div id="product-root"></div>
-  </main>
-
-  <script src="admin/js/services/catalog.service.js"></script>
-  <script src="js/products.js"></script>
-  <script>
-    // Render product details using selectedProduct from localStorage or fallback to products list
-    function q(name){ return new URLSearchParams(location.search).get(name); }
-
-    let product = null;
-    const stored = localStorage.getItem('selectedProduct');
-    if (stored) {
-      try { product = JSON.parse(stored); } catch (e) { product = null; }
-    }
-
-    // If not stored, try to get by id from query string and products data
-    if (!product) {
-      const id = Number(q('id')) || null;
-      if (typeof products !== 'undefined' && Array.isArray(products)) {
-        product = products.find(p => Number(p.id) === id) || products[0];
-      }
-    }
-
-    const root = document.getElementById('product-root');
-
-    if (!product) {
-      root.innerHTML = '<div style="text-align:center;padding:40px;"><h2>Product not found</h2><a href="shop.html" class="btn btn-primary">Back to Shop</a></div>';
-    } else {
-      const imageMain = product.thumbnail || (product.images && product.images[0]) || product.image || '';
-      const thumbs = (product.images && product.images.length) ? product.images : (product.thumbnail ? [product.thumbnail] : []);
-
-      root.innerHTML = `
-      <div class="product-details-grid">
-        <div class="gallery">
-          <div class="gallery-main"><img id="pd-main-img" src="${imageMain}" alt="${product.name}"></div>
-          <div class="gallery-thumbs">${thumbs.map(i=>`<button class="thumb"><img src="${i}" alt=""></button>`).join('')}</div>
-        </div>
-        <div class="details">
-          <h1>${product.name}</h1>
-          <div class="price">${Number(product.price).toLocaleString()} RWF</div>
-          <p class="desc">${product.description || product.shortDescription || ''}</p>
-          <div class="options">
-            <label>Size:</label>
-            <select id="size-select"><option>One Size</option></select>
-            <label>Color:</label>
-            <select id="color-select"><option>Default</option></select>
-          </div>
-          <div class="actions">
-            <button id="pd-add" class="btn btn-primary">Add to Cart</button>
-          </div>
-        </div>
-      </div>
-      `;
-
-      // gallery interactions
-      document.querySelectorAll('.thumb').forEach((btn,i)=>{ btn.addEventListener('click', ()=>{ document.getElementById('pd-main-img').src = thumbs[i]; }); });
-
-      document.getElementById('pd-add').addEventListener('click', ()=>{
-        const payload = {
-          id: String(product.id),
-          name: product.name,
-          price: Number(product.price),
-          image: imageMain,
-          qty: 1,
-        };
-
-        if (window.Cart && typeof window.Cart.addItem === 'function') {
-          window.Cart.addItem(payload);
-        } else {
-          window.dispatchEvent(new CustomEvent('addToCart', { detail: payload }));
-        }
-
-        // Small UX feedback
-        alert('Added to cart');
-      });
-    }
-  </script>
-
-  <script src="cart.js" defer></script>
-  <link rel="stylesheet" href="mobile-nav.css">
-  <script src="js/mobile-nav.js" defer></script>
+  <p>Redirecting to the updated product details page...</p>
 </body>
 </html>

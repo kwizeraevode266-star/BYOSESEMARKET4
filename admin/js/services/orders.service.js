@@ -20,6 +20,9 @@
 	}
 
 	function readArrayFromKeys(keys) {
+		const merged = [];
+		const seen = new Set();
+
 		for (const key of keys) {
 			const raw = global.localStorage.getItem(key);
 			if (!raw) {
@@ -27,12 +30,30 @@
 			}
 
 			const parsed = safeParse(raw, []);
-			if (Array.isArray(parsed)) {
-				return parsed;
+			if (!Array.isArray(parsed)) {
+				continue;
 			}
+
+			parsed.forEach((entry, index) => {
+				const identifier = String(
+					entry?.orderId
+					|| entry?.id
+					|| entry?.customerId
+					|| entry?.email
+					|| entry?.phone
+					|| `${key}-${index}`
+				).trim().toLowerCase();
+
+				if (seen.has(identifier)) {
+					return;
+				}
+
+				seen.add(identifier);
+				merged.push(entry);
+			});
 		}
 
-		return [];
+		return merged;
 	}
 
 	function writeOrders(orders) {
@@ -138,7 +159,8 @@
 			}
 
 			if (value.startsWith("./") || value.startsWith("../")) {
-				return new URL(value, global.location.href).href;
+				const normalizedValue = value.replace(/^\.\//, "").replace(/^(\.\.\/)+/, "");
+				return new URL(normalizedValue, getSiteRootHref()).href;
 			}
 
 			return new URL(value.replace(/^\/+/, ""), getSiteRootHref()).href;

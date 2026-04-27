@@ -224,12 +224,12 @@
 
   function createEmptyState(currentUser) {
     const config = VIEW_CONFIG[view] || VIEW_CONFIG.pending;
-    if (!currentUser || !(currentUser.id || currentUser.userId)) {
+    if (!currentUser || !(currentUser.id || currentUser.userId || currentUser.email || currentUser.phone)) {
       return `
         <section class="orders-login-state orders-panel">
           <i class="fa-solid fa-user-lock" aria-hidden="true"></i>
           <h2>Sign in to view your orders</h2>
-          <p>Your My Orders page only loads orders linked to your account.</p>
+          <p>Your My Orders page only loads orders linked to your account or saved contact details.</p>
           <a class="orders-action-link" href="../../login.html">Go to login</a>
         </section>
       `;

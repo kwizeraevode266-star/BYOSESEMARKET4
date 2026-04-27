@@ -12,7 +12,7 @@ const {
     forgotPassword,
     verifyCode,
     resetPassword
-} = require('../controllers/authController');
+} = require('../controllers/authcontroller');
 
 const authMiddleware = require('../middleware/authMiddleware');
 

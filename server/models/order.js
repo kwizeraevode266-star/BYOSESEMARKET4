@@ -1,17 +1,56 @@
 const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    id: { type: String, trim: true },
+    orderId: { type: String, required: true, unique: true, index: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    userId: { type: String, default: '' },
+    accountId: { type: String, default: '' },
+    customerId: { type: String, default: '' },
+    isGuest: { type: Boolean, default: false },
+    userEmail: { type: String, default: '', lowercase: true, index: true },
+    customerEmail: { type: String, default: '', lowercase: true, index: true },
+    customerPhone: { type: String, default: '', index: true },
+    phoneNumber: { type: String, default: '' },
+    customerName: { type: String, default: '' },
+    customerImage: { type: String, default: '' },
     items: [
         {
-            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+            product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: null },
+            productId: { type: String, default: '' },
+            productName: { type: String, default: '' },
             quantity: { type: Number, default: 1 },
-            price: { type: Number, default: 0 }
+            price: { type: Number, default: 0 },
+            image: { type: String, default: '' },
+            attributes: { type: mongoose.Schema.Types.Mixed, default: {} },
+            color: { type: String, default: '' },
+            size: { type: String, default: '' }
         }
     ],
+    products: { type: [mongoose.Schema.Types.Mixed], default: [] },
     totalPrice: { type: Number, default: 0 },
-    status: { type: String, enum: ['pending', 'completed', 'cancelled'], default: 'pending' },
-    createdAt: { type: Date, default: Date.now }
-});
+    subtotal: { type: Number, default: 0 },
+    shippingFee: { type: Number, default: 0 },
+    deliveryFee: { type: Number, default: 0 },
+    codFee: { type: Number, default: 0 },
+    totalAmount: { type: Number, default: 0 },
+    status: { type: String, default: 'Pending' },
+    orderStatus: { type: String, default: 'pending' },
+    paymentStatus: { type: String, default: 'pending' },
+    paymentStatusLabel: { type: String, default: '' },
+    paymentMethod: { type: String, default: '' },
+    paymentType: { type: String, default: '' },
+    note: { type: String, default: '' },
+    payment: { type: mongoose.Schema.Types.Mixed, default: {} },
+    customer: { type: mongoose.Schema.Types.Mixed, default: {} },
+    shippingAddress: { type: mongoose.Schema.Types.Mixed, default: {} },
+    fullAddress: { type: mongoose.Schema.Types.Mixed, default: {} },
+    gpsLocation: { type: mongoose.Schema.Types.Mixed, default: {} },
+    deliveryMethod: { type: String, default: '' },
+    deliveryLabel: { type: String, default: '' },
+    statusHistory: { type: [mongoose.Schema.Types.Mixed], default: [] },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
+}, { strict: false });
 
 module.exports = mongoose.model('Order', OrderSchema);
